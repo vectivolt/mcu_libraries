@@ -1,0 +1,16 @@
+[submodule "libraries/JouleOTA"]
+	path = libraries/JouleOTA
+	url  = https://github.com/hyndex/JouleOTA.git
+	branch = main
+[submodule "libraries/JouleSerial"]
+	path = libraries/JouleSerial
+	url  = https://github.com/hyndex/JouleSerial.git
+	branch = main
+[submodule "libraries/JouleNet"]
+	path = libraries/JouleNet
+	url  = https://github.com/hyndex/JouleNet.git
+	branch = main
+[submodule "libraries/JouleDash"]
+	path = libraries/JouleDash
+	url  = https://github.com/hyndex/JouleDash.git
+	branch = main
