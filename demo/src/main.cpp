@@ -32,8 +32,8 @@
 #include <math.h>
 
 // ---- defaults ----------------------------------------------------------
-static constexpr const char *DEFAULT_SSID    = "Rajesh k";   // lower-case k
-static constexpr const char *DEFAULT_PASS    = "Vishu2012";
+static constexpr const char *DEFAULT_SSID    = "TP-Link_930C";
+static constexpr const char *DEFAULT_PASS    = "66021117";
 static constexpr const char *AP_FALLBACK_SSID= "Joule-Demo";
 static constexpr const char *HOSTNAME        = "joule-demo";
 static constexpr const char *FW_VERSION      = "1.0.0+demo";

@@ -22,6 +22,10 @@
   let connected = $state(false);
   let toasts    = $state([]);
   let theme     = $state(localStorage.getItem("joule-theme") || "dark");
+  // Viewport bucket — recomputed on resize so the grid can collapse from
+  // 12 columns (desktop) → cards in pairs (tablet/mobile) without each
+  // card having to know about media queries.
+  let viewport  = $state("desktop");
 
   $effect(() => { document.documentElement.setAttribute("data-theme", theme); });
   function cycleTheme() {
@@ -65,12 +69,34 @@
     }
   }
 
-  onMount(open);
+  onMount(() => {
+    open();
+    const updateVp = () => {
+      const w = window.innerWidth;
+      viewport = w <= 420 ? "small" : w <= 760 ? "tablet" : "desktop";
+    };
+    updateVp();
+    window.addEventListener("resize", updateVp);
+    return () => window.removeEventListener("resize", updateVp);
+  });
   onDestroy(() => ws?.close());
 
   let visibleCards = $derived(
     layout?.cards?.filter(c => !c.hidden && (c.tab || "Main") === currentTab) || []
   );
+
+  // Map declared card width → an effective grid span for the active
+  // viewport. On a phone, even a "narrow" 3-col card becomes half-row so
+  // the value + unit + sparkline have room; full-width charts stay full.
+  function spanFor(c) {
+    const base = c.width || (c.type === "chart" || c.type === "custom" ? 12 : 3);
+    if (viewport === "small") {
+      if (c.type === "chart" || c.type === "custom" || base >= 12) return 12;
+      return 6;     // pairs of cards on phones
+    }
+    if (viewport === "tablet") return Math.min(12, base * 2);
+    return base;
+  }
 
   function onCmd(id, v) { send({ type: "cmd", id, value: String(v) }); }
 
@@ -214,17 +240,18 @@
       {@const v = values[c.id] ?? c.value ?? ""}
       {@const dec = decor(c)}
       <Card color={c.color || dec.color} Icon={dec.Icon}
-            span={c.width || (c.type==="chart"||c.type==="custom"?12:3)}
+            span={spanFor(c)}
             label={c.label || c.id}>
 
         <!-- ===== Numeric ===== -->
         {#if c.type === "number" || c.type === "temperature" || c.type === "humidity"}
-          <div class="flex items-end justify-between gap-2 mt-auto">
-            <div class="font-mono font-light tabular-nums" style="font-size:28px;letter-spacing:-.5px;line-height:1.05">
-              {v || "—"}{#if c.unit}<span class="text-[14px] text-[color:var(--color-muted)] ml-1">{c.unit}</span>{/if}
+          <div class="flex items-end justify-between gap-2 mt-auto min-w-0">
+            <div class="font-mono font-light tabular-nums truncate min-w-0"
+                 style="font-size:clamp(20px, 4.4vw, 28px);letter-spacing:-.5px;line-height:1.05">
+              {v || "—"}{#if c.unit}<span class="text-[13px] text-[color:var(--color-muted)] ml-1">{c.unit}</span>{/if}
             </div>
             {#if history[c.id]?.length > 1}
-              <div class="w-16 h-8 flex-shrink-0 opacity-90">
+              <div class="w-14 h-8 flex-shrink-0 opacity-90 hidden sm:block">
                 <Sparkline data={history[c.id]} height={32}/>
               </div>
             {/if}
@@ -268,7 +295,9 @@
           {@const p  = Math.max(0, Math.min(1, (n - lo) / (hi - lo)))}
           {@const len = p * 125.6}
           <div class="relative" style="height:96px">
-            <svg viewBox="0 0 100 60" preserveAspectRatio="xMidYMax meet" class="w-full h-full">
+            <!-- viewBox includes 5-unit margin so the 8-unit stroke can't
+                 clip the right/top edge when the card is very narrow. -->
+            <svg viewBox="-5 -5 110 70" preserveAspectRatio="xMidYMax meet" class="w-full h-full">
               <path d="M10,50 A40,40 0 0 1 90,50" fill="none" stroke="var(--color-line)" stroke-width="8" stroke-linecap="round"/>
               <path d="M10,50 A40,40 0 0 1 90,50" fill="none" stroke="url(#brand-gradient)" stroke-width="8" stroke-linecap="round"
                     stroke-dasharray="{len} 999" style="transition:stroke-dasharray .5s ease"/>
