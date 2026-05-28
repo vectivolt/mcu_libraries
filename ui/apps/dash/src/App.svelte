@@ -12,7 +12,7 @@
   import Sparkline from "$shared/components/Sparkline.svelte";
   import { Zap, BatteryCharging, IndianRupee, Clock, ActivitySquare,
            Cpu, Wifi, Bolt, Gauge as GaugeIcon, Thermometer, Droplets,
-           Sun, Moon, Monitor } from "lucide-svelte";
+           Sun, Moon, Monitor, Menu, X, ChevronRight } from "lucide-svelte";
 
   let ws        = $state(null);
   let layout    = $state(null);
@@ -26,6 +26,8 @@
   // 12 columns (desktop) → cards in pairs (tablet/mobile) without each
   // card having to know about media queries.
   let viewport  = $state("desktop");
+  // Mobile hamburger drawer state. Auto-closes on tab pick + ESC.
+  let menuOpen  = $state(false);
 
   $effect(() => { document.documentElement.setAttribute("data-theme", theme); });
   function cycleTheme() {
@@ -74,10 +76,16 @@
     const updateVp = () => {
       const w = window.innerWidth;
       viewport = w <= 420 ? "small" : w <= 760 ? "tablet" : "desktop";
+      if (viewport === "desktop" && menuOpen) menuOpen = false;
     };
     updateVp();
     window.addEventListener("resize", updateVp);
-    return () => window.removeEventListener("resize", updateVp);
+    const onKey = (e) => { if (e.key === "Escape") menuOpen = false; };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("resize", updateVp);
+      window.removeEventListener("keydown", onKey);
+    };
   });
   onDestroy(() => ws?.close());
 
@@ -202,11 +210,28 @@
       class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition-colors cursor-pointer">
       {#if theme === "light"}<Sun size={16} strokeWidth={2.2}/>{:else if theme === "dark"}<Moon size={16} strokeWidth={2.2}/>{:else}<Monitor size={16} strokeWidth={2.2}/>{/if}
     </button>
+    <!-- Hamburger — small viewport only. Sits on the right so the user's
+         thumb (on the phone) is closer to it than to the logo. -->
+    {#if viewport === "small" && layout?.tabs?.length}
+      <button onclick={() => menuOpen = true} aria-label="open menu"
+        class="w-9 h-9 grid place-items-center rounded-full text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_6%,transparent)] transition cursor-pointer">
+        <Menu size={18} strokeWidth={2.2}/>
+      </button>
+    {/if}
   </div>
+  <!-- Phone breadcrumb — when tabs are hidden, this strip shows the
+       current tab so the user always knows where they are. -->
+  {#if viewport === "small" && currentTab}
+    <div class="max-w-[1280px] mx-auto px-5 pb-2.5 -mt-1 flex items-center gap-1.5 text-[11.5px] font-semibold uppercase tracking-[1px] text-[color:var(--color-muted)]">
+      <span style="color:var(--color-brand)">{currentTab}</span>
+      <ChevronRight size={12} strokeWidth={2.4}/>
+      <span class="lowercase tracking-normal font-normal opacity-70">tap menu for other tabs</span>
+    </div>
+  {/if}
 </header>
 
 <!-- ============================== TAB BAR ============================== -->
-{#if layout?.tabs?.length}
+{#if layout?.tabs?.length && viewport !== "small"}
   <nav class="sticky top-16 z-40 backdrop-blur-xl border-b border-[color:var(--color-line)]"
        style="background:color-mix(in srgb,var(--color-bg) 80%,transparent)">
     <div class="max-w-[1280px] mx-auto px-6 py-3 flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden" style="scrollbar-width:none">
@@ -223,6 +248,54 @@
       {/each}
     </div>
   </nav>
+{/if}
+
+<!-- ============================== MOBILE DRAWER ============================== -->
+{#if viewport === "small" && layout?.tabs?.length}
+  <!-- Backdrop — clicking it closes the drawer. Aria-hidden so it doesn't
+       confuse screen readers when the drawer is closed (opacity 0). -->
+  <div onclick={() => menuOpen = false} aria-hidden="true"
+       class="fixed inset-0 z-[60] transition-opacity duration-200 backdrop-blur-sm"
+       class:opacity-100={menuOpen} class:opacity-0={!menuOpen} class:pointer-events-none={!menuOpen}
+       style="background:rgb(0 0 0 / 0.55)"></div>
+  <aside class="fixed top-0 right-0 bottom-0 z-[70] w-[80vw] max-w-[320px] flex flex-col
+                border-l border-[color:var(--color-line)]"
+         style="background:var(--color-bg);box-shadow:-24px 0 64px -16px rgb(0 0 0 / 0.6);
+                transform:{menuOpen ? 'translateX(0)' : 'translateX(100%)'};
+                transition:transform 280ms cubic-bezier(.3,.8,.2,1)"
+         aria-hidden={!menuOpen}>
+    <div class="flex items-center justify-between px-5 h-16 border-b border-[color:var(--color-line)]">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 grid place-items-center rounded-[10px] text-white"
+             style="background:var(--grad);box-shadow:0 6px 20px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">⚡</div>
+        <span class="font-semibold text-[14px] text-[color:var(--color-ink)]">Menu</span>
+      </div>
+      <button onclick={() => menuOpen = false} aria-label="close menu"
+        class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition cursor-pointer">
+        <X size={16} strokeWidth={2.2}/>
+      </button>
+    </div>
+    <nav class="flex-1 overflow-y-auto py-3">
+      {#each layout.tabs as t (t)}
+        {@const active = t === currentTab}
+        <button onclick={() => { currentTab = t; history.replaceState(null, "", "#" + t.toLowerCase()); menuOpen = false; }}
+          class="w-full flex items-center justify-between px-5 py-3.5 text-[14.5px] font-semibold transition-colors cursor-pointer"
+          class:text-[color:var(--color-ink)]={active}
+          class:text-[color:var(--color-ink-2)]={!active}
+          style:background={active ? "color-mix(in srgb, var(--color-brand) 10%, transparent)" : "transparent"}
+          style:border-left={active ? "3px solid var(--color-brand)" : "3px solid transparent"}>
+          <span>{t}</span>
+          {#if active}<span class="w-1.5 h-1.5 rounded-full" style="background:var(--color-brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--color-brand) 25%,transparent)"></span>{/if}
+        </button>
+      {/each}
+    </nav>
+    <div class="px-5 py-4 border-t border-[color:var(--color-line)] text-[11px] text-[color:var(--color-muted)] font-mono">
+      <div class="flex items-center justify-between">
+        <span>{connected ? "● online" : "○ offline"}</span>
+        <span>JouleSuite</span>
+      </div>
+    </div>
+  </aside>
 {/if}
 
 <!-- ============================== GRID =============================== -->
