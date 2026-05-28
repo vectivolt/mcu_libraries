@@ -9,3 +9,5 @@ demo/build/
 *.bin
 *.tmp
 .claude/
+ui/node_modules/
+ui/dist/

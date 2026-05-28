@@ -1,0 +1,96 @@
+/* ---------------------------------------------------------------------------
+ * JouleSuite — shared design tokens (Linear/Vercel-inspired, indigo accent)
+ * Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>
+ * (c) 2026 — MIT
+ * ------------------------------------------------------------------------- */
+@import "tailwindcss";
+
+/* ---- Design tokens ------------------------------------------------------ */
+@theme {
+  --color-bg:         #08090f;
+  --color-bg-soft:    #0d0f17;
+  --color-panel:      #11131c;
+  --color-panel-2:    #161824;
+  --color-line:       rgb(255 255 255 / 0.06);
+  --color-line-soft:  rgb(255 255 255 / 0.04);
+  --color-ink:        #f1f3fa;
+  --color-ink-2:      #b5bbd0;
+  --color-muted:      #7a809a;
+
+  --color-brand:      #6366f1;
+  --color-brand-2:    #8b5cf6;
+  --color-ok:         #10b981;
+  --color-warn:       #f59e0b;
+  --color-err:        #ef4444;
+  --color-info:       #06b6d4;
+
+  --radius-card:      20px;
+  --shadow-card:      0 1px 0 rgb(255 255 255 / 0.04) inset,
+                      0 24px 48px -16px rgb(0 0 0 / 0.55),
+                      0 4px 12px -4px rgb(0 0 0 / 0.30);
+  --shadow-card-hover:0 1px 0 rgb(255 255 255 / 0.06) inset,
+                      0 30px 60px -18px rgb(99 102 241 / 0.35),
+                      0 6px 16px -4px rgb(0 0 0 / 0.35);
+  --shadow-btn:       0 8px 24px -8px rgb(99 102 241 / 0.7),
+                      inset 0 1px 0 rgb(255 255 255 / 0.2);
+  --grad:             linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-2) 100%);
+
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter",
+               "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
+/* Light theme — applied when prefers-color-scheme:light AND user hasn't pinned dark */
+@media (prefers-color-scheme: light) {
+  :root[data-theme="auto"] {
+    --color-bg:         #f6f7fb;
+    --color-bg-soft:    #ffffff;
+    --color-panel:      #ffffff;
+    --color-panel-2:    #f9fafc;
+    --color-line:       rgb(15 18 40 / 0.08);
+    --color-line-soft:  rgb(15 18 40 / 0.04);
+    --color-ink:        #0b0d18;
+    --color-ink-2:      #42485c;
+    --color-muted:      #7d8398;
+    --shadow-card:      0 1px 0 rgb(255 255 255 / 0.6) inset,
+                        0 24px 48px -22px rgb(15 18 40 / 0.18),
+                        0 4px 12px -4px rgb(15 18 40 / 0.05);
+    --shadow-card-hover:0 1px 0 rgb(255 255 255 / 0.7) inset,
+                        0 30px 60px -24px rgb(99 102 241 / 0.22),
+                        0 6px 14px -3px rgb(15 18 40 / 0.08);
+  }
+}
+:root[data-theme="light"] {
+  --color-bg:         #f6f7fb;
+  --color-bg-soft:    #ffffff;
+  --color-panel:      #ffffff;
+  --color-panel-2:    #f9fafc;
+  --color-line:       rgb(15 18 40 / 0.08);
+  --color-line-soft:  rgb(15 18 40 / 0.04);
+  --color-ink:        #0b0d18;
+  --color-ink-2:      #42485c;
+  --color-muted:      #7d8398;
+  --shadow-card:      0 1px 0 rgb(255 255 255 / 0.6) inset,
+                      0 24px 48px -22px rgb(15 18 40 / 0.18),
+                      0 4px 12px -4px rgb(15 18 40 / 0.05);
+  --shadow-card-hover:0 1px 0 rgb(255 255 255 / 0.7) inset,
+                      0 30px 60px -24px rgb(99 102 241 / 0.22),
+                      0 6px 14px -3px rgb(15 18 40 / 0.08);
+}
+
+/* ---- Base layer -------------------------------------------------------- */
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; }
+body {
+  font: 14.5px/1.5 var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-bg);
+  background-image:
+    radial-gradient(900px 600px at 12% -8%, color-mix(in srgb, var(--color-brand) 22%, transparent), transparent 55%),
+    radial-gradient(700px 480px at 92% 6%,  color-mix(in srgb, var(--color-brand-2) 18%, transparent), transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, color-mix(in srgb, var(--color-brand) 8%, transparent), transparent 60%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  font-feature-settings: "cv11", "ss01";
+}
+::selection { background: color-mix(in srgb, var(--color-brand) 35%, transparent); color: var(--color-ink); }

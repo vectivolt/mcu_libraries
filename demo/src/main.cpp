@@ -4,24 +4,21 @@
 // Email:  dikibhuyan@gmail.com
 // (c) 2026 — MIT License
 // ---------------------------------------------------------------------------
-
-// JouleSuite demo — exercises JouleOTA + JouleSerial + JouleNet + JouleDash
-// on a single ESP32-S3 N8R2. Mounts:
 //
-//   /         → JouleDash (dashboard with live cards)
-//   /ota      → JouleOTA  (drag-drop firmware updater)
-//   /serial   → JouleSerial (wireless console)
-//   /wifi   → JouleNet  (Wi-Fi reconfig + custom parameters)
+// JouleSuite combined demo for ESP32-S3 N8R2.
 //
-// Wi-Fi behavior:
-//   1. Load saved networks from NVS.
-//   2. If "Rajesh K" isn't in the saved list, inject it (default creds for
-//      this demo board) so a fresh flash connects out of the box.
-//   3. autoConnect(); if every saved SSID fails, open the captive portal
-//      "Joule-Demo" SoftAP at 192.168.4.1/wifi.
+// Spins up a polished, EV-charger-themed dashboard that exercises every
+// widget type in JouleDash plus the OTA / Serial / Wi-Fi UIs at the same
+// time. All four libraries share one AsyncWebServer instance.
 //
-// Demo dashboard widgets cycle simulated sensor data so the UI shows life
-// the moment a browser connects.
+//   /         → JouleDash (302 → /dash)
+//   /dash     → JouleDash · 4 tabs of live energy / status / control widgets
+//   /ota      → JouleOTA  · drag-drop firmware updater
+//   /serial   → JouleSerial · wireless console
+//   /wifi     → JouleNet  · provisioning portal + custom params
+//
+// Simulated telemetry is sized to look like a real 7.2 kW Level-2 AC
+// charging session so the dashboard screenshot is meaningful, not toy.
 
 #include <Arduino.h>
 #include <WiFi.h>
@@ -32,57 +29,71 @@
 #include <JouleNet.h>
 #include <JouleDash.h>
 
+#include <math.h>
+
 // ---- defaults ----------------------------------------------------------
-// NB: Wi-Fi SSIDs are case-sensitive. The router's broadcast name is
-// "Rajesh k" with a lowercase k (verified via airport -I on the host Mac
-// 2026-05-28). An uppercase "K" yields NO_AP_FOUND immediately on scan.
-static constexpr const char *DEFAULT_SSID    = "Rajesh k";
+static constexpr const char *DEFAULT_SSID    = "Rajesh k";   // lower-case k
 static constexpr const char *DEFAULT_PASS    = "Vishu2012";
 static constexpr const char *AP_FALLBACK_SSID= "Joule-Demo";
 static constexpr const char *HOSTNAME        = "joule-demo";
 static constexpr const char *FW_VERSION      = "1.0.0+demo";
+// Unified JouleSuite brand: Indigo 500. Same family as the gradient companion
+// (Violet) baked into the UI CSS so the hero card, buttons, gauges, charts,
+// and tab pills all sit in one harmonious palette.
+static constexpr const char *BRAND_HEX       = "#6366f1";    // Indigo 500
 
-// Single shared async HTTP server. Each library mounts its own routes on
-// top of this one (so /, /ota, /serial, /wifi, /dash/ws all coexist).
 AsyncWebServer server(80);
 
-// ---- dashboard widgets -------------------------------------------------
-// All cards are global so they outlive setup() — JouleDash holds raw
-// pointers, mutating them in loop() is fine because tick() does the
-// thread-safe broadcast.
 using joule::DashCard;
 using joule::DashType;
 using joule::DashColor;
 
-DashCard cTemp   (DashType::Temperature, "temp",  "Temperature", "°C");
-DashCard cHumid  (DashType::Humidity,    "hum",   "Humidity",    "%");
-DashCard cRssi   (DashType::Number,      "rssi",  "Wi-Fi RSSI",  "dBm");
-DashCard cHeap   (DashType::Number,      "heap",  "Free heap",   "KB");
-DashCard cUptime (DashType::Number,      "up",    "Uptime",      "s");
-DashCard cLed    (DashType::Switch,      "led",   "Onboard LED");
-DashCard cBright (DashType::Slider,      "bright","Brightness",  "%");
-DashCard cReboot (DashType::Button,      "rb",    "Reboot now");
-DashCard cGauge  (DashType::Gauge,       "g1",    "CPU load",    "%");
-DashCard cProg   (DashType::Progress,    "p1",    "Cycle",       "%");
-DashCard cStatus (DashType::Status,      "st",    "Charger");
-DashCard cChart  (DashType::Chart,       "ch",    "Temperature trend");
-DashCard cJoy    (DashType::Joystick,    "j1",    "Joystick");
-DashCard cColor  (DashType::Color,       "c1",    "Brand color");
-DashCard cInput  (DashType::Input,       "note",  "Note");
-DashCard cCustom (DashType::Custom,      "cus",   "Custom HTML");
-DashCard cDonut  (DashType::Donut,       "dn",    "Battery",     "%");
+// ---- Overview tab — hero + live energy / session telemetry ----------------
+
+DashCard hero    (DashType::Custom,      "hero",   "JouleSuite EV charger");
+DashCard cPower  (DashType::Number,      "pwr",    "Power output",   "kW");
+DashCard cEnergy (DashType::Number,      "kwh",    "Energy delivered","kWh");
+DashCard cCost   (DashType::Number,      "cost",   "Session cost",   "₹");
+DashCard cSess   (DashType::Number,      "sess",   "Session time",   "min");
+DashCard cState  (DashType::Status,      "st",     "Charger state");
+DashCard cSoc    (DashType::Donut,       "soc",    "Battery SoC",    "%");
+DashCard cChargeG(DashType::Gauge,       "cg",     "Charge power",   "kW");
+
+// ---- Energy tab — phase + power detail -----------------------------------
+
+DashCard cV1     (DashType::Number,      "v1",     "Voltage L1",     "V");
+DashCard cI1     (DashType::Number,      "i1",     "Current L1",     "A");
+DashCard cPF     (DashType::Number,      "pf",     "Power factor",   "");
+DashCard cFreq   (DashType::Number,      "f",      "Frequency",      "Hz");
+DashCard cQuota  (DashType::Progress,    "q",      "Daily quota",    "%");
+DashCard cGreen  (DashType::Donut,       "gn",     "Renewable mix",  "%");
+DashCard cTrend  (DashType::Chart,       "tr",     "Power over time");
+
+// ---- Controls tab — interactive widgets ----------------------------------
+
+DashCard cStart  (DashType::Switch,      "start",  "Start session");
+DashCard cLimit  (DashType::Slider,      "lim",    "Current limit",  "A");
+DashCard cMode   (DashType::Slider,      "mode",   "Charge mode",    "");
+DashCard cLed    (DashType::Color,       "led",    "LED ring colour");
+DashCard cStop   (DashType::Button,      "estop",  "Emergency STOP");
+DashCard cReboot (DashType::Button,      "rb",     "Reboot device");
+DashCard cJoy    (DashType::Joystick,    "joy",    "Camera pan / tilt");
+DashCard cTag    (DashType::Input,       "tag",    "Driver RFID tag");
+
+// ---- Diagnostics tab -----------------------------------------------------
+
+DashCard cTemp   (DashType::Temperature, "tmp",    "PCB temperature","°C");
+DashCard cHumid  (DashType::Humidity,    "hum",    "Cabinet humidity","%");
+DashCard cRssi   (DashType::Number,      "rssi",   "Wi-Fi RSSI",     "dBm");
+DashCard cHeap   (DashType::Number,      "heap",   "Free heap",      "KB");
+DashCard cUp     (DashType::Number,      "up",     "Uptime",         "s");
+DashCard cNet    (DashType::Status,      "net",    "Network link");
+DashCard cOcpp   (DashType::Status,      "ocpp",   "OCPP backend");
+DashCard cRssiCh (DashType::Chart,       "rch",    "RSSI history");
 
 // ---- helpers -----------------------------------------------------------
 
-// Inject the lab default Wi-Fi creds if no networks are saved yet, so
-// flashing a brand-new board connects to "Rajesh K" without ever opening
-// the portal. After the first successful join JouleNet persists the
-// credentials, so subsequent reflashes pick them up from NVS regardless.
 static void seedDefaultWiFiIfEmpty() {
-  // If NVS already holds entries that don't include the known-good SSID
-  // (e.g. a previous flash burned in a typo), wipe the lot so the device
-  // can't get stuck retrying a never-going-to-work name. Then ensure the
-  // correct SSID is in the saved list.
   bool hasCorrect = false;
   for (auto &n : JouleNet.savedNetworks()) if (n.ssid == DEFAULT_SSID) { hasCorrect = true; break; }
   if (!hasCorrect) {
@@ -96,27 +107,27 @@ static void seedDefaultWiFiIfEmpty() {
 }
 
 static void setupNet() {
-  JouleNet.setApCredentials(AP_FALLBACK_SSID, "");        // open AP for setup
+  JouleNet.setApCredentials(AP_FALLBACK_SSID, "");
   JouleNet.setHostname(HOSTNAME);
   JouleNet.setMdnsName(HOSTNAME);
-  JouleNet.setPortalTimeoutMs(0);                         // keep portal up
+  JouleNet.setPortalTimeoutMs(0);
   JouleNet.setConnectTimeoutMs(20000);
   JouleNet.setReprovisionMs(120000);
-  JouleNet.setBrandColor("#7c5cff");
+  JouleNet.setBrandColor(BRAND_HEX);
   JouleNet.setTitle("JouleSuite Setup");
 
-  // Custom parameters — exercise every supported widget type so the Setup
-  // tab renders the full toolbox.
-  JouleNet.addParameter({"section1","Application",  joule::NetParamType::Header,  "","","",0,0});
-  JouleNet.addParameter({"room",    "Room name",    joule::NetParamType::Text,    "Lab","where is this device?","",0,0});
-  JouleNet.addParameter({"mqtt_host","MQTT host",   joule::NetParamType::Text,    "broker.local","fqdn or ip","",0,0});
-  JouleNet.addParameter({"mqtt_port","MQTT port",   joule::NetParamType::Number,  "1883","","",1,65535});
+  // Custom parameters covering every supported type.
+  JouleNet.addParameter({"sec1",    "Application",  joule::NetParamType::Header,  "","","",0,0});
+  JouleNet.addParameter({"name",    "Charger name", joule::NetParamType::Text,    "Bay 3 · JouleSuite Demo","display name","",0,0});
+  JouleNet.addParameter({"mqtt_h",  "MQTT host",    joule::NetParamType::Text,    "broker.local","fqdn or ip","",0,0});
+  JouleNet.addParameter({"mqtt_p",  "MQTT port",    joule::NetParamType::Number,  "1883","","",1,65535});
   JouleNet.addParameter({"mqtt_pw", "MQTT password",joule::NetParamType::Password,"","","",0,0});
-  JouleNet.addParameter({"region",  "Region",       joule::NetParamType::Dropdown,"EU","","EU|US|APAC|other",0,0});
-  JouleNet.addParameter({"brand_c", "Accent color", joule::NetParamType::Color,   "#7c5cff","","",0,0});
+  JouleNet.addParameter({"region",  "Region",       joule::NetParamType::Dropdown,"IN","","EU|US|APAC|IN|other",0,0});
+  JouleNet.addParameter({"accent",  "Accent colour",joule::NetParamType::Color,   BRAND_HEX,"","",0,0});
   JouleNet.addParameter({"verbose", "Verbose logs", joule::NetParamType::Toggle,  "1","","",0,0});
-  JouleNet.addParameter({"section2","Notes",        joule::NetParamType::Divider, "","","",0,0});
-  JouleNet.addParameter({"notes",   "Site notes",   joule::NetParamType::Textarea,"installed by site team\nfront entrance, bay 3","free-form","",0,0});
+  JouleNet.addParameter({"sec2",    "Notes",        joule::NetParamType::Divider, "","","",0,0});
+  JouleNet.addParameter({"notes",   "Site notes",   joule::NetParamType::Textarea,
+                         "Bay 3, ground floor.\nMounted on west pillar.\nKey under reception.","free-form","",0,0});
 
   JouleNet.begin(&server);
   seedDefaultWiFiIfEmpty();
@@ -126,10 +137,7 @@ static void setupNet() {
     JouleSerial.inf("netState=%s", names[(int)s]);
     if (s == joule::NetState::Connected) {
       JouleDash.notify(joule::NotifyLevel::Success,
-                       String("Wi-Fi connected: ") + WiFi.SSID() + " @ " + WiFi.localIP().toString());
-    } else if (s == joule::NetState::Portal) {
-      JouleDash.notify(joule::NotifyLevel::Warn,
-                       String("Setup portal up at AP ") + AP_FALLBACK_SSID);
+        String("Connected: ") + WiFi.SSID() + " · " + WiFi.localIP().toString());
     }
   });
 }
@@ -138,148 +146,178 @@ static void setupOta() {
   JouleOTA.setID(WiFi.macAddress());
   JouleOTA.setFWVersion(FW_VERSION);
   JouleOTA.setTitle("JouleSuite OTA");
-  JouleOTA.setBrandColor("#7c5cff");
+  JouleOTA.setBrandColor(BRAND_HEX);
   JouleOTA.setRateLimitMs(2000);
-  JouleOTA.setRollbackTimeoutMs(0);                       // demo: don't auto-rollback
 
-  JouleOTA.onStart   ([](joule::OtaMode m){ JouleSerial.wrn("OTA start mode=%s", m==joule::OtaMode::Filesystem?"fs":"fw"); });
   JouleOTA.onProgress([](size_t cur, size_t tot){
-    static int last=-5;
-    int pct = tot? (int)((cur*100)/tot) : 0;
-    if (pct >= last+5){ last=pct; JouleSerial.dbg("OTA %d%%  %u/%u", pct, (unsigned)cur, (unsigned)tot); }
+    static int last = -5;
+    int pct = tot ? (int)((cur * 100) / tot) : 0;
+    if (pct >= last + 5) { last = pct; JouleSerial.dbg("OTA %d%%", pct); }
   });
-  JouleOTA.onEnd     ([](bool ok, const String &m){
+  JouleOTA.onEnd([](bool ok, const String &m){
     JouleSerial.inf("OTA end ok=%d msg=%s", ok, m.c_str());
-    JouleDash.notify(ok?joule::NotifyLevel::Success:joule::NotifyLevel::Error,
-                     ok?"Update complete — rebooting":(String("Update failed: ")+m));
+    JouleDash.notify(ok ? joule::NotifyLevel::Success : joule::NotifyLevel::Error,
+                     ok ? "Update complete — rebooting" : (String("Update failed: ") + m));
   });
 
-  // Auth deliberately disabled in the demo: HTTP Basic doubles the round-
-  // trip count (401 challenge → request with creds) and the second leg
-  // fails reliably on RSSI worse than ~-85 dBm on this bench. Production
-  // sketches should pass "admin","joule" (or stronger) here.
-  JouleOTA.begin(&server, "", "");
-  JouleOTA.commit();                                      // accept this firmware
+  JouleOTA.begin(&server, "", "");        // demo: no auth (see README)
+  JouleOTA.commit();
 }
 
 static void setupSerial() {
   JouleSerial.setTitle("JouleSuite Console");
-  JouleSerial.setBrandColor("#2ee5a0");
+  JouleSerial.setBrandColor("#10b981");
   JouleSerial.setHistorySize(512);
   JouleSerial.onMessage([](const String &cmd){
     JouleSerial.inf("recv> %s", cmd.c_str());
-    if      (cmd == "reboot") { JouleSerial.wrn("rebooting in 1s"); delay(1000); ESP.restart(); }
-    else if (cmd == "scan")   { WiFi.scanNetworks(true); JouleSerial.inf("scan started"); }
-    else if (cmd == "heap")   { JouleSerial.inf("heap = %u bytes", ESP.getFreeHeap()); }
-    else if (cmd == "wipe-wifi") { JouleNet.clearAllCredentials(); JouleSerial.wrn("WiFi creds wiped"); }
-    else if (cmd.startsWith("notify ")) { JouleDash.notify(joule::NotifyLevel::Info, cmd.substring(7)); }
-    else JouleSerial.dbg("unknown cmd '%s' — try: reboot scan heap wipe-wifi 'notify <msg>'", cmd.c_str());
+    if      (cmd == "reboot")     { JouleSerial.wrn("rebooting in 1s"); delay(1000); ESP.restart(); }
+    else if (cmd == "scan")       { WiFi.scanNetworks(true); JouleSerial.inf("scan started"); }
+    else if (cmd == "heap")       { JouleSerial.inf("heap = %u bytes", ESP.getFreeHeap()); }
+    else if (cmd == "wipe-wifi")  { JouleNet.clearAllCredentials(); JouleSerial.wrn("WiFi creds wiped"); }
+    else if (cmd.startsWith("notify ")) JouleDash.notify(joule::NotifyLevel::Info, cmd.substring(7));
+    else JouleSerial.dbg("unknown '%s' — try: reboot scan heap wipe-wifi 'notify <msg>'", cmd.c_str());
   });
-  JouleSerial.begin(&server, "", "");   // demo: no auth (see JouleOTA note)
+  JouleSerial.begin(&server, "", "");
 }
 
 static void setupDash() {
-  JouleDash.setTitle("JouleSuite Dashboard");
-  JouleDash.setBrandColor("#7c5cff");
+  JouleDash.setTitle("JouleSuite EV Charger");
+  JouleDash.setBrandColor(BRAND_HEX);
   JouleDash.setTheme("auto");
   JouleDash.addTab("Overview");
+  JouleDash.addTab("Energy");
   JouleDash.addTab("Controls");
-  JouleDash.addTab("Charts");
+  JouleDash.addTab("Diagnostics");
 
-  // Tab assignments + sizing (12-col grid).
-  cTemp  .setTab("Overview"); cTemp .setWidth(3); cTemp .setColor(DashColor::Info);
-  cHumid .setTab("Overview"); cHumid.setWidth(3); cHumid.setColor(DashColor::Info);
-  cRssi  .setTab("Overview"); cRssi .setWidth(3);
-  cHeap  .setTab("Overview"); cHeap .setWidth(3);
-  cUptime.setTab("Overview"); cUptime.setWidth(6);
-  cStatus.setTab("Overview"); cStatus.setWidth(6); cStatus.setColor(DashColor::Success);
-  cCustom.setTab("Overview"); cCustom.setWidth(12);
+  // ---- Overview --------------------------------------------------------
+  hero.setTab("Overview"); hero.setWidth(12);
+  hero.setCustomHtml(
+    "<div style='display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:6px 4px'>"
+      "<div style='width:64px;height:64px;border-radius:16px;display:grid;place-items:center;"
+          "background:var(--grad);box-shadow:0 10px 30px color-mix(in srgb,var(--brand) 35%,transparent);"
+          "font-size:30px;color:#fff'>⚡</div>"
+      "<div style='flex:1;min-width:220px'>"
+        "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700'>"
+          "Bay 3 · JouleSuite Demo</div>"
+        "<div style='font-size:24px;font-weight:800;background:var(--grad);"
+          "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1'>"
+          "<span id='dash-hero-out'>Charging · 7.2 kW</span></div>"
+        "<div style='font-size:12px;color:var(--muted);margin-top:4px'>"
+          "OCPP 1.6 · CCS2 connector · 32 A type-2 cable</div>"
+      "</div>"
+      "<div style='display:flex;gap:8px;flex-wrap:wrap'>"
+        "<span style='padding:6px 12px;border-radius:99px;background:color-mix(in srgb,var(--ok) 18%,transparent);"
+            "color:var(--ok);font-weight:700;font-size:12px'>● live</span>"
+        "<span style='padding:6px 12px;border-radius:99px;background:color-mix(in srgb,var(--brand) 18%,transparent);"
+            "color:var(--brand);font-weight:700;font-size:12px'>RFID linked</span>"
+      "</div>"
+    "</div>");
 
+  cPower .setTab("Overview"); cPower .setWidth(3); cPower .setColor(DashColor::Info);
+  cEnergy.setTab("Overview"); cEnergy.setWidth(3); cEnergy.setColor(DashColor::Success);
+  cCost  .setTab("Overview"); cCost  .setWidth(3); cCost  .setColor(DashColor::Primary);
+  cSess  .setTab("Overview"); cSess  .setWidth(3);
+  cState .setTab("Overview"); cState .setWidth(4); cState.setValue("ok");
+  cSoc   .setTab("Overview"); cSoc   .setWidth(4); cSoc.setRange(0,100);
+  cChargeG.setTab("Overview");cChargeG.setWidth(4);cChargeG.setRange(0,22);
+
+  // ---- Energy ----------------------------------------------------------
+  cV1   .setTab("Energy");  cV1   .setWidth(3); cV1.setColor(DashColor::Info);
+  cI1   .setTab("Energy");  cI1   .setWidth(3); cI1.setColor(DashColor::Warning);
+  cPF   .setTab("Energy");  cPF   .setWidth(3);
+  cFreq .setTab("Energy");  cFreq .setWidth(3);
+  cQuota.setTab("Energy");  cQuota.setWidth(6); cQuota.setRange(0,100);
+  cGreen.setTab("Energy");  cGreen.setWidth(6); cGreen.setRange(0,100); cGreen.setColor(DashColor::Success);
+  cTrend.setTab("Energy");  cTrend.setWidth(12);
+
+  // ---- Controls --------------------------------------------------------
+  cStart .setTab("Controls"); cStart .setWidth(3);
+  cLimit .setTab("Controls"); cLimit .setWidth(6); cLimit.setRange(6,32);  cLimit.setStep(1);
+  cMode  .setTab("Controls"); cMode  .setWidth(3); cMode .setRange(0,3);   cMode .setStep(1);
   cLed   .setTab("Controls"); cLed   .setWidth(3);
-  cBright.setTab("Controls"); cBright.setWidth(6); cBright.setRange(0, 100);
-  cReboot.setTab("Controls"); cReboot.setWidth(3); cReboot.setColor(DashColor::Danger);
+  cStop  .setTab("Controls"); cStop  .setWidth(3); cStop .setColor(DashColor::Danger);
+  cReboot.setTab("Controls"); cReboot.setWidth(3); cReboot.setColor(DashColor::Warning);
   cJoy   .setTab("Controls"); cJoy   .setWidth(6);
-  cColor .setTab("Controls"); cColor .setWidth(3);
-  cInput .setTab("Controls"); cInput .setWidth(3);
+  cTag   .setTab("Controls"); cTag   .setWidth(6);
 
-  cGauge .setTab("Charts");   cGauge .setWidth(4); cGauge.setRange(0, 100);
-  cProg  .setTab("Charts");   cProg  .setWidth(4); cProg.setRange(0, 100);
-  cDonut .setTab("Charts");   cDonut .setWidth(4); cDonut.setRange(0, 100);
-  cChart .setTab("Charts");   cChart .setWidth(12);
+  // ---- Diagnostics -----------------------------------------------------
+  cTemp  .setTab("Diagnostics"); cTemp  .setWidth(3);
+  cHumid .setTab("Diagnostics"); cHumid .setWidth(3);
+  cRssi  .setTab("Diagnostics"); cRssi  .setWidth(3);
+  cHeap  .setTab("Diagnostics"); cHeap  .setWidth(3);
+  cUp    .setTab("Diagnostics"); cUp    .setWidth(4);
+  cNet   .setTab("Diagnostics"); cNet   .setWidth(4); cNet.setValue("ok");
+  cOcpp  .setTab("Diagnostics"); cOcpp  .setWidth(4); cOcpp.setValue("ok");
+  cRssiCh.setTab("Diagnostics"); cRssiCh.setWidth(12);
 
-  // Custom HTML — proves the escape-hatch widget. The firmware updates the
-  // span#dash-cus-out automatically with every setValue() broadcast.
-  cCustom.setCustomHtml(
-    "<div style='display:flex;gap:18px;align-items:center;flex-wrap:wrap'>"
-    "<div style='font-size:34px'>⚡</div>"
-    "<div><div style='font-size:11px;color:var(--muted)'>Custom widget — your HTML in our card</div>"
-    "<div style='font-family:ui-monospace,Menlo,monospace'>last tick: <span id='dash-cus-out'>—</span></div></div></div>"
-  );
-  cStatus.setValue("ok");
-  cColor .setValue("#7c5cff");
-
-  // Wire interactive widgets to host-side effects.
+  // ---- Interactive callbacks ------------------------------------------
   pinMode(LED_BUILTIN, OUTPUT);
-  cLed.onChange([](const String &v){
-    bool on = (v == "1");
+  cStart.onChange([](const String &v){
+    bool on = v == "1";
     digitalWrite(LED_BUILTIN, on ? HIGH : LOW);
-    JouleSerial.inf("LED %s", on ? "ON" : "OFF");
+    JouleDash.notify(on ? joule::NotifyLevel::Success : joule::NotifyLevel::Info,
+                     on ? "Session started" : "Session stopped");
   });
-  cBright.onChange([](const String &v){
-    JouleSerial.dbg("brightness=%s%%", v.c_str());
-    // Real PWM would go here. We just log it for the demo.
+  cLimit .onChange([](const String &v){ JouleSerial.inf("current limit → %sA", v.c_str()); });
+  cMode  .onChange([](const String &v){
+    const char *names[]={"Standard","Eco","Boost","Solar"};
+    int n = constrain(v.toInt(), 0, 3);
+    JouleSerial.inf("mode → %s", names[n]);
+    JouleDash.notify(joule::NotifyLevel::Info, String("Mode: ") + names[n]);
   });
-  cReboot.onChange([](const String &v){
-    if (v == "1") {
-      JouleDash.notify(joule::NotifyLevel::Warn, "Rebooting in 1s…", 1000);
-      delay(1100); ESP.restart();
-    }
-  });
-  cJoy.onChange([](const String &v){
-    JouleSerial.dbg("joystick %s", v.c_str());
-  });
-  cColor.onChange([](const String &v){
-    JouleSerial.inf("brand color → %s", v.c_str());
+  cLed   .onChange([](const String &v){
+    JouleSerial.inf("LED ring → %s", v.c_str());
     JouleDash.setBrandColor(v);
     JouleDash.refreshLayout();
   });
-  cInput.onChange([](const String &v){
-    JouleSerial.inf("note: %s", v.c_str());
-    JouleDash.notify(joule::NotifyLevel::Info, String("Saved: ") + v);
+  cStop  .onChange([](const String &){
+    JouleDash.notify(joule::NotifyLevel::Error, "Emergency STOP triggered");
+    JouleSerial.err("E-STOP");
+  });
+  cReboot.onChange([](const String &){
+    JouleDash.notify(joule::NotifyLevel::Warn, "Rebooting in 1s…", 1000);
+    delay(1100); ESP.restart();
+  });
+  cTag   .onChange([](const String &v){
+    JouleSerial.inf("Driver tag: %s", v.c_str());
+    JouleDash.notify(joule::NotifyLevel::Success, String("RFID: ") + v + " · authorized");
   });
 
-  JouleDash.add(&cTemp); JouleDash.add(&cHumid); JouleDash.add(&cRssi); JouleDash.add(&cHeap);
-  JouleDash.add(&cUptime); JouleDash.add(&cStatus); JouleDash.add(&cCustom);
-  JouleDash.add(&cLed); JouleDash.add(&cBright); JouleDash.add(&cReboot);
-  JouleDash.add(&cJoy); JouleDash.add(&cColor); JouleDash.add(&cInput);
-  JouleDash.add(&cGauge); JouleDash.add(&cProg); JouleDash.add(&cDonut); JouleDash.add(&cChart);
+  // ---- Register every card ---------------------------------------------
+  JouleDash.add(&hero);
+  JouleDash.add(&cPower); JouleDash.add(&cEnergy); JouleDash.add(&cCost); JouleDash.add(&cSess);
+  JouleDash.add(&cState); JouleDash.add(&cSoc);    JouleDash.add(&cChargeG);
+  JouleDash.add(&cV1);    JouleDash.add(&cI1);     JouleDash.add(&cPF);   JouleDash.add(&cFreq);
+  JouleDash.add(&cQuota); JouleDash.add(&cGreen);  JouleDash.add(&cTrend);
+  JouleDash.add(&cStart); JouleDash.add(&cLimit);  JouleDash.add(&cMode); JouleDash.add(&cLed);
+  JouleDash.add(&cStop);  JouleDash.add(&cReboot); JouleDash.add(&cJoy);  JouleDash.add(&cTag);
+  JouleDash.add(&cTemp);  JouleDash.add(&cHumid);  JouleDash.add(&cRssi); JouleDash.add(&cHeap);
+  JouleDash.add(&cUp);    JouleDash.add(&cNet);    JouleDash.add(&cOcpp); JouleDash.add(&cRssiCh);
 
-  // Anonymous read-only so the dashboard is browseable without auth,
-  // but interactions still go through HTTP basic.
-  JouleDash.begin(&server, "admin", "joule", true);
+  JouleDash.begin(&server, "", "", /*allowAnonymousRead=*/true);
 }
-
-// ---- arduino entry points ----------------------------------------------
 
 void setup() {
   Serial.begin(115200);
-  delay(300);
-  Serial.println();
-  Serial.println("== JouleSuite demo ==");
+  delay(300); Serial.println("\n== JouleSuite demo ==");
 
-  // Network first so the captive portal can come up before anything else
-  // tries to log over the wireless console.
   setupNet();
   setupSerial();
   setupOta();
   setupDash();
 
   server.begin();
-  JouleSerial.inf("HTTP server started on port 80");
-  JouleSerial.inf("Routes: / (dash)  /ota  /serial  /wifi");
+  JouleSerial.inf("HTTP server up — routes: / /dash /ota /serial /wifi");
   JouleSerial.inf("mDNS: http://%s.local", HOSTNAME);
-
   JouleNet.autoConnect();
+
+  // Seed Energy + RSSI charts with a plausible warm-up curve so the first
+  // viewer of the dashboard sees something interesting immediately.
+  for (int i = 0; i < 30; i++) {
+    float t = i;
+    cTrend  .chartPushXY(t, 7.0f + 0.3f * sinf(i / 4.0f));
+    cRssiCh .chartPushXY(t, -70 + 8 * sinf(i / 5.0f));
+  }
 }
 
 void loop() {
@@ -288,26 +326,63 @@ void loop() {
   JouleSerial.loop();
   JouleDash.tick();
 
-  // Simulated telemetry — 1 Hz tick.
-  static uint32_t last = 0;
-  static uint32_t startMs = millis();
-  static uint32_t chartT = 0;
-  if (millis() - last >= 1000) {
-    last = millis();
-    float t = 22.0f + 3.0f * sin((millis() % 60000) / 9550.0f);
-    float h = 45.0f + 4.0f * cos((millis() % 60000) / 7200.0f);
-    cTemp  .setValue(t, 2);
-    cHumid .setValue(h, 1);
-    cRssi  .setValue(WiFi.RSSI());
-    cHeap  .setValue((int)(ESP.getFreeHeap() / 1024));
-    cUptime.setValue((int)((millis() - startMs) / 1000));
-    cGauge .setValue((int)(30 + 50.0 * (0.5 + 0.5 * sin(millis()/3200.0))));
-    cProg  .setValue((int)((millis() / 100) % 101));
-    cDonut .setValue((int)(50 + 40.0 * sin(millis()/4800.0)));
-    cCustom.setValue(String(millis()/1000) + "s · t=" + String(t,1) + "°C");
-    if (millis() - chartT > 1000) {
-      chartT = millis();
-      cChart.chartPushXY(millis()/1000.0f, t);
-    }
+  static uint32_t last = 0, startMs = millis(), chartT = 0, notifyT = millis();
+  uint32_t now = millis();
+  if (now - last < 1000) return;
+  last = now;
+
+  // ----- Plausible 7.2 kW Level-2 charging session ---------------------
+  float sessionS  = (now - startMs) / 1000.0f;
+  float sessionM  = sessionS / 60.0f;
+  float power     = 7.0f + 0.4f * sinf(sessionS / 11.0f);   // ~7 kW with sway
+  float energy    = power * sessionS / 3600.0f;              // kWh delivered
+  int   socPct    = (int)constrain(45 + (energy * 8.0f), 45.0f, 100.0f);
+  float voltage   = 230.0f + 1.4f * sinf(sessionS / 7.0f);
+  float current   = (power * 1000.0f) / voltage;
+  float pf        = 0.97f + 0.015f * sinf(sessionS / 9.0f);
+  float freq      = 50.0f + 0.05f * sinf(sessionS / 13.0f);
+  int   greenMix  = (int)constrain(60 + 25.0f * sinf(sessionS / 17.0f), 0.0f, 100.0f);
+  int   quota     = (int)constrain(energy * 4.0f, 0.0f, 100.0f);
+  float tempC     = 38.0f + 2.5f * sinf(sessionS / 19.0f);
+  float humPct    = 42.0f + 3.0f * cosf(sessionS / 23.0f);
+  int   rssi      = WiFi.RSSI();
+
+  cPower  .setValue(power, 2);
+  cEnergy .setValue(energy, 3);
+  cCost   .setValue((int)(energy * 12.0f));            // ₹12/kWh (demo)
+  cSess   .setValue((int)sessionM);
+  cSoc    .setValue(socPct);
+  cChargeG.setValue(power, 1);
+
+  cV1     .setValue(voltage, 1);
+  cI1     .setValue(current, 1);
+  cPF     .setValue(pf, 3);
+  cFreq   .setValue(freq, 2);
+  cQuota  .setValue(quota);
+  cGreen  .setValue(greenMix);
+
+  cTemp   .setValue(tempC, 1);
+  cHumid  .setValue(humPct, 1);
+  cRssi   .setValue(rssi);
+  cHeap   .setValue((int)(ESP.getFreeHeap() / 1024));
+  cUp     .setValue((int)sessionS);
+
+  // Hero card narrative
+  char heroBuf[80];
+  snprintf(heroBuf, sizeof(heroBuf), "Charging · %.2f kW · %d%%", power, socPct);
+  hero.setValue(heroBuf);
+
+  // Push to time-series charts every 2 s
+  if (now - chartT > 2000) {
+    chartT = now;
+    cTrend .chartPushXY(sessionS, power);
+    cRssiCh.chartPushXY(sessionS, rssi);
+  }
+
+  // Occasional notifications so the toast UI is visible in screenshots
+  if (now - notifyT > 25000) {
+    notifyT = now;
+    JouleDash.notify(joule::NotifyLevel::Info,
+                     String("Energy delivered: ") + String(energy, 2) + " kWh", 4000);
   }
 }
