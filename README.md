@@ -27,11 +27,14 @@
 | ![JouleDash dashboard](docs/screenshots/dash-desktop-overview.png) <br>**JouleDash** — 17 cards, 3 tabs, live WebSocket | ![JouleOTA updater](docs/screenshots/ota-desktop.png) <br>**JouleOTA** — drag-drop with SVG progress ring |
 | ![JouleNet portal](docs/screenshots/wifi-desktop.png) <br>**JouleNet** — multi-SSID picker + custom-param form | ![JouleSerial console](docs/screenshots/serial-desktop.png) <br>**JouleSerial** — colour-tinted WebSocket log + cmd input |
 
-Mobile mockups: [dash](docs/screenshots/dash-mobile.png) ·
+Mobile mockups: [dash · overview](docs/screenshots/dash-mobile-overview.png) ·
+[dash · drawer](docs/screenshots/dash-mobile-menu.png) ·
 [ota](docs/screenshots/ota-mobile.png) ·
 [wifi](docs/screenshots/wifi-mobile.png) ·
 [serial](docs/screenshots/serial-mobile.png) — every UI is responsive
-down to a 320 px viewport.
+down to a 320 px viewport. JouleDash automatically collapses its
+horizontal tab strip into a slide-in hamburger drawer on phones so
+no tab ever scrolls off-screen.
 
 ---
 
