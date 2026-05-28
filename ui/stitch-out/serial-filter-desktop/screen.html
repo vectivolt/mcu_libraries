@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleSerial Console</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "bg-soft": "#0d0f17",
+                    "err": "#ef4444",
+                    "surface-bright": "#393841",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "inverse-surface": "#e4e1ed",
+                    "outline": "#908fa0",
+                    "on-error": "#690005",
+                    "primary": "#c0c1ff",
+                    "surface-container-high": "#292932",
+                    "inverse-on-surface": "#303038",
+                    "error-container": "#93000a",
+                    "outline-variant": "#464554",
+                    "tertiary-container": "#d97721",
+                    "surface-tint": "#c0c1ff",
+                    "on-primary-container": "#0d0096",
+                    "on-tertiary-container": "#452000",
+                    "ink": "#f1f3fa",
+                    "surface": "#13131b",
+                    "surface-container-lowest": "#0d0d15",
+                    "primary-fixed": "#e1e0ff",
+                    "on-surface": "#e4e1ed",
+                    "ok": "#10b981",
+                    "line": "rgba(255, 255, 255, 0.06)",
+                    "ink-2": "#b5bbd0",
+                    "on-primary": "#1000a9",
+                    "on-surface-variant": "#c7c4d7",
+                    "surface-variant": "#34343d",
+                    "surface-container": "#1f1f27",
+                    "on-tertiary": "#4f2500",
+                    "secondary": "#d0bcff",
+                    "primary-container": "#8083ff",
+                    "bg": "#08090f",
+                    "on-error-container": "#ffdad6",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "tertiary-fixed": "#ffdcc5",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "info": "#06b6d4",
+                    "inverse-primary": "#494bd6",
+                    "on-tertiary-fixed": "#301400",
+                    "panel-2": "#161824",
+                    "tertiary-fixed-dim": "#ffb783",
+                    "background": "#13131b",
+                    "tertiary": "#ffb783",
+                    "warn": "#f59e0b",
+                    "secondary-container": "#571bc1",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "panel": "#11131c",
+                    "on-tertiary-fixed-variant": "#703700",
+                    "on-background": "#e4e1ed",
+                    "surface-container-highest": "#34343d",
+                    "on-secondary-fixed": "#23005c",
+                    "secondary-fixed": "#e9ddff",
+                    "on-secondary": "#3c0091",
+                    "line-soft": "rgba(255, 255, 255, 0.04)",
+                    "surface-container-low": "#1b1b23",
+                    "on-primary-fixed": "#07006c",
+                    "muted": "#7a809a",
+                    "on-secondary-container": "#c4abff",
+                    "error": "#ffb4ab",
+                    "surface-dim": "#13131b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "gutter": "16px",
+                    "container-max": "1280px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "24px"
+            },
+            "fontFamily": {
+                    "section-label": [
+                            "Inter"
+                    ],
+                    "body-md": [
+                            "Inter"
+                    ],
+                    "title-header": [
+                            "Inter"
+                    ],
+                    "kpi-value-lg-mobile": [
+                            "Inter"
+                    ],
+                    "mono-code": [
+                            "JetBrains Mono"
+                    ],
+                    "kpi-value-lg": [
+                            "Inter"
+                    ],
+                    "subtitle-header": [
+                            "Inter"
+                    ]
+            },
+            "fontSize": {
+                    "section-label": [
+                            "11px",
+                            {
+                                    "lineHeight": "1.2",
+                                    "letterSpacing": "1px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "1.6",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "title-header": [
+                            "15.5px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "letterSpacing": "-0.2px",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "kpi-value-lg-mobile": [
+                            "32px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-1px",
+                                    "fontWeight": "300"
+                            }
+                    ],
+                    "mono-code": [
+                            "12.5px",
+                            {
+                                    "lineHeight": "1.5",
+                                    "letterSpacing": "0",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "kpi-value-lg": [
+                            "48px",
+                            {
+                                    "lineHeight": "1.1",
+                                    "letterSpacing": "-1px",
+                                    "fontWeight": "300"
+                            }
+                    ],
+                    "subtitle-header": [
+                            "11.5px",
+                            {
+                                    "lineHeight": "1.4",
+                                    "letterSpacing": "0.1px",
+                                    "fontWeight": "500"
+                            }
+                    ]
+            }
+        },
+        },
+      }
+    </script>
+<style>
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1); 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.1); 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.2); 
+        }
+        
+        .bg-brand-gradient {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .pulse-dot {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: .5; }
+        }
+        
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 0,
+          'wght' 300,
+          'GRAD' 0,
+          'opsz' 24
+        }
+        
+        .material-symbols-outlined.filled {
+          font-variation-settings:
+          'FILL' 1,
+          'wght' 300,
+          'GRAD' 0,
+          'opsz' 24
+        }
+    </style>
+</head>
+<body class="bg-bg text-ink h-screen flex flex-col overflow-hidden selection:bg-primary-container/30 selection:text-ink">
+<!-- Ambient Background Blobs -->
+<div class="fixed inset-0 pointer-events-none overflow-hidden z-[-1]">
+<div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-secondary-container/10 blur-[120px]"></div>
+<div class="absolute bottom-[20%] right-[-5%] w-[30%] h-[30%] rounded-full bg-primary-container/5 blur-[100px]"></div>
+</div>
+<!-- Side Navigation (Shared Component Injection - Modified for full width context as side nav wasn't requested in prompt but present in JSON context, adapting to top-nav only as per prompt layout requirements) -->
+<!-- Top Header -->
+<header class="h-[52px] sticky top-0 bg-bg/80 backdrop-blur-md border-b border-line z-50 flex items-center justify-between px-margin-desktop shrink-0">
+<div class="flex items-center gap-4">
+<!-- Brand Logo -->
+<div class="w-8 h-8 rounded-[11px] bg-brand-gradient flex items-center justify-center shadow-[0_0_15px_rgba(99,102,241,0.3)]">
+<span class="material-symbols-outlined text-white text-[18px]">terminal</span>
+</div>
+<div class="flex items-baseline gap-3">
+<h1 class="font-title-header text-title-header text-ink tracking-tight">JouleSerial Console</h1>
+<div class="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-panel-2 border border-line">
+<div class="w-1.5 h-1.5 rounded-full bg-ok pulse-dot shadow-[0_0_8px_rgba(16,185,129,0.6)]"></div>
+<span class="font-mono-code text-mono-code text-ink-2">online · 3 clients</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-3">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-ink-2 hover:text-ink hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">dark_mode</span>
+</button>
+<div class="w-px h-4 bg-line mx-1"></div>
+<!-- TopNavBar trailing icons -->
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-ink-2 hover:text-ink hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-ink-2 hover:text-ink hover:bg-white/5 transition-colors">
+<span class="material-symbols-outlined text-[20px]">help</span>
+</button>
+</div>
+</header>
+<!-- Toolbar -->
+<div class="h-[48px] bg-bg-soft/90 backdrop-blur-sm border-b border-line flex items-center justify-between px-margin-desktop shrink-0">
+<div class="flex items-center gap-3">
+<!-- Search -->
+<div class="relative w-64 group">
+<div class="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-primary text-[16px] transition-colors">search</span>
+</div>
+<input class="w-full h-8 bg-panel-2 border border-[#6366f1] rounded-lg pl-8 pr-3 font-mono-code text-[12px] text-ink placeholder:text-muted focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all ring-1 ring-[#6366f1]" placeholder="filter — regex ok · press /" type="text" value="wifi|rssi"/>
+</div>
+<div class="w-px h-4 bg-line mx-1"></div>
+<!-- Filters -->
+<button class="flex items-center gap-1 text-[13.5px] font-semibold text-ink-2 hover:text-ink transition-colors px-2 h-8 rounded-md hover:bg-white/5">
+                WARN+
+                <span class="material-symbols-outlined text-[16px]">expand_more</span>
+</button>
+<div class="flex items-center gap-1 bg-panel-2 border border-line p-0.5 rounded-full">
+<button class="px-3 h-7 rounded-full bg-brand-gradient text-white font-title-header text-[12px] shadow-[0_2px_10px_rgba(99,102,241,0.2)]">Auto</button>
+<button class="px-3 h-7 rounded-full text-ink-2 hover:text-ink font-title-header text-[12px] transition-colors">rel</button>
+<button class="px-3 h-7 rounded-full text-ink-2 hover:text-ink font-title-header text-[12px] transition-colors">text</button>
+</div>
+<div class="w-px h-4 bg-line mx-1"></div>
+<button class="flex items-center gap-1 text-[13px] font-medium text-ink-2 hover:text-ink transition-colors px-2 h-8 rounded-md hover:bg-white/5 border border-transparent hover:border-line">
+                13px
+                <span class="material-symbols-outlined text-[14px]">expand_more</span>
+</button>
+<button class="w-8 h-8 rounded-md flex items-center justify-center text-ink-2 hover:text-ink hover:bg-white/5 border border-transparent hover:border-line transition-all">
+<span class="material-symbols-outlined text-[16px]">download</span>
+</button>
+<button class="w-8 h-8 rounded-md flex items-center justify-center text-ink-2 hover:text-ink hover:bg-white/5 border border-transparent hover:border-line transition-all">
+<span class="material-symbols-outlined text-[16px]">ink_eraser</span>
+</button>
+</div>
+<!-- Stat Chips -->
+<div class="flex items-center gap-2 font-mono-code text-[11px]">
+<div class="px-2 py-1 rounded-full bg-info/10 text-info border border-info/20 flex items-center gap-1">
+<span>dbg:</span><span class="font-bold">4</span>
+</div>
+<div class="px-2 py-1 rounded-full bg-ok/10 text-ok border border-ok/20 flex items-center gap-1">
+<span>inf:</span><span class="font-bold">28</span>
+</div>
+<div class="px-2 py-1 rounded-full bg-warn/10 text-warn border border-warn/20 flex items-center gap-1">
+<span>wrn:</span><span class="font-bold">1</span>
+</div>
+<div class="px-2 py-1 rounded-full bg-err/10 text-err border border-err/20 flex items-center gap-1">
+<span>err:</span><span class="font-bold">0</span>
+</div>
+<div class="w-px h-3 bg-line mx-1"></div>
+<div class="px-2 py-1 text-ink-2">
+<span>rate:6/s</span>
+</div>
+<div class="px-2 py-1 text-ink-2">
+<span>total:7</span>
+</div>
+</div>
+</div>
+<!-- Main Log Pane -->
+<main class="flex-1 overflow-y-auto bg-bg p-4 font-mono-code text-[13px] leading-relaxed">
+<div class="w-full max-w-screen-2xl mx-auto flex flex-col gap-1">
+<!-- Log Lines -->
+<div class="flex items-start bg-info/5 hover:bg-info/10 px-2 py-0.5 rounded transition-colors group border-l-2 border-info/50">
+<div class="w-[80px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">14.012s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-info/10 text-info text-[11px] uppercase border border-info/20">DBG</span>
+</div>
+<div class="flex-1 text-ink break-all">heap=246412 <mark class="bg-warn/20 text-warn px-1 rounded">rssi</mark>=-86</div>
+</div>
+<div class="flex items-start bg-warn/5 hover:bg-warn/10 px-2 py-0.5 rounded transition-colors group border-l-2 border-warn/50">
+<div class="w-[80px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">16.025s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-warn/10 text-warn text-[11px] uppercase border border-warn/20">WRN</span>
+</div>
+<div class="flex-1 text-warn break-all"><mark class="bg-warn/20 text-warn px-1 rounded">rssi</mark>=-87 weak</div>
+</div>
+<div class="flex items-start hover:bg-white/5 px-2 py-0.5 rounded transition-colors group">
+<div class="w-[82px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">17.402s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-ok/10 text-ok text-[11px] uppercase border border-ok/20">INF</span>
+</div>
+<div class="flex-1 text-ink break-all">Network: <mark class="bg-warn/20 text-warn px-1 rounded">wifi</mark> connection stable</div>
+</div>
+<div class="flex items-start hover:bg-white/5 px-2 py-0.5 rounded transition-colors group">
+<div class="w-[82px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">19.005s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-info/10 text-info text-[11px] uppercase border border-info/20">DBG</span>
+</div>
+<div class="flex-1 text-ink break-all">heap=245900 <mark class="bg-warn/20 text-warn px-1 rounded">rssi</mark>=-85</div>
+</div>
+<div class="flex items-start bg-warn/5 hover:bg-warn/10 px-2 py-0.5 rounded transition-colors group border-l-2 border-warn/50">
+<div class="w-[80px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">21.110s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-warn/10 text-warn text-[11px] uppercase border border-warn/20">WRN</span>
+</div>
+<div class="flex-1 text-warn break-all"><mark class="bg-warn/20 text-warn px-1 rounded">wifi</mark> latency spike detected</div>
+</div>
+<div class="flex items-start hover:bg-white/5 px-2 py-0.5 rounded transition-colors group">
+<div class="w-[82px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">24.500s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-ok/10 text-ok text-[11px] uppercase border border-ok/20">INF</span>
+</div>
+<div class="flex-1 text-ink break-all">Scanning for <mark class="bg-warn/20 text-warn px-1 rounded">wifi</mark> networks...</div>
+</div>
+<div class="flex items-start hover:bg-white/5 px-2 py-0.5 rounded transition-colors group">
+<div class="w-[82px] shrink-0 text-ink-2/60 group-hover:text-ink-2 transition-colors">26.002s</div>
+<div class="w-[52px] shrink-0">
+<span class="px-1.5 py-[1px] rounded bg-info/10 text-info text-[11px] uppercase border border-info/20">DBG</span>
+</div>
+<div class="flex-1 text-ink break-all">heap=245112 <mark class="bg-warn/20 text-warn px-1 rounded">rssi</mark>=-85</div>
+</div>
+</div>
+</main>
+<!-- Bottom Command Bar -->
+<div class="h-[60px] sticky bottom-0 bg-bg/80 backdrop-blur-md border-t border-line px-margin-desktop flex items-center shrink-0">
+<div class="flex-1 flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] font-bold shrink-0">chevron_right</span>
+<input class="w-full bg-panel-2 border border-line rounded-lg py-2 px-3 font-mono-code text-[13px] text-ink placeholder:text-ink-2/50 focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="type a command — Enter to send · arrow keys history · / to focus filter" type="text"/>
+</div>
+<button class="ml-4 h-10 px-6 rounded-full bg-brand-gradient text-white font-title-header text-[14px] shadow-[0_4px_15px_rgba(99,102,241,0.25)] hover:translate-y-[-1px] transition-all flex items-center gap-2">
+            Send
+            <span class="material-symbols-outlined text-[18px]">send</span>
+</button>
+</div>
+<!-- Footer - using JSON Shared component as a base for standard app layout consistency, although not explicitly requested, it provides a complete look. However, the prompt asks for a "Bottom Command Bar (60px): Sticky bottom". I will assume the command bar REPLACES the standard footer for this specific tool view. I will NOT render the standard footer to strictly adhere to the "3-band vertical layout" requested (Header, Toolbar, Main, Command Bar - technically 4 bands). -->
+</body></html>

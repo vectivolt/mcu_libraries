@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleOTA Firmware Updater - Pull URL</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#e4e1ed",
+                        "ok": "#10b981",
+                        "on-secondary-container": "#c4abff",
+                        "surface-dim": "#13131b",
+                        "ink-2-dark": "#b5bbd0",
+                        "surface-variant": "#34343d",
+                        "inverse-primary": "#494bd6",
+                        "ink-dark": "#f1f3fa",
+                        "panel-dark": "#11131c",
+                        "panel-2-dark": "#161824",
+                        "tertiary": "#ffb783",
+                        "surface-container-high": "#292932",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "secondary-fixed": "#e9ddff",
+                        "outline": "#908fa0",
+                        "on-error": "#690005",
+                        "surface-container-low": "#1b1b23",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface": "#13131b",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-primary": "#1000a9",
+                        "error-container": "#93000a",
+                        "surface-container": "#1f1f27",
+                        "panel-2-light": "#f9fafc",
+                        "on-primary-container": "#0d0096",
+                        "muted-dark": "#7a809a",
+                        "bg-soft-dark": "#0d0f17",
+                        "ink-2-light": "#42485c",
+                        "surface-container-highest": "#34343d",
+                        "bg-dark": "#08090f",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "secondary-container": "#571bc1",
+                        "surface-container-lowest": "#0d0d15",
+                        "on-secondary": "#3c0091",
+                        "panel-light": "#ffffff",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "primary-container": "#8083ff",
+                        "on-tertiary-container": "#452000",
+                        "warn": "#f59e0b",
+                        "err": "#ef4444",
+                        "outline-variant": "#464554",
+                        "on-primary-fixed": "#07006c",
+                        "inverse-surface": "#e4e1ed",
+                        "on-tertiary-fixed": "#301400",
+                        "bg-light": "#f6f7fb",
+                        "tertiary-fixed": "#ffdcc5",
+                        "inverse-on-surface": "#303038",
+                        "primary-fixed": "#e1e0ff",
+                        "on-tertiary": "#4f2500",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "info": "#06b6d4",
+                        "on-surface": "#e4e1ed",
+                        "on-secondary-fixed": "#23005c",
+                        "on-error-container": "#ffdad6",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "primary": "#c0c1ff",
+                        "secondary": "#d0bcff",
+                        "error": "#ffb4ab",
+                        "surface-bright": "#393841",
+                        "tertiary-container": "#d97721",
+                        "background": "#13131b",
+                        "ink-light": "#0b0d18",
+                        "surface-tint": "#c0c1ff",
+                        "muted-light": "#7d8398"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "16px",
+                        "2xl": "28px",
+                        "xl": "20px",
+                        "3xl": "40px",
+                        "xs": "4px",
+                        "card-padding": "20px",
+                        "grid-gap-mobile": "10px",
+                        "grid-gap-desktop": "14px",
+                        "sm": "8px",
+                        "md": "12px"
+                    },
+                    "fontFamily": {
+                        "title-header": ["Inter"],
+                        "kpi-sm": ["Inter"],
+                        "section-label": ["Inter"],
+                        "mono-code": ["JetBrains Mono"],
+                        "kpi-lg": ["Inter"],
+                        "subtitle-header": ["Inter"],
+                        "button": ["Inter"],
+                        "body": ["Inter"]
+                    },
+                    "fontSize": {
+                        "title-header": ["15.5px", { "lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600" }],
+                        "kpi-sm": ["26px", { "lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300" }],
+                        "section-label": ["11px", { "lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600" }],
+                        "mono-code": ["12.5px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "kpi-lg": ["40px", { "lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300" }],
+                        "subtitle-header": ["11.5px", { "lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "button": ["13.5px", { "lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600" }],
+                        "body": ["14.5px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }]
+                    },
+                    backgroundImage: {
+                        'brand-gradient': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        'danger-gradient': 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)',
+                        'card-sheen': 'linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%)'
+                    },
+                    boxShadow: {
+                        'btn': '0 4px 14px -2px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15)',
+                        'btn-hover': '0 6px 20px -2px rgba(99, 102, 241, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2)',
+                        'card': '0 10px 40px -10px rgba(0,0,0,0.5), inset 0 1px 0 0 rgba(255,255,255,0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .pulse-ok {
+            animation: pulse-ok 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse-ok {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            50% { opacity: .8; box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        }
+        .lucide {
+            stroke-width: 2.2px;
+            width: 16px;
+            height: 16px;
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-on-background min-h-screen relative overflow-x-hidden font-body text-body">
+<!-- Ambient Blurs -->
+<div class="fixed top-[-10%] left-[-10%] w-[50vw] h-[50vw] rounded-full bg-primary/10 blur-[120px] pointer-events-none"></div>
+<div class="fixed bottom-[-20%] right-[-10%] w-[60vw] h-[60vw] rounded-full bg-[#8b5cf6]/10 blur-[150px] pointer-events-none"></div>
+<!-- TopNavBar -->
+<nav class="sticky top-0 w-full bg-background/80 backdrop-blur-xl border-b border-outline-variant/20 shadow-sm z-50">
+<div class="flex justify-between items-center h-16 px-xl max-w-7xl mx-auto w-full">
+<div class="flex items-center gap-md">
+<div class="w-[32px] h-[32px] rounded-[11px] bg-brand-gradient flex items-center justify-center shadow-btn">
+<svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="font-title-header text-title-header text-ink-dark">JouleSuite OTA</span>
+</div>
+<div class="flex items-center gap-lg">
+<div class="flex items-center gap-sm px-md py-xs rounded-full bg-surface-container border border-outline-variant/30">
+<div class="w-1.5 h-1.5 rounded-full bg-ok pulse-ok relative">
+<div class="absolute -inset-1 rounded-full border border-ok/20"></div>
+</div>
+<span class="font-mono-code text-mono-code text-muted-dark">Live</span>
+</div>
+<button class="p-2 rounded-lg text-muted-dark hover:text-primary transition-colors duration-200">
+<span class="material-symbols-outlined" data-icon="dark_mode">dark_mode</span>
+</button>
+</div>
+</div>
+</nav>
+<main class="max-w-4xl mx-auto px-lg py-xl md:py-3xl flex flex-col gap-xl">
+<!-- DEVICE CARD -->
+<section class="bg-panel-dark rounded-[20px] border border-white/[0.06] shadow-card bg-card-sheen p-card-padding relative overflow-hidden">
+<h2 class="font-section-label text-section-label text-muted-dark uppercase tracking-wider mb-lg">Device Status</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-lg">
+<div class="flex flex-col gap-xs">
+<span class="font-subtitle-header text-subtitle-header text-muted-dark">Hardware ID</span>
+<span class="font-mono-code text-mono-code text-ink-dark">ESP32-S3-WROOM</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-subtitle-header text-subtitle-header text-muted-dark">Firmware</span>
+<span class="font-mono-code text-mono-code text-primary">v1.2.2-stable</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-subtitle-header text-subtitle-header text-muted-dark">Slots</span>
+<span class="font-mono-code text-mono-code text-ink-dark">APP0 / APP1</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-subtitle-header text-subtitle-header text-muted-dark">Free Heap</span>
+<span class="font-mono-code text-mono-code text-ink-dark px-sm py-xs bg-panel-2-dark rounded-md border border-white/[0.04] w-fit">248 KB</span>
+</div>
+</div>
+</section>
+<!-- UPLOAD CARD -->
+<section class="bg-panel-dark rounded-[20px] border border-white/[0.06] shadow-card bg-card-sheen flex flex-col relative overflow-hidden">
+<!-- Tabs -->
+<div class="flex border-b border-white/[0.06] px-card-padding pt-md overflow-x-auto no-scrollbar">
+<button class="px-md py-sm font-button text-button text-muted-dark hover:text-ink-dark transition-colors border-b-2 border-transparent">
+                    Firmware
+                </button>
+<button class="px-md py-sm font-button text-button text-muted-dark hover:text-ink-dark transition-colors border-b-2 border-transparent">
+                    Filesystem
+                </button>
+<button class="px-md py-sm font-button text-button text-primary border-b-2 border-primary bg-white/[0.02] rounded-t-lg">
+                    Pull URL
+                </button>
+</div>
+<!-- Content -->
+<div class="p-card-padding flex flex-col gap-xl">
+<div class="flex flex-col gap-sm">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark" for="url-input">Source URL</label>
+<div class="relative">
+<input class="w-full bg-panel-2-dark border border-white/[0.08] rounded-lg px-md py-md font-mono-code text-mono-code text-ink-dark focus:ring-1 focus:ring-primary focus:border-primary focus:outline-none transition-shadow shadow-inner" id="url-input" type="text" value="https://builds.example.com/v1.2.3/firmware.bin"/>
+</div>
+<p class="font-body text-[13px] text-muted-dark mt-xs">Device will download and flash directly from this URL.</p>
+</div>
+<div class="flex items-center gap-md pt-sm">
+<button class="bg-brand-gradient shadow-btn hover:shadow-btn-hover hover:-translate-y-[2px] transition-all duration-200 rounded-full px-xl py-sm flex items-center gap-sm">
+<svg class="lucide text-white w-[16px] h-[16px]" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"></path><path d="M12 12v7"></path><path d="m9 15 3 3 3-3"></path></svg>
+<span class="font-button text-button text-white">Pull &amp; flash</span>
+</button>
+<button class="bg-panel-2-dark border border-white/[0.08] hover:border-primary/50 hover:text-primary transition-colors duration-200 rounded-full px-xl py-sm">
+<span class="font-button text-button text-ink-dark">Cancel</span>
+</button>
+</div>
+</div>
+</section>
+<!-- MAINTENANCE CARD -->
+<section class="bg-panel-dark rounded-[20px] border border-white/[0.06] shadow-card bg-card-sheen p-card-padding relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-warn/40"></div>
+<div class="pl-sm">
+<h2 class="font-section-label text-section-label text-muted-dark uppercase tracking-wider mb-lg">Maintenance</h2>
+<div class="flex flex-col sm:flex-row gap-md">
+<button class="bg-panel-2-dark border border-white/[0.08] hover:border-primary/50 hover:text-primary transition-colors duration-200 rounded-full px-xl py-sm flex items-center justify-center gap-sm flex-1">
+<span class="material-symbols-outlined text-[16px]" data-icon="task_alt">task_alt</span>
+<span class="font-button text-button text-ink-dark">Commit current</span>
+</button>
+<button class="bg-danger-gradient shadow-[0_4px_14px_-2px_rgba(239,68,68,0.4)] hover:shadow-[0_6px_20px_-2px_rgba(239,68,68,0.6)] hover:-translate-y-[2px] transition-all duration-200 rounded-full px-xl py-sm flex items-center justify-center gap-sm flex-1">
+<span class="material-symbols-outlined text-[16px] text-white" data-icon="history">history</span>
+<span class="font-button text-button text-white">Rollback</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

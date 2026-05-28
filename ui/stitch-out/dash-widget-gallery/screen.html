@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleDash Widget Gallery</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface": "#e4e1ed",
+                        "surface-dim": "#13131b",
+                        "on-secondary-container": "#c4abff",
+                        "tertiary-fixed": "#ffdcc5",
+                        "bg-light": "#f6f7fb",
+                        "outline-variant": "#464554",
+                        "on-surface-variant": "#c7c4d7",
+                        "error-container": "#93000a",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container-low": "#1b1b23",
+                        "muted-dark": "#7a809a",
+                        "outline": "#908fa0",
+                        "on-secondary-fixed": "#23005c",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "surface-container-high": "#292932",
+                        "tertiary": "#ffb783",
+                        "surface-container": "#1f1f27",
+                        "surface": "#13131b",
+                        "inverse-primary": "#494bd6",
+                        "inverse-on-surface": "#303038",
+                        "tertiary-container": "#d97721",
+                        "panel-2-dark": "#161824",
+                        "on-background": "#e4e1ed",
+                        "on-tertiary-container": "#452000",
+                        "background": "#13131b",
+                        "bg-soft-dark": "#0d0f17",
+                        "surface-container-lowest": "#0d0d15",
+                        "primary-fixed": "#e1e0ff",
+                        "secondary": "#d0bcff",
+                        "primary-container": "#8083ff",
+                        "warn": "#f59e0b",
+                        "panel-2-light": "#f9fafc",
+                        "ink-2-dark": "#b5bbd0",
+                        "err": "#ef4444",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-tertiary": "#4f2500",
+                        "surface-bright": "#393841",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "info": "#06b6d4",
+                        "on-secondary": "#3c0091",
+                        "error": "#ffb4ab",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "ink-dark": "#f1f3fa",
+                        "on-primary": "#1000a9",
+                        "on-tertiary-fixed": "#301400",
+                        "on-error": "#690005",
+                        "ink-light": "#0b0d18",
+                        "inverse-surface": "#e4e1ed",
+                        "panel-light": "#ffffff",
+                        "surface-container-highest": "#34343d",
+                        "panel-dark": "#11131c",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "ink-2-light": "#42485c",
+                        "primary": "#c0c1ff",
+                        "on-error-container": "#ffdad6",
+                        "secondary-container": "#571bc1",
+                        "surface-tint": "#c0c1ff",
+                        "muted-light": "#7d8398",
+                        "surface-variant": "#34343d",
+                        "ok": "#10b981",
+                        "secondary-fixed": "#e9ddff",
+                        "on-primary-container": "#0d0096",
+                        "bg-dark": "#08090f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-padding": "20px",
+                        "xs": "4px",
+                        "xl": "20px",
+                        "grid-gap-desktop": "14px",
+                        "grid-gap-mobile": "10px",
+                        "2xl": "28px",
+                        "md": "12px",
+                        "3xl": "40px",
+                        "lg": "16px",
+                        "sm": "8px"
+                    },
+                    "fontFamily": {
+                        "section-label": ["Inter", "sans-serif"],
+                        "button": ["Inter", "sans-serif"],
+                        "body": ["Inter", "sans-serif"],
+                        "title-header": ["Inter", "sans-serif"],
+                        "subtitle-header": ["Inter", "sans-serif"],
+                        "kpi-sm": ["Inter", "sans-serif"],
+                        "mono-code": ["JetBrains Mono", "monospace"],
+                        "kpi-lg": ["Inter", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "section-label": ["11px", { "lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600" }],
+                        "button": ["13.5px", { "lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600" }],
+                        "body": ["14.5px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "title-header": ["15.5px", { "lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600" }],
+                        "subtitle-header": ["11.5px", { "lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "kpi-sm": ["26px", { "lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300" }],
+                        "mono-code": ["12.5px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "kpi-lg": ["40px", { "lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300" }]
+                    },
+                    "boxShadow": {
+                        'btn': '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.04)',
+                    },
+                    "backgroundImage": {
+                        'brand-gradient': 'linear-gradient(135deg, #6366f1, #8b5cf6)',
+                        'card-sheen': 'linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 0%, transparent 50%)',
+                    }
+                }
+            }
+        }
+    </script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+        }
+        body {
+            background-color: #08090f;
+            color: #e4e1ed;
+        }
+        .blur-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 40vw; height: 40vw; background: rgba(99, 102, 241, 0.12); }
+        .blob-2 { bottom: -20%; right: -10%; width: 50vw; height: 50vw; background: rgba(139, 92, 246, 0.08); }
+        .blob-3 { top: 40%; left: 30%; width: 30vw; height: 30vw; background: rgba(99, 102, 241, 0.05); }
+
+        .card {
+            background-color: #11131c;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.04);
+            position: relative;
+            overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 50%;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 0%, transparent 100%);
+            pointer-events: none;
+        }
+        
+        .status-dot {
+            position: relative;
+            width: 6px; height: 6px;
+            border-radius: 50%;
+        }
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            top: -4px; left: -4px; right: -4px; bottom: -4px;
+            border-radius: 50%;
+            border: 1px solid currentColor;
+            opacity: 0.18;
+        }
+        @keyframes pulse-ok {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .status-ok {
+            background-color: #10b981;
+            color: #10b981;
+            animation: pulse-ok 2.4s infinite;
+        }
+    </style>
+</head>
+<body class="font-body text-body antialiased min-h-screen">
+<!-- Atmospheric Background -->
+<div class="blur-blob blob-1"></div>
+<div class="blur-blob blob-2"></div>
+<div class="blur-blob blob-3"></div>
+<!-- Navigation (TopNavBar) -->
+<header class="sticky top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-xl saturate-160 border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-6 h-16 max-w-screen-2xl mx-auto">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-[11px] bg-brand-gradient flex items-center justify-center shadow-btn">
+<svg fill="none" height="14" viewbox="0 0 24 24" width="14" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="white" stroke="white" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<span class="font-title-header text-title-header font-bold text-on-surface dark:text-on-surface">JouleDash</span>
+</div>
+<nav class="hidden md:flex items-center gap-lg h-full">
+<a class="font-title-header text-title-header text-primary dark:text-primary border-b-2 border-primary pb-2 flex items-center h-full mt-2" href="#">Display</a>
+<a class="font-title-header text-title-header text-on-surface-variant dark:text-on-surface-variant pb-2 hover:text-primary transition-colors duration-200 flex items-center h-full mt-2" href="#">Interactive</a>
+<a class="font-title-header text-title-header text-on-surface-variant dark:text-on-surface-variant pb-2 hover:text-primary transition-colors duration-200 flex items-center h-full mt-2" href="#">Indicators</a>
+</nav>
+<div class="flex items-center gap-sm text-on-surface-variant">
+<button class="hover:text-primary transition-colors duration-200 w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="hover:text-primary transition-colors duration-200 w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-highest">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</header>
+<main class="max-w-screen-2xl mx-auto p-6 md:p-8 space-y-3xl">
+<!-- DISPLAY row -->
+<section>
+<h2 class="font-section-label text-section-label text-muted-dark uppercase tracking-widest mb-lg">Display</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-grid-gap-desktop">
+<div class="card p-card-padding flex flex-col justify-between min-h-[140px]">
+<span class="font-subtitle-header text-subtitle-header text-on-surface-variant">Power Output</span>
+<div class="flex items-end justify-between">
+<span class="font-kpi-sm text-kpi-sm font-light tabular-nums">7.42 kW</span>
+<svg fill="none" height="24" viewbox="0 0 60 24" width="60" xmlns="http://www.w3.org/2000/svg">
+<path d="M0 20L10 15L20 18L30 8L40 12L50 2L60 6" stroke="url(#paint0_linear)" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 20L10 15L20 18L30 8L40 12L50 2L60 6V24H0V20Z" fill="url(#paint1_linear)" opacity="0.35"></path>
+<defs>
+<lineargradient gradientunits="userSpaceOnUse" id="paint0_linear" x1="0" x2="60" y1="0" y2="24">
+<stop stop-color="#6366f1"></stop>
+<stop offset="1" stop-color="#8b5cf6"></stop>
+</lineargradient>
+<lineargradient gradientunits="userSpaceOnUse" id="paint1_linear" x1="30" x2="30" y1="2" y2="24">
+<stop stop-color="#6366f1"></stop>
+<stop offset="1" stop-color="#6366f1" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+</div>
+<div class="card p-card-padding flex flex-col justify-between min-h-[140px] border-l-4 border-l-err">
+<span class="font-subtitle-header text-subtitle-header text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">thermostat</span> Temperature
+                    </span>
+<span class="font-kpi-sm text-kpi-sm font-light tabular-nums">23.4 °C</span>
+</div>
+<div class="card p-card-padding flex flex-col justify-between min-h-[140px] border-l-4 border-l-info">
+<span class="font-subtitle-header text-subtitle-header text-on-surface-variant flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">humidity_mid</span> Humidity
+                    </span>
+<span class="font-kpi-sm text-kpi-sm font-light tabular-nums">48 %</span>
+</div>
+<div class="card p-card-padding flex flex-col justify-between min-h-[140px]">
+<span class="font-subtitle-header text-subtitle-header text-on-surface-variant">System Status</span>
+<div class="flex items-center gap-sm">
+<div class="status-dot status-ok"></div>
+<span class="font-body text-body">Online</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+</body></html>

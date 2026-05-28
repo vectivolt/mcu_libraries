@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleDash Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "background": "#13131b",
+                      "on-background": "#e4e1ed",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "ink-dark": "#f1f3fa",
+                      "warn": "#f59e0b",
+                      "surface-container": "#1f1f27",
+                      "panel-2-light": "#f9fafc",
+                      "secondary": "#d0bcff",
+                      "ink-2-dark": "#b5bbd0",
+                      "inverse-primary": "#494bd6",
+                      "muted-dark": "#7a809a",
+                      "primary": "#c0c1ff",
+                      "surface-dim": "#13131b",
+                      "ink-light": "#0b0d18",
+                      "on-primary": "#1000a9",
+                      "error-container": "#93000a",
+                      "err": "#ef4444",
+                      "surface-container-highest": "#34343d",
+                      "outline": "#908fa0",
+                      "on-surface-variant": "#c7c4d7",
+                      "on-primary-container": "#0d0096",
+                      "surface-container-low": "#1b1b23",
+                      "surface-tint": "#c0c1ff",
+                      "surface-bright": "#393841",
+                      "on-secondary": "#3c0091",
+                      "panel-2-dark": "#161824",
+                      "inverse-on-surface": "#303038",
+                      "tertiary-container": "#d97721",
+                      "ink-2-light": "#42485c",
+                      "bg-light": "#f6f7fb",
+                      "on-primary-fixed": "#07006c",
+                      "secondary-fixed": "#e9ddff",
+                      "on-secondary-fixed-variant": "#5516be",
+                      "panel-light": "#ffffff",
+                      "tertiary": "#ffb783",
+                      "primary-container": "#8083ff",
+                      "bg-soft-dark": "#0d0f17",
+                      "on-tertiary-fixed": "#301400",
+                      "on-surface": "#e4e1ed",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "secondary-container": "#571bc1",
+                      "error": "#ffb4ab",
+                      "on-tertiary-container": "#452000",
+                      "ok": "#10b981",
+                      "tertiary-fixed": "#ffdcc5",
+                      "muted-light": "#7d8398",
+                      "surface-variant": "#34343d",
+                      "info": "#06b6d4",
+                      "on-tertiary": "#4f2500",
+                      "bg-dark": "#08090f",
+                      "panel-dark": "#11131c",
+                      "surface": "#13131b",
+                      "inverse-surface": "#e4e1ed",
+                      "secondary-fixed-dim": "#d0bcff",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-error": "#690005",
+                      "on-error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "outline-variant": "#464554",
+                      "on-secondary-container": "#c4abff",
+                      "surface-container-high": "#292932",
+                      "primary-fixed": "#e1e0ff",
+                      "surface-container-lowest": "#0d0d15",
+                      "on-secondary-fixed": "#23005c"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "20": "20px"
+              },
+              "spacing": {
+                      "xl": "20px",
+                      "grid-gap-desktop": "14px",
+                      "md": "12px",
+                      "card-padding": "20px",
+                      "grid-gap-mobile": "10px",
+                      "lg": "16px",
+                      "2xl": "28px",
+                      "sm": "8px",
+                      "3xl": "40px",
+                      "xs": "4px"
+              },
+              "fontFamily": {
+                      "subtitle-header": [
+                              "Inter"
+                      ],
+                      "section-label": [
+                              "Inter"
+                      ],
+                      "mono-code": [
+                              "JetBrains Mono"
+                      ],
+                      "button": [
+                              "Inter"
+                      ],
+                      "kpi-sm": [
+                              "Inter"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "title-header": [
+                              "Inter"
+                      ],
+                      "kpi-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "subtitle-header": [
+                              "11.5px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "0.1px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "section-label": [
+                              "11px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "1px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "mono-code": [
+                              "12.5px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "button": [
+                              "13.5px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-0.1px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "kpi-sm": [
+                              "26px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-0.6px",
+                                      "fontWeight": "300"
+                              }
+                      ],
+                      "body": [
+                              "14.5px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "title-header": [
+                              "15.5px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.2px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "kpi-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-1px",
+                                      "fontWeight": "300"
+                              }
+                      ]
+              },
+              "boxShadow": {
+                  "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+                  "btn": "0 4px 14px 0 rgba(99, 102, 241, 0.39)",
+                  "card": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255,255,255,0.04)"
+              }
+            }
+          }
+        }
+      </script>
+<style>
+        @keyframes pulse-ok {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .pulse-dot {
+            animation: pulse-ok 2.4s infinite;
+        }
+        
+        .lucide {
+            stroke-width: 2.2px;
+        }
+
+        /* Fluid background blobs */
+        .bg-blobs::before, .bg-blobs::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .bg-blobs::before {
+            top: -10%;
+            left: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0) 70%);
+        }
+        .bg-blobs::after {
+            bottom: -10%;
+            right: -10%;
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, rgba(139,92,246,0) 70%);
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-bg-dark text-on-surface min-h-screen relative font-body bg-blobs pb-24 overflow-x-hidden w-full max-w-[390px] mx-auto overflow-y-auto">
+<!-- Top App Bar -->
+<header class="flex justify-between items-center h-16 px-lg w-full max-w-[390px] mx-auto bg-surface/80 dark:bg-surface/80 backdrop-blur-xl saturate-160 docked full-width top-0 sticky z-50 shadow-sm border-b border-outline-variant/20">
+<div class="flex items-center gap-md font-title-header text-title-header text-on-surface dark:text-on-surface before:content-['\26a1'] before:flex before:items-center before:justify-center before:w-[24px] before:h-[24px] before:bg-gradient-to-br before:from-primary-container before:to-secondary-container before:rounded-[11px] before:text-[12px] before:text-white">
+            charge_os
+        </div>
+<div class="flex items-center gap-sm">
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[20px]">notifications</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+</button>
+<button class="p-2 rounded-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[20px]">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Pill Tabs -->
+<div class="w-full px-lg py-md overflow-x-auto scrollbar-hide flex gap-sm border-b border-outline-variant/20 sticky top-16 z-40 bg-bg-dark/90 backdrop-blur-md">
+<button class="px-4 py-1.5 rounded-full bg-ink-light/60 text-primary font-section-label text-section-label border border-outline-variant/30 flex-shrink-0">Overview</button>
+<button class="px-4 py-1.5 rounded-full text-muted-dark font-section-label text-section-label border border-transparent flex-shrink-0">Analytics</button>
+<button class="px-4 py-1.5 rounded-full text-muted-dark font-section-label text-section-label border border-transparent flex-shrink-0">Sessions</button>
+<button class="px-4 py-1.5 rounded-full text-muted-dark font-section-label text-section-label border border-transparent flex-shrink-0">Logs</button>
+</div>
+<!-- Main Content Grid -->
+<main class="p-lg grid grid-cols-2 gap-grid-gap-mobile w-full max-w-[390px] mx-auto">
+<!-- Hero Card (Span 2) -->
+<div class="col-span-2 bg-panel-dark rounded-20 p-card-padding border border-outline-variant/30 shadow-card relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-[50%] bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-2">
+<div class="w-2 h-2 rounded-full bg-ok pulse-dot"></div>
+<span class="font-subtitle-header text-subtitle-header text-ok">Charging Active</span>
+</div>
+<div class="px-2 py-1 bg-surface-container-high rounded border border-outline-variant/40">
+<span class="font-mono-code text-mono-code text-muted-dark">CS-882A</span>
+</div>
+</div>
+<div class="flex items-end justify-between mt-6">
+<div>
+<div class="font-kpi-lg text-kpi-lg text-on-surface mb-1 tracking-tighter">7.20 <span class="text-xl text-muted-dark font-normal">kW</span></div>
+<div class="font-body text-body text-muted-dark">Current Power</div>
+</div>
+<div class="text-right">
+<div class="font-kpi-sm text-kpi-sm text-primary mb-1">47%</div>
+<div class="font-body text-body text-muted-dark">SOC</div>
+</div>
+</div>
+<div class="mt-4 pt-4 border-t border-outline-variant/20 flex justify-between items-center text-sm text-muted-dark">
+<span>Bay 3</span>
+<span>CCS2</span>
+</div>
+</div>
+<!-- Power Output KPI -->
+<div class="col-span-1 bg-panel-dark rounded-xl p-md border border-outline-variant/30 shadow-card relative overflow-hidden">
+<div class="font-subtitle-header text-subtitle-header text-muted-dark mb-2">Power Output</div>
+<div class="font-kpi-sm text-kpi-sm text-on-surface mb-3">6.81 <span class="text-sm text-muted-dark">kW</span></div>
+<svg class="w-full h-8 overflow-visible" preserveaspectratio="none" viewbox="0 0 100 30">
+<defs>
+<lineargradient id="powerGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#c0c1ff" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#c0c1ff" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,30 L0,20 L20,15 L40,25 L60,10 L80,18 L100,5 L100,30 Z" fill="url(#powerGrad)"></path>
+<path d="M0,20 L20,15 L40,25 L60,10 L80,18 L100,5" fill="none" stroke="#c0c1ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+</svg>
+</div>
+<!-- Energy Delivered KPI -->
+<div class="col-span-1 bg-panel-dark rounded-xl p-md border border-outline-variant/30 shadow-card relative overflow-hidden">
+<div class="font-subtitle-header text-subtitle-header text-muted-dark mb-2">Energy</div>
+<div class="font-kpi-sm text-kpi-sm text-on-surface mb-3">0.298 <span class="text-sm text-muted-dark">kWh</span></div>
+<svg class="w-full h-8 overflow-visible" preserveaspectratio="none" viewbox="0 0 100 30">
+<defs>
+<lineargradient id="energyGrad" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#c0c1ff" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#c0c1ff" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,30 L0,25 L20,20 L40,15 L60,10 L80,5 L100,2 L100,30 Z" fill="url(#energyGrad)"></path>
+<path d="M0,25 L20,20 L40,15 L60,10 L80,5 L100,2" fill="none" stroke="#c0c1ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+</svg>
+</div>
+<!-- Session Cost -->
+<div class="col-span-1 bg-panel-dark rounded-xl p-md border border-outline-variant/30 shadow-card relative overflow-hidden pl-5">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-warn"></div>
+<div class="font-subtitle-header text-subtitle-header text-muted-dark mb-1">Session Cost</div>
+<div class="font-kpi-sm text-kpi-sm text-on-surface">3 <span class="text-sm text-muted-dark">INR</span></div>
+</div>
+<!-- Session Time -->
+<div class="col-span-1 bg-panel-dark rounded-xl p-md border border-outline-variant/30 shadow-card relative overflow-hidden pl-5">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-info"></div>
+<div class="font-subtitle-header text-subtitle-header text-muted-dark mb-1">Session Time</div>
+<div class="font-kpi-sm text-kpi-sm text-on-surface">5 <span class="text-sm text-muted-dark">min</span></div>
+</div>
+</main>
+<!-- Floating Action Button Footer -->
+<div class="fixed bottom-0 left-0 w-full p-lg bg-gradient-to-t from-bg-dark via-bg-dark/90 to-transparent z-50">
+<button class="w-full h-[44px] rounded-full bg-gradient-to-r from-primary-container to-secondary-container text-white font-button text-button shadow-btn flex items-center justify-center gap-2 active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[18px]">pause</span>
+            Pause Session
+        </button>
+</div>
+</body></html>

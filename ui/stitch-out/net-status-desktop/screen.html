@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleNet Wi-Fi Status</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-fixed-variant": "#703700",
+                      "secondary-fixed": "#e9ddff",
+                      "ink-2-dark": "#b5bbd0",
+                      "on-tertiary-container": "#452000",
+                      "on-secondary-fixed-variant": "#5516be",
+                      "on-primary-container": "#0d0096",
+                      "surface-container": "#1f1f27",
+                      "on-primary": "#1000a9",
+                      "primary": "#c0c1ff",
+                      "on-secondary-container": "#c4abff",
+                      "bg-light": "#f6f7fb",
+                      "on-tertiary-fixed": "#301400",
+                      "error": "#ffb4ab",
+                      "ink-dark": "#f1f3fa",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "surface-container-highest": "#34343d",
+                      "error-container": "#93000a",
+                      "panel-light": "#ffffff",
+                      "panel-dark": "#11131c",
+                      "on-surface-variant": "#c7c4d7",
+                      "tertiary": "#ffb783",
+                      "outline": "#908fa0",
+                      "on-background": "#e4e1ed",
+                      "secondary": "#d0bcff",
+                      "inverse-primary": "#494bd6",
+                      "surface-variant": "#34343d",
+                      "surface": "#13131b",
+                      "on-tertiary": "#4f2500",
+                      "on-error": "#690005",
+                      "tertiary-container": "#d97721",
+                      "surface-tint": "#c0c1ff",
+                      "primary-fixed": "#e1e0ff",
+                      "secondary-fixed-dim": "#d0bcff",
+                      "secondary-container": "#571bc1",
+                      "on-surface": "#e4e1ed",
+                      "on-secondary-fixed": "#23005c",
+                      "surface-dim": "#13131b",
+                      "primary-container": "#8083ff",
+                      "surface-container-low": "#1b1b23",
+                      "panel-2-dark": "#161824",
+                      "muted-light": "#7d8398",
+                      "err": "#ef4444",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "ink-light": "#0b0d18",
+                      "background": "#13131b",
+                      "inverse-on-surface": "#303038",
+                      "bg-dark": "#08090f",
+                      "tertiary-fixed": "#ffdcc5",
+                      "surface-container-lowest": "#0d0d15",
+                      "surface-container-high": "#292932",
+                      "panel-2-light": "#f9fafc",
+                      "outline-variant": "#464554",
+                      "on-primary-fixed": "#07006c",
+                      "ok": "#10b981",
+                      "inverse-surface": "#e4e1ed",
+                      "on-secondary": "#3c0091",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "ink-2-light": "#42485c",
+                      "warn": "#f59e0b",
+                      "bg-soft-dark": "#0d0f17",
+                      "surface-bright": "#393841",
+                      "info": "#06b6d4",
+                      "on-error-container": "#ffdad6",
+                      "muted-dark": "#7a809a"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "grid-gap-mobile": "10px",
+                      "2xl": "28px",
+                      "sm": "8px",
+                      "card-padding": "20px",
+                      "md": "12px",
+                      "grid-gap-desktop": "14px",
+                      "xl": "20px",
+                      "3xl": "40px",
+                      "xs": "4px",
+                      "lg": "16px"
+              },
+              "fontFamily": {
+                      "mono-code": [
+                              "JetBrains Mono"
+                      ],
+                      "button": [
+                              "Inter"
+                      ],
+                      "section-label": [
+                              "Inter"
+                      ],
+                      "subtitle-header": [
+                              "Inter"
+                      ],
+                      "body": [
+                              "Inter"
+                      ],
+                      "kpi-sm": [
+                              "Inter"
+                      ],
+                      "title-header": [
+                              "Inter"
+                      ],
+                      "kpi-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "mono-code": [
+                              "12.5px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "button": [
+                              "13.5px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-0.1px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "section-label": [
+                              "11px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "1px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "subtitle-header": [
+                              "11.5px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "0.1px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "body": [
+                              "14.5px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "letterSpacing": "0",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "kpi-sm": [
+                              "26px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-0.6px",
+                                      "fontWeight": "300"
+                              }
+                      ],
+                      "title-header": [
+                              "15.5px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "letterSpacing": "-0.2px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "kpi-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "-1px",
+                                      "fontWeight": "300"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .brand-gradient {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        .error-gradient {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+        }
+        .bg-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #6366f1; }
+        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #8b5cf6; opacity: 0.1; }
+        
+        .shadow-btn {
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39);
+        }
+        .shadow-err {
+            box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.39);
+        }
+        .card-inner-glow {
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 20px 40px -10px rgba(0,0,0,0.5);
+        }
+        .hover-lift {
+            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 24px 48px -12px rgba(99, 102, 241, 0.15);
+        }
+        .glass-header {
+            background: rgba(19, 19, 27, 0.8);
+            backdrop-filter: blur(20px) saturate(160%);
+        }
+        .pulse-dot {
+            animation: pulse 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-on-surface min-h-screen font-body antialiased selection:bg-primary/30">
+<!-- Ambient Background Blobs -->
+<div class="bg-blob blob-1"></div>
+<div class="bg-blob blob-2"></div>
+<div class="flex h-screen w-full">
+<!-- TopNavBar (Simulated SideNav Layout as per standard app shells, but focusing on Top Nav as anchor) -->
+<nav class="glass-header sticky top-0 w-full z-50 border-b border-outline-variant/20 shadow-sm flex justify-between items-center h-16 px-xl max-w-7xl mx-auto">
+<div class="flex items-center gap-md">
+<div class="w-8 h-8 rounded-[11px] brand-gradient flex items-center justify-center shadow-btn">
+<span class="material-symbols-outlined text-white text-lg">bolt</span>
+</div>
+<span class="font-title-header text-title-header text-on-surface">JouleSuite OTA</span>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-muted-dark hover:text-primary transition-colors cursor-pointer">dark_mode</span>
+<div class="px-md py-xs rounded-full bg-primary/10 text-primary font-section-label text-section-label uppercase flex items-center gap-xs">
+<span class="w-1.5 h-1.5 rounded-full bg-primary pulse-dot"></span> Live
+                </div>
+</div>
+</nav>
+<main class="flex-1 w-full max-w-4xl mx-auto py-3xl px-xl md:px-3xl flex flex-col items-center">
+<!-- Segmented Control Nav -->
+<div class="bg-surface-container-high rounded-full p-xs flex items-center mb-3xl w-full max-w-sm border border-outline-variant/20 shadow-sm">
+<button class="flex-1 py-sm px-md rounded-full font-button text-button text-muted-dark hover:text-on-surface transition-colors">Wi-Fi</button>
+<button class="flex-1 py-sm px-md rounded-full font-button text-button text-muted-dark hover:text-on-surface transition-colors">Setup</button>
+<button class="flex-1 py-sm px-md rounded-full brand-gradient font-button text-button text-white shadow-sm hover-lift">Status</button>
+</div>
+<!-- Main Diagnostic Card -->
+<div class="w-full bg-panel-dark rounded-[20px] border border-outline-variant/20 card-inner-glow hover-lift relative overflow-hidden flex flex-col">
+<!-- Subtle top sheen -->
+<div class="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-white/[0.03] to-transparent pointer-events-none"></div>
+<div class="p-card-padding flex flex-col">
+<!-- KV Rows container -->
+<div class="flex flex-col gap-y-0">
+<!-- Row: STATE -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">State</span>
+<div class="flex items-center gap-sm">
+<span class="font-body text-body text-ok capitalize">connected</span>
+<div class="w-1.5 h-1.5 rounded-full bg-ok pulse-dot ring-4 ring-ok/20"></div>
+</div>
+</div>
+<!-- Row: SSID -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">SSID</span>
+<span class="font-body text-body text-on-surface">Rajesh k</span>
+</div>
+<!-- Row: IP -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">IP</span>
+<span class="font-mono-code text-mono-code text-primary-fixed">192.168.1.100</span>
+</div>
+<!-- Row: GATEWAY -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Gateway</span>
+<span class="font-mono-code text-mono-code text-ink-2-dark">192.168.1.1</span>
+</div>
+<!-- Row: NETMASK -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Netmask</span>
+<span class="font-mono-code text-mono-code text-ink-2-dark">255.255.255.0</span>
+</div>
+<!-- Row: DNS -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">DNS</span>
+<span class="font-mono-code text-mono-code text-ink-2-dark">192.168.1.1</span>
+</div>
+<!-- Row: BSSID -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">BSSID</span>
+<span class="font-mono-code text-mono-code text-muted-dark">28:EE:52:EA:23:FC</span>
+</div>
+<!-- Row: CHANNEL -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Channel</span>
+<span class="font-body text-body text-on-surface">10</span>
+</div>
+<!-- Row: RSSI -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">RSSI</span>
+<div class="flex items-center gap-sm">
+<span class="font-body text-body text-on-surface">-86 dBm</span>
+<span class="material-symbols-outlined text-muted-dark text-[16px]">signal_cellular_alt_1_bar</span>
+</div>
+</div>
+<!-- Row: HOSTNAME -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Hostname</span>
+<span class="font-mono-code text-mono-code text-on-surface">joule-demo</span>
+</div>
+<!-- Row: mDNS -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">mDNS</span>
+<span class="font-mono-code text-mono-code text-on-surface">joule-demo.local</span>
+</div>
+<!-- Row: MAC -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">MAC</span>
+<span class="font-mono-code text-mono-code text-muted-dark">D0:CF:13:73:0A:B8</span>
+</div>
+<!-- Row: HEAP -->
+<div class="flex justify-between items-center py-md border-b border-white/[0.04] border-dashed">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Heap</span>
+<span class="font-mono-code text-mono-code text-on-surface">245 KB</span>
+</div>
+<!-- Row: UPTIME -->
+<div class="flex justify-between items-center py-md pb-0">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Uptime</span>
+<span class="font-mono-code text-mono-code text-primary-fixed">246 s</span>
+</div>
+</div>
+</div>
+<!-- Footer Action Row -->
+<div class="bg-panel-2-dark border-t border-outline-variant/20 p-card-padding flex justify-between items-center mt-auto rounded-b-[20px]">
+<button class="bg-panel-2-dark border border-outline-variant/30 text-on-surface hover:border-primary hover:text-primary transition-colors duration-200 font-button text-button py-sm px-lg rounded-lg flex items-center gap-xs">
+                        Restart
+                    </button>
+<button class="error-gradient shadow-err hover-lift text-white font-button text-button py-sm px-lg rounded-lg flex items-center gap-sm">
+<span class="material-symbols-outlined text-[16px]" style="stroke-width: 2.2px;">delete</span>
+                        Erase &amp; reboot
+                    </button>
+</div>
+</div>
+</main>
+</div>
+</body></html>

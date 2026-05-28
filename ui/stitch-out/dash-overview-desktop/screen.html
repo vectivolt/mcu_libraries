@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleDash - Overview</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#d0bcff",
+                        "ink-2-light": "#42485c",
+                        "on-error": "#690005",
+                        "bg-soft-dark": "#0d0f17",
+                        "muted-light": "#7d8398",
+                        "muted-dark": "#7a809a",
+                        "primary": "#c0c1ff",
+                        "on-primary-container": "#0d0096",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "panel-2-dark": "#161824",
+                        "primary-container": "#8083ff",
+                        "surface-variant": "#34343d",
+                        "tertiary-container": "#d97721",
+                        "tertiary": "#ffb783",
+                        "on-error-container": "#ffdad6",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "surface-container-highest": "#34343d",
+                        "on-tertiary-fixed": "#301400",
+                        "surface-container": "#1f1f27",
+                        "bg-dark": "#08090f",
+                        "warn": "#f59e0b",
+                        "surface-dim": "#13131b",
+                        "surface-container-low": "#1b1b23",
+                        "on-surface": "#e4e1ed",
+                        "error": "#ffb4ab",
+                        "on-background": "#e4e1ed",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-bright": "#393841",
+                        "on-secondary-fixed": "#23005c",
+                        "ink-light": "#0b0d18",
+                        "on-primary-fixed": "#07006c",
+                        "panel-light": "#ffffff",
+                        "on-secondary-container": "#c4abff",
+                        "panel-dark": "#11131c",
+                        "surface-container-high": "#292932",
+                        "info": "#06b6d4",
+                        "on-tertiary": "#4f2500",
+                        "panel-2-light": "#f9fafc",
+                        "on-tertiary-container": "#452000",
+                        "tertiary-fixed": "#ffdcc5",
+                        "bg-light": "#f6f7fb",
+                        "error-container": "#93000a",
+                        "inverse-primary": "#494bd6",
+                        "outline-variant": "#464554",
+                        "primary-fixed": "#e1e0ff",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "on-secondary": "#3c0091",
+                        "surface-tint": "#c0c1ff",
+                        "outline": "#908fa0",
+                        "secondary": "#d0bcff",
+                        "ink-dark": "#f1f3fa",
+                        "background": "#13131b",
+                        "err": "#ef4444",
+                        "surface-container-lowest": "#0d0d15",
+                        "on-primary": "#1000a9",
+                        "secondary-fixed": "#e9ddff",
+                        "inverse-surface": "#e4e1ed",
+                        "surface": "#13131b",
+                        "secondary-container": "#571bc1",
+                        "ink-2-dark": "#b5bbd0",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "inverse-on-surface": "#303038",
+                        "ok": "#10b981",
+                        "on-secondary-fixed-variant": "#5516be"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "xs": "4px",
+                        "sm": "8px",
+                        "card-padding": "20px",
+                        "grid-gap-mobile": "10px",
+                        "3xl": "40px",
+                        "grid-gap-desktop": "14px",
+                        "2xl": "28px",
+                        "md": "12px",
+                        "lg": "16px",
+                        "xl": "20px"
+                    },
+                    fontFamily: {
+                        "title-header": ["Inter"],
+                        "mono-code": ["JetBrains Mono"],
+                        "body": ["Inter"],
+                        "kpi-lg": ["Inter"],
+                        "subtitle-header": ["Inter"],
+                        "kpi-sm": ["Inter"],
+                        "section-label": ["Inter"],
+                        "button": ["Inter"]
+                    },
+                    fontSize: {
+                        "title-header": ["15.5px", { lineHeight: "1.2", letterSpacing: "-0.2px", fontWeight: "600" }],
+                        "mono-code": ["12.5px", { lineHeight: "1.4", letterSpacing: "0", fontWeight: "500" }],
+                        "body": ["14.5px", { lineHeight: "1.5", letterSpacing: "0", fontWeight: "400" }],
+                        "kpi-lg": ["40px", { lineHeight: "1", letterSpacing: "-1px", fontWeight: "300" }],
+                        "subtitle-header": ["11.5px", { lineHeight: "1.2", letterSpacing: "0.1px", fontWeight: "500" }],
+                        "kpi-sm": ["26px", { lineHeight: "1", letterSpacing: "-0.6px", fontWeight: "300" }],
+                        "section-label": ["11px", { lineHeight: "1", letterSpacing: "1px", fontWeight: "600" }],
+                        "button": ["13.5px", { lineHeight: "1", letterSpacing: "-0.1px", fontWeight: "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1;
+        }
+        
+        .lucide {
+            stroke-width: 2.2px;
+        }
+        
+        /* Glassmorphism effects */
+        .glass-header {
+            background-color: rgba(19, 19, 27, 0.88);
+            backdrop-filter: blur(20px) saturate(160%);
+            -webkit-backdrop-filter: blur(20px) saturate(160%);
+        }
+        
+        /* Blur blobs */
+        .blur-blob-1 {
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.15) 0%, rgba(99, 102, 241, 0) 70%);
+        }
+        .blur-blob-2 {
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.12) 0%, rgba(139, 92, 246, 0) 70%);
+        }
+        
+        /* Card Sheen */
+        .card-sheen {
+            position: relative;
+        }
+        .card-sheen::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+            pointer-events: none;
+            border-radius: 20px 20px 0 0;
+        }
+        
+        /* Shadows */
+        .shadow-card {
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .shadow-card:hover {
+            box-shadow: 0 8px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 20px rgba(99, 102, 241, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        /* Animations */
+        @keyframes pulse-ok {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .pulse-dot {
+            animation: pulse-ok 2.4s infinite;
+        }
+        
+        /* SVG Stroke Gradients */
+        .svg-gradient-stroke {
+            stroke: url(#brand-gradient);
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-on-surface font-body min-h-screen relative overflow-x-hidden selection:bg-primary-container/30">
+<!-- Atmospheric Blur Blobs -->
+<div class="fixed inset-0 pointer-events-none z-0">
+<div class="absolute top-[-20%] left-[-10%] w-[800px] h-[800px] rounded-full blur-blob-1 mix-blend-screen"></div>
+<div class="absolute top-[40%] right-[-15%] w-[600px] h-[600px] rounded-full blur-blob-2 mix-blend-screen"></div>
+</div>
+<!-- Sticky Header -->
+<header class="glass-header sticky top-0 z-50 border-b border-white/5 transition-all w-full flex items-center justify-between px-lg h-16">
+<div class="flex items-center gap-md">
+<!-- Brand Logo -->
+<div class="w-[32px] h-[32px] rounded-[11px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg shadow-indigo-500/20">
+<span class="text-white text-[16px]">⚡</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-sm">
+<h1 class="font-title-header text-title-header text-on-surface">JouleSuite EV Charger</h1>
+<!-- Status Pill -->
+<div class="flex items-center gap-xs px-2 py-0.5 rounded-full bg-surface-container border border-white/5">
+<div class="w-[6px] h-[6px] rounded-full bg-ok pulse-dot"></div>
+<span class="font-mono-code text-mono-code text-ok text-[10px]">Online</span>
+</div>
+</div>
+<span class="font-subtitle-header text-subtitle-header text-muted-dark">live dashboard</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<!-- TopAppBar trailing actions translated from JSON style guidance if present, else custom -->
+<button class="p-2 rounded-full hover:bg-white/5 text-muted-dark hover:text-on-surface transition-colors flex items-center justify-center">
+<i class="w-4 h-4" data-lucide="moon"></i>
+</button>
+</div>
+</header>
+<!-- Sticky Tab Bar -->
+<div class="glass-header sticky top-16 z-40 border-b border-white/5 w-full px-lg py-md">
+<div class="flex gap-sm overflow-x-auto no-scrollbar max-w-[1280px] mx-auto">
+<button class="px-4 py-1.5 rounded-full bg-white/[0.06] border border-white/10 font-button text-button text-on-surface">Overview</button>
+<button class="px-4 py-1.5 rounded-full hover:bg-white/[0.03] border border-transparent font-button text-button text-muted-dark hover:text-on-surface transition-colors">Energy</button>
+<button class="px-4 py-1.5 rounded-full hover:bg-white/[0.03] border border-transparent font-button text-button text-muted-dark hover:text-on-surface transition-colors">Controls</button>
+<button class="px-4 py-1.5 rounded-full hover:bg-white/[0.03] border border-transparent font-button text-button text-muted-dark hover:text-on-surface transition-colors">Diagnostics</button>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 max-w-[1280px] mx-auto p-card-padding">
+<!-- SVG Definitions for Gradients -->
+<svg aria-hidden="true" focusable="false" style="width:0;height:0;position:absolute;">
+<defs>
+<lineargradient id="brand-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#6366f1"></stop>
+<stop offset="100%" stop-color="#8b5cf6"></stop>
+</lineargradient>
+</defs>
+</svg>
+<div class="grid grid-cols-12 gap-grid-desktop">
+<!-- Hero Card -->
+<div class="col-span-12 bg-panel-dark rounded-[20px] p-card-padding shadow-card card-sheen border border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-lg transition-all duration-300">
+<div class="flex items-center gap-lg">
+<!-- Large Icon Tile -->
+<div class="w-[64px] h-[64px] rounded-[16px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg shadow-indigo-500/20 flex-shrink-0">
+<span class="text-white text-[28px]">⚡</span>
+</div>
+<div class="flex flex-col gap-xs">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">BAY 3 · JOULESUITE DEMO</span>
+<h2 class="font-title-header text-[24px] tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-[#6366f1] to-[#8b5cf6]">Charging · 7.20 kW · 47%</h2>
+<span class="font-body text-body text-muted-dark">OCPP 1.6 · CCS2 connector · 32 A type-2 cable</span>
+</div>
+</div>
+<div class="flex flex-wrap gap-sm">
+<div class="px-3 py-1 rounded-full bg-ok/10 border border-ok/20 flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-ok pulse-dot"></div>
+<span class="font-mono-code text-mono-code text-ok text-[11px]">live</span>
+</div>
+<div class="px-3 py-1 rounded-full bg-primary-container/10 border border-primary-container/20 flex items-center gap-xs">
+<i class="w-3 h-3 text-primary-container" data-lucide="nfc"></i>
+<span class="font-mono-code text-mono-code text-primary-container text-[11px]">RFID linked</span>
+</div>
+</div>
+</div>
+<!-- KPI Row (4 Cards) -->
+<!-- KPI 1 -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 relative overflow-hidden transition-all duration-300 group">
+<!-- Semantic Strip -->
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-info opacity-70"></div>
+<div class="flex flex-col gap-sm h-full justify-between">
+<div class="flex items-center justify-between">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">POWER OUTPUT</span>
+<i class="w-4 h-4 text-info/50" data-lucide="zap"></i>
+</div>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-mono-code text-kpi-sm text-on-surface">6.81 <span class="text-[14px] text-muted-dark">kW</span></span>
+<!-- Sparkline placeholder using SVG -->
+<div class="w-16 h-8">
+<svg class="w-full h-full overflow-visible" viewbox="0 0 64 32">
+<path class="svg-gradient-stroke" d="M0 24 L10 20 L20 28 L30 16 L40 18 L50 8 L64 12" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 24 L10 20 L20 28 L30 16 L40 18 L50 8 L64 12 L64 32 L0 32 Z" fill="url(#brand-gradient)" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- KPI 2 -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 relative overflow-hidden transition-all duration-300 group">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-ok opacity-70"></div>
+<div class="flex flex-col gap-sm h-full justify-between">
+<div class="flex items-center justify-between">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">ENERGY DELIVERED</span>
+<i class="w-4 h-4 text-ok/50" data-lucide="battery-charging"></i>
+</div>
+<div class="flex items-end justify-between mt-sm">
+<span class="font-mono-code text-kpi-sm text-on-surface">0.298 <span class="text-[14px] text-muted-dark">kWh</span></span>
+<div class="w-16 h-8">
+<svg class="w-full h-full overflow-visible" viewbox="0 0 64 32">
+<path d="M0 28 L15 26 L30 18 L45 12 L64 4" fill="none" stroke="#10b981" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 28 L15 26 L30 18 L45 12 L64 4 L64 32 L0 32 Z" fill="#10b981" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- KPI 3 -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 relative overflow-hidden transition-all duration-300 group">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#6366f1] opacity-70"></div>
+<div class="flex flex-col gap-sm h-full justify-between">
+<div class="flex items-center justify-between">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">SESSION COST</span>
+<i class="w-4 h-4 text-[#6366f1]/50" data-lucide="coins"></i>
+</div>
+<div class="flex items-end justify-between mt-sm h-[32px]">
+<span class="font-mono-code text-kpi-sm text-on-surface">INR 3</span>
+</div>
+</div>
+</div>
+<!-- KPI 4 -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 relative overflow-hidden transition-all duration-300 group">
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-surface-variant opacity-70"></div>
+<div class="flex flex-col gap-sm h-full justify-between">
+<div class="flex items-center justify-between">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">SESSION TIME</span>
+<i class="w-4 h-4 text-muted-dark/50" data-lucide="clock"></i>
+</div>
+<div class="flex items-end justify-between mt-sm h-[32px]">
+<span class="font-mono-code text-kpi-sm text-on-surface">5 <span class="text-[14px] text-muted-dark">min</span></span>
+</div>
+</div>
+</div>
+<!-- Gauges Row -->
+<!-- Charger State -->
+<div class="col-span-12 md:col-span-4 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 flex flex-col items-center justify-center min-h-[200px] transition-all duration-300">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest mb-lg self-start">CHARGER STATE</span>
+<div class="flex flex-col items-center gap-md">
+<div class="w-12 h-12 rounded-full bg-ok/10 flex items-center justify-center relative">
+<div class="absolute inset-0 rounded-full border border-ok/20"></div>
+<div class="w-4 h-4 rounded-full bg-ok pulse-dot"></div>
+</div>
+<span class="font-title-header text-title-header text-ok">Charging Active</span>
+</div>
+</div>
+<!-- Battery SOC Donut -->
+<div class="col-span-12 md:col-span-4 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 relative min-h-[200px] transition-all duration-300">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest absolute top-lg left-lg">BATTERY SOC</span>
+<div class="flex items-center justify-center h-full pt-8">
+<div class="relative w-[120px] h-[120px]">
+<!-- Background Ring -->
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle cx="50" cy="50" fill="none" r="45" stroke="rgba(255,255,255,0.05)" stroke-width="8"></circle>
+<!-- Foreground Ring (47%) -->
+<circle class="svg-gradient-stroke" cx="50" cy="50" fill="none" r="45" stroke-dasharray="282.7" stroke-dashoffset="149.8" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-mono-code text-[22px] font-medium text-on-surface">47%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Charge Power Half-Gauge -->
+<div class="col-span-12 md:col-span-4 bg-panel-dark rounded-[20px] p-lg shadow-card card-sheen border border-white/5 relative min-h-[200px] transition-all duration-300">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest absolute top-lg left-lg">CHARGE POWER</span>
+<div class="flex items-end justify-center h-full pb-4 pt-12 relative overflow-hidden">
+<div class="relative w-[160px] h-[80px]">
+<!-- Background Arc -->
+<svg class="w-full h-[160px] absolute bottom-0" viewbox="0 0 200 200">
+<!-- Half circle (only top half is visible due to container height) -->
+<path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="rgba(255,255,255,0.05)" stroke-linecap="round" stroke-width="16"></path>
+<!-- Foreground Arc (~30% of 22kW) -->
+<path class="svg-gradient-stroke" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke-dasharray="251.2" stroke-dashoffset="175" stroke-linecap="round" stroke-width="16"></path>
+</svg>
+<div class="absolute bottom-0 left-0 right-0 flex flex-col items-center justify-end h-full translate-y-2">
+<span class="font-mono-code text-[20px] font-medium text-on-surface">6.8<span class="text-[12px] text-muted-dark ml-1">kW</span></span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<script>
+        lucide.createIcons();
+    </script>
+</body></html>

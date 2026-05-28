@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleDash - Energy</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;family=JetBrains+Mono:wght@300;400;500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Theme Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary-container": "#d97721", "panel-2-dark": "#161824", "on-tertiary-fixed-variant": "#703700", "surface-variant": "#34343d", "ink-dark": "#f1f3fa", "tertiary-fixed": "#ffdcc5", "ink-2-dark": "#b5bbd0", "ok": "#10b981", "muted-light": "#7d8398", "ink-light": "#0b0d18", "on-error-container": "#ffdad6", "on-background": "#e4e1ed", "panel-2-light": "#f9fafc", "on-surface": "#e4e1ed", "on-secondary": "#3c0091", "surface-container-highest": "#34343d", "on-tertiary-fixed": "#301400", "on-error": "#690005", "on-primary-fixed": "#07006c", "bg-soft-dark": "#0d0f17", "surface-dim": "#13131b", "surface": "#13131b", "panel-light": "#ffffff", "secondary-fixed-dim": "#d0bcff", "inverse-on-surface": "#303038", "muted-dark": "#7a809a", "bg-light": "#f6f7fb", "tertiary": "#ffb783", "on-primary": "#1000a9", "info": "#06b6d4", "tertiary-fixed-dim": "#ffb783", "error-container": "#93000a", "on-primary-container": "#0d0096", "error": "#ffb4ab", "on-secondary-container": "#c4abff", "ink-2-light": "#42485c", "secondary": "#d0bcff", "surface-bright": "#393841", "primary": "#c0c1ff", "outline": "#908fa0", "on-secondary-fixed-variant": "#5516be", "surface-tint": "#c0c1ff", "outline-variant": "#464554", "surface-container-high": "#292932", "bg-dark": "#08090f", "primary-container": "#8083ff", "on-primary-fixed-variant": "#2f2ebe", "inverse-surface": "#e4e1ed", "warn": "#f59e0b", "primary-fixed-dim": "#c0c1ff", "surface-container": "#1f1f27", "err": "#ef4444", "on-secondary-fixed": "#23005c", "background": "#13131b", "secondary-fixed": "#e9ddff", "secondary-container": "#571bc1", "panel-dark": "#11131c", "surface-container-low": "#1b1b23", "on-tertiary-container": "#452000", "inverse-primary": "#494bd6", "surface-container-lowest": "#0d0d15", "on-surface-variant": "#c7c4d7", "on-tertiary": "#4f2500", "primary-fixed": "#e1e0ff"
+                    },
+                    borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
+                    spacing: { "3xl": "40px", "card-padding": "20px", "xs": "4px", "sm": "8px", "md": "12px", "grid-gap-mobile": "10px", "grid-gap-desktop": "14px", "xl": "20px", "lg": "16px", "2xl": "28px" },
+                    fontFamily: { "body": ["Inter"], "subtitle-header": ["Inter"], "mono-code": ["JetBrains Mono"], "kpi-sm": ["Inter"], "title-header": ["Inter"], "section-label": ["Inter"], "button": ["Inter"], "kpi-lg": ["Inter"] },
+                    fontSize: {
+                        "body": ["14.5px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "subtitle-header": ["11.5px", { "lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "mono-code": ["12.5px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "kpi-sm": ["26px", { "lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300" }],
+                        "title-header": ["15.5px", { "lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600" }],
+                        "section-label": ["11px", { "lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600" }],
+                        "button": ["13.5px", { "lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600" }],
+                        "kpi-lg": ["40px", { "lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .brand-gradient {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        .text-brand-gradient {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card-shadow {
+            box-shadow: 0 4px 24px -4px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+        }
+        .card-hover-glow:hover {
+            box-shadow: 0 8px 32px -4px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-on-surface font-body min-h-screen relative overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Atmospheric Blur Blobs -->
+<div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+<div class="absolute top-[-10%] left-[-5%] w-[40vw] h-[40vw] rounded-full bg-[#6366f1] opacity-[0.08] blur-[120px]"></div>
+<div class="absolute bottom-[-10%] right-[-5%] w-[35vw] h-[35vw] rounded-full bg-[#8b5cf6] opacity-[0.08] blur-[100px]"></div>
+</div>
+<!-- TopNavBar Component -->
+<header class="bg-surface/80 dark:bg-surface/80 font-body text-body fixed top-0 w-full z-50 backdrop-blur-[20px] saturate-[160%] border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-lg h-16 w-full">
+<!-- Brand Logo -->
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-[11px] brand-gradient flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-[18px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<span class="font-title-header text-title-header font-bold text-on-surface tracking-tight">charge_os</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex items-center gap-xl h-full">
+<a class="text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 px-sm py-2 rounded-md h-full flex items-center border-b-2 border-transparent" href="#">Overview</a>
+<a class="text-primary border-b-2 border-primary pb-1 px-sm h-full flex items-center" href="#">Energy</a>
+<a class="text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 px-sm py-2 rounded-md h-full flex items-center border-b-2 border-transparent" href="#">Controls</a>
+<a class="text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 px-sm py-2 rounded-md h-full flex items-center border-b-2 border-transparent" href="#">Diagnostics</a>
+</nav>
+<!-- Trailing Icons -->
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 rounded-full hover:bg-surface-variant/10 flex items-center justify-center text-muted-dark hover:text-on-surface transition-colors active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="notifications">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full hover:bg-surface-variant/10 flex items-center justify-center text-muted-dark hover:text-on-surface transition-colors active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="settings">settings</span>
+</button>
+<button class="w-10 h-10 rounded-full hover:bg-surface-variant/10 flex items-center justify-center text-muted-dark hover:text-on-surface transition-colors active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-[20px]" data-icon="account_circle">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="relative z-10 pt-24 pb-xl px-lg md:px-2xl max-w-[1280px] mx-auto">
+<div class="grid grid-cols-12 gap-grid-gap-desktop">
+<!-- ROW 1: KPI Cards -->
+<!-- Voltage L1 -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding flex flex-col justify-between min-h-[140px]">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">VOLTAGE L1</span>
+<div class="w-1.5 h-1.5 rounded-full bg-info ring-[3px] ring-info/10 relative">
+<div class="absolute inset-0 rounded-full bg-info animate-ping opacity-20"></div>
+</div>
+</div>
+<div class="relative z-10 flex items-baseline gap-xs mt-auto">
+<span class="font-mono-code text-[36px] font-light text-on-surface tabular-nums tracking-tight leading-none">230.4</span>
+<span class="font-body text-body text-muted-dark">V</span>
+</div>
+</div>
+<!-- Current L1 -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding flex flex-col justify-between min-h-[140px]">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">CURRENT L1</span>
+<div class="w-1.5 h-1.5 rounded-full bg-warn ring-[3px] ring-warn/10"></div>
+</div>
+<div class="relative z-10 flex items-baseline gap-xs mt-auto">
+<span class="font-mono-code text-[36px] font-light text-on-surface tabular-nums tracking-tight leading-none">31.6</span>
+<span class="font-body text-body text-muted-dark">A</span>
+</div>
+</div>
+<!-- Power Factor -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding flex flex-col justify-between min-h-[140px]">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">POWER FACTOR</span>
+</div>
+<div class="relative z-10 flex items-baseline gap-xs mt-auto">
+<span class="font-mono-code text-[36px] font-light text-on-surface tabular-nums tracking-tight leading-none">0.974</span>
+</div>
+</div>
+<!-- Frequency -->
+<div class="col-span-12 md:col-span-3 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding flex flex-col justify-between min-h-[140px]">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-start relative z-10">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">FREQUENCY</span>
+<div class="w-1.5 h-1.5 rounded-full bg-ok ring-[3px] ring-ok/10"></div>
+</div>
+<div class="relative z-10 flex items-baseline gap-xs mt-auto">
+<span class="font-mono-code text-[36px] font-light text-on-surface tabular-nums tracking-tight leading-none">50.02</span>
+<span class="font-body text-body text-muted-dark">Hz</span>
+</div>
+</div>
+<!-- ROW 2: Mixed Dashboards -->
+<!-- Daily Quota -->
+<div class="col-span-12 md:col-span-6 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding flex flex-col justify-center h-[100px]">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest mb-md relative z-10">DAILY QUOTA</span>
+<div class="flex items-center gap-md relative z-10">
+<div class="flex-grow h-2 bg-surface-container-high rounded-full overflow-hidden relative">
+<div class="absolute top-0 left-0 h-full w-[47%] brand-gradient rounded-full relative overflow-hidden">
+<div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yKSIvPjwvc3ZnPg==')] bg-repeat opacity-50"></div>
+</div>
+</div>
+<span class="font-mono-code text-mono-code text-on-surface tabular-nums shrink-0">47.0%</span>
+</div>
+</div>
+<!-- Renewable Mix -->
+<div class="col-span-12 md:col-span-6 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding flex items-center justify-between h-[100px]">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<div class="flex flex-col relative z-10">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest mb-xs">RENEWABLE MIX</span>
+<span class="font-mono-code text-[12px] text-muted-dark">solar + wind</span>
+</div>
+<div class="relative w-16 h-16 flex items-center justify-center z-10">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<path class="text-surface-container-high" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="3"></path>
+<path class="text-ok" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="78, 100" stroke-linecap="round" stroke-width="3.5"></path>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center">
+<span class="font-mono-code text-[12.5px] text-on-surface">78%</span>
+</div>
+</div>
+</div>
+<!-- ROW 3: Area Chart -->
+<div class="col-span-12 bg-panel-dark rounded-[20px] border border-white/[0.06] relative overflow-hidden transition-transform duration-200 hover:-translate-y-[2px] card-shadow card-hover-glow p-card-padding h-[220px] flex flex-col">
+<div class="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.025] to-transparent pointer-events-none"></div>
+<div class="flex justify-between items-center mb-md relative z-10">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">POWER OVER TIME</span>
+<div class="px-sm py-xs bg-panel-2-dark rounded-full border border-white/5 flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-ok"></div>
+<span class="font-mono-code text-[10px] text-muted-dark">LIVE</span>
+</div>
+</div>
+<!-- Abstract Chart Canvas -->
+<div class="flex-grow relative z-10 w-full overflow-hidden mt-sm border-b border-surface-variant/30 pb-sm">
+<!-- Gridlines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="w-full border-t border-white/[0.03]"></div>
+<div class="w-full border-t border-white/[0.03]"></div>
+<div class="w-full border-t border-white/[0.03]"></div>
+</div>
+<!-- SVG Chart -->
+<svg class="absolute inset-0 h-full w-full" preserveaspectratio="none" viewbox="0 0 1000 100">
+<defs>
+<lineargradient id="areaGradient" x1="0" x2="0" y1="0" y2="1">
+<stop offset="0%" stop-color="#6366f1" stop-opacity="0.25"></stop>
+<stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"></stop>
+</lineargradient>
+<lineargradient id="lineGradient" x1="0" x2="1" y1="0" y2="0">
+<stop offset="0%" stop-color="#6366f1"></stop>
+<stop offset="100%" stop-color="#8b5cf6"></stop>
+</lineargradient>
+</defs>
+<!-- Area Fill -->
+<path d="M0,80 Q100,75 200,50 T400,60 T600,30 T800,45 T1000,20 L1000,100 L0,100 Z" fill="url(#areaGradient)"></path>
+<!-- Stroke Line -->
+<path d="M0,80 Q100,75 200,50 T400,60 T600,30 T800,45 T1000,20" fill="none" stroke="url(#lineGradient)" stroke-width="2" vector-effect="non-scaling-stroke"></path>
+<!-- End Dot -->
+<circle class="animate-pulse" cx="1000" cy="20" fill="#8b5cf6" r="4"></circle>
+<circle class="animate-ping" cx="1000" cy="20" fill="#8b5cf6" opacity="0.2" r="8"></circle>
+</svg>
+</div>
+<!-- X Axis Labels -->
+<div class="flex justify-between items-center mt-sm relative z-10 px-xs">
+<span class="font-mono-code text-[11px] text-muted-dark/50">-60m</span>
+<span class="font-mono-code text-[11px] text-muted-dark/50">-45m</span>
+<span class="font-mono-code text-[11px] text-muted-dark/50">-30m</span>
+<span class="font-mono-code text-[11px] text-muted-dark/50">-15m</span>
+<span class="font-mono-code text-[11px] text-muted-dark">Now</span>
+</div>
+</div>
+</div>
+</main>
+</body></html>

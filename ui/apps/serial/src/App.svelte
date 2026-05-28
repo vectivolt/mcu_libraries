@@ -115,24 +115,29 @@
 
 <div class="flex flex-col h-screen">
   <!-- ===== Header ===== -->
-  <header class="flex items-center gap-3 px-4 py-3 border-b border-[color:var(--color-line)] backdrop-blur-xl
+  <header class="flex items-center gap-3 px-5 h-16 border-b border-[color:var(--color-line)] backdrop-blur-xl
                  bg-[color-mix(in_srgb,var(--color-bg)_80%,transparent)]">
-    <div class="w-8 h-8 grid place-items-center rounded-[9px] text-white"
-         style="background:var(--grad);box-shadow:0 6px 18px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.2)">
+    <div class="w-8 h-8 grid place-items-center rounded-[10px] text-white"
+         style="background:var(--grad);box-shadow:0 6px 20px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">
       <Terminal size={14} strokeWidth={2.4}/>
     </div>
-    <div>
-      <div class="font-semibold text-[14px] text-[color:var(--color-ink)]">JouleSerial Console</div>
-      <div class="flex items-center gap-2 text-[10.5px] text-[color:var(--color-muted)] font-mono">
-        <span class="w-[6px] h-[6px] rounded-full" class:bg-[color:var(--color-ok)]={connected} class:bg-[color:var(--color-muted)]={!connected}
-              style:box-shadow={connected ? "0 0 0 4px color-mix(in srgb, var(--color-ok) 18%, transparent)" : "none"}></span>
-        {connected ? "online" : "offline"} · <b class="text-[color:var(--color-ink-2)]">{clients}</b> clients
+    <div class="flex flex-col min-w-0">
+      <div class="flex items-center gap-2">
+        <h1 class="font-semibold text-[15px] tracking-tight text-[color:var(--color-ink)]">JouleSerial Console</h1>
+        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-mono text-[10px]
+                     bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] border border-[color:var(--color-line)]"
+              style:color={connected ? "var(--color-ok)" : "var(--color-muted)"}>
+          <span class="w-[6px] h-[6px] rounded-full"
+                style:background={connected ? "var(--color-ok)" : "var(--color-muted)"}
+                style:box-shadow={connected ? "0 0 0 4px color-mix(in srgb,var(--color-ok) 18%,transparent)" : "none"}></span>
+          {connected ? "Online" : "Offline"}
+        </span>
       </div>
+      <span class="text-[11.5px] text-[color:var(--color-muted)] font-mono">{clients} clients connected</span>
     </div>
     <div class="flex-1"></div>
     <button onclick={cycleTheme} aria-label="theme"
-      class="w-8 h-8 grid place-items-center rounded-[9px] border border-[color:var(--color-line)] text-[color:var(--color-ink)]
-             bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] hover:text-[color:var(--color-brand)] hover:border-[color:var(--color-brand)] transition cursor-pointer">◐</button>
+      class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition cursor-pointer">◐</button>
   </header>
 
   <!-- ===== Toolbar ===== -->

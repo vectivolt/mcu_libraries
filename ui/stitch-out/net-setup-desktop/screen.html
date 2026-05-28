@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleSuite Setup</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://unpkg.com/lucide@latest"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-tertiary-container": "#452000",
+                      "on-tertiary-fixed-variant": "#703700",
+                      "on-error": "#690005",
+                      "on-tertiary": "#4f2500",
+                      "panel-2-dark": "#161824",
+                      "bg-dark": "#08090f",
+                      "on-tertiary-fixed": "#301400",
+                      "secondary-container": "#571bc1",
+                      "error": "#ffb4ab",
+                      "bg-light": "#f6f7fb",
+                      "primary-container": "#8083ff",
+                      "primary": "#c0c1ff",
+                      "panel-dark": "#11131c",
+                      "tertiary-fixed-dim": "#ffb783",
+                      "secondary-fixed": "#e9ddff",
+                      "inverse-on-surface": "#303038",
+                      "tertiary": "#ffb783",
+                      "secondary-fixed-dim": "#d0bcff",
+                      "on-surface-variant": "#c7c4d7",
+                      "bg-soft-dark": "#0d0f17",
+                      "outline": "#908fa0",
+                      "surface-container-lowest": "#0d0d15",
+                      "ok": "#10b981",
+                      "surface-tint": "#c0c1ff",
+                      "tertiary-container": "#d97721",
+                      "primary-fixed-dim": "#c0c1ff",
+                      "on-secondary-container": "#c4abff",
+                      "on-secondary-fixed-variant": "#5516be",
+                      "on-primary-fixed": "#07006c",
+                      "surface-container-high": "#292932",
+                      "on-primary-container": "#0d0096",
+                      "primary-fixed": "#e1e0ff",
+                      "on-secondary-fixed": "#23005c",
+                      "surface": "#13131b",
+                      "surface-dim": "#13131b",
+                      "ink-light": "#0b0d18",
+                      "surface-bright": "#393841",
+                      "panel-light": "#ffffff",
+                      "on-primary-fixed-variant": "#2f2ebe",
+                      "on-secondary": "#3c0091",
+                      "error-container": "#93000a",
+                      "surface-container-highest": "#34343d",
+                      "inverse-surface": "#e4e1ed",
+                      "info": "#06b6d4",
+                      "warn": "#f59e0b",
+                      "on-background": "#e4e1ed",
+                      "outline-variant": "#464554",
+                      "tertiary-fixed": "#ffdcc5",
+                      "on-surface": "#e4e1ed",
+                      "surface-variant": "#34343d",
+                      "on-error-container": "#ffdad6",
+                      "on-primary": "#1000a9",
+                      "panel-2-light": "#f9fafc",
+                      "ink-dark": "#f1f3fa",
+                      "surface-container": "#1f1f27",
+                      "secondary": "#d0bcff",
+                      "ink-2-dark": "#b5bbd0",
+                      "muted-light": "#7d8398",
+                      "surface-container-low": "#1b1b23",
+                      "muted-dark": "#7a809a",
+                      "ink-2-light": "#42485c",
+                      "background": "#13131b",
+                      "err": "#ef4444",
+                      "inverse-primary": "#494bd6",
+                      "brand-gradient-start": "#6366f1",
+                      "brand-gradient-end": "#8b5cf6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "2xl": "1.25rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "xs": "4px",
+                      "grid-gap-mobile": "10px",
+                      "2xl": "28px",
+                      "lg": "16px",
+                      "xl": "20px",
+                      "card-padding": "20px",
+                      "sm": "8px",
+                      "grid-gap-desktop": "14px",
+                      "3xl": "40px",
+                      "md": "12px"
+              },
+              "fontFamily": {
+                      "mono-code": ["JetBrains Mono"],
+                      "kpi-lg": ["Inter"],
+                      "title-header": ["Inter"],
+                      "section-label": ["Inter"],
+                      "subtitle-header": ["Inter"],
+                      "button": ["Inter"],
+                      "body": ["Inter"],
+                      "kpi-sm": ["Inter"]
+              },
+              "fontSize": {
+                      "mono-code": ["12.5px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500"}],
+                      "kpi-lg": ["40px", {"lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300"}],
+                      "title-header": ["15.5px", {"lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600"}],
+                      "section-label": ["11px", {"lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600"}],
+                      "subtitle-header": ["11.5px", {"lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                      "button": ["13.5px", {"lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600"}],
+                      "body": ["14.5px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                      "kpi-sm": ["26px", {"lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300"}]
+              },
+              boxShadow: {
+                  'btn': '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                  'card': '0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 0 rgba(255,255,255,0.04)',
+                  'card-hover': '0 20px 40px -10px rgba(0,0,0,0.7), 0 0 20px 0 rgba(99, 102, 241, 0.15), inset 0 1px 0 0 rgba(255,255,255,0.05)'
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: #08090f;
+            color: #e4e1ed;
+        }
+        
+        /* Blur Blobs */
+        .blur-blob-1 {
+            position: fixed;
+            top: -10%;
+            left: -10%;
+            width: 50vw;
+            height: 50vw;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, rgba(139,92,246,0) 70%);
+            border-radius: 50%;
+            filter: blur(60px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .blur-blob-2 {
+            position: fixed;
+            bottom: -20%;
+            right: -10%;
+            width: 60vw;
+            height: 60vw;
+            background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, rgba(99,102,241,0) 70%);
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Card Sheen */
+        .card-sheen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 20px 20px 0 0;
+            pointer-events: none;
+        }
+
+        /* Toggle Animation */
+        .toggle-thumb {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        input:checked + .toggle-track {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            box-shadow: 0 0 10px rgba(99,102,241,0.5);
+        }
+        input:checked + .toggle-track .toggle-thumb {
+            transform: translateX(20px);
+        }
+        
+        /* Input Styles */
+        .input-base {
+            @apply bg-panel-2-dark border border-outline-variant/30 rounded-lg px-md py-sm font-body text-body text-on-surface focus:outline-none focus:border-brand-gradient-start focus:ring-1 focus:ring-brand-gradient-start transition-colors w-full;
+        }
+        
+        /* Select Chevron overrides */
+        select.input-base {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23908fa0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 36px;
+        }
+    </style>
+</head>
+<body class="min-h-screen relative font-body antialiased selection:bg-brand-gradient-start selection:text-white">
+<!-- Atmospheric Backgrounds -->
+<div class="blur-blob-1"></div>
+<div class="blur-blob-2"></div>
+<!-- Sticky Header -->
+<header class="sticky top-0 w-full z-50 bg-bg-dark/80 backdrop-blur-[20px] saturate-[160%] border-b border-outline-variant/20 h-16">
+<div class="max-w-4xl mx-auto h-full px-lg md:px-xl flex items-center justify-between">
+<div class="flex items-center gap-md">
+<!-- Brand Logo Tile -->
+<div class="w-[32px] h-[32px] rounded-[11px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-lg shadow-brand-gradient-start/20">
+<i class="w-4 h-4 text-white fill-white" data-lucide="zap" stroke-width="2.5"></i>
+</div>
+<h1 class="font-title-header text-title-header text-on-surface tracking-tight">JouleSuite Setup</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 rounded-lg flex items-center justify-center text-muted-dark hover:text-on-surface hover:bg-surface-variant/30 transition-colors">
+<i class="w-5 h-5" data-lucide="log-out" stroke-width="2"></i>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content -->
+<main class="max-w-4xl mx-auto px-lg md:px-xl pt-2xl pb-3xl">
+<!-- Segmented Tabs -->
+<div class="flex justify-center mb-2xl">
+<div class="inline-flex p-xs bg-panel-dark rounded-xl border border-outline-variant/20 shadow-sm">
+<button class="px-xl py-sm rounded-lg font-button text-button text-muted-dark hover:text-on-surface transition-colors">
+                    Wi-Fi
+                </button>
+<button class="px-xl py-sm rounded-lg font-button text-button text-white bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] shadow-sm">
+                    Setup
+                </button>
+<button class="px-xl py-sm rounded-lg font-button text-button text-muted-dark hover:text-on-surface transition-colors">
+                    Status
+                </button>
+</div>
+</div>
+<!-- Setup Card -->
+<div class="relative bg-panel-dark border border-outline-variant/20 rounded-[20px] shadow-card hover:shadow-card-hover transition-all duration-300 transform hover:-translate-y-[2px] overflow-hidden">
+<div class="card-sheen"></div>
+<div class="p-card md:p-3xl relative z-10 flex flex-col gap-2xl">
+<!-- Section 1: Application -->
+<div>
+<h2 class="font-section-label text-section-label text-[#6366f1] uppercase tracking-[1px] mb-lg flex items-center gap-sm">
+<i class="w-4 h-4" data-lucide="settings-2"></i>
+                        Application
+                    </h2>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-grid-desktop">
+<!-- Charger Name -->
+<div class="col-span-1 md:col-span-12 flex flex-col gap-xs">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">Charger Name</label>
+<input class="input-base" type="text" value="Bay 3 · JouleSuite Demo"/>
+</div>
+<!-- MQTT Host -->
+<div class="col-span-1 md:col-span-12 flex flex-col gap-xs mt-sm">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">MQTT Host</label>
+<input class="input-base" type="text" value="broker.local"/>
+</div>
+<!-- Row 2-col: Port & Password -->
+<div class="col-span-1 md:col-span-4 flex flex-col gap-xs mt-sm">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">MQTT Port</label>
+<input class="input-base font-mono-code text-mono-code" type="number" value="1883"/>
+</div>
+<div class="col-span-1 md:col-span-8 flex flex-col gap-xs mt-sm">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">MQTT Password</label>
+<div class="relative">
+<input class="input-base pr-10" type="password" value="supersecretpassword"/>
+<button class="absolute right-md top-1/2 -translate-y-1/2 text-muted-dark hover:text-on-surface" type="button">
+<i class="w-4 h-4" data-lucide="eye"></i>
+</button>
+</div>
+</div>
+<!-- Region -->
+<div class="col-span-1 md:col-span-6 flex flex-col gap-xs mt-sm">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">Region</label>
+<select class="input-base">
+<option value="US">US</option>
+<option value="EU">EU</option>
+<option selected="" value="IN">IN</option>
+<option value="AU">AU</option>
+</select>
+</div>
+<!-- Accent Colour -->
+<div class="col-span-1 md:col-span-6 flex flex-col gap-xs mt-sm">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">Accent Colour</label>
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-lg border border-outline-variant/30 bg-[#6366f1] shadow-inner"></div>
+<input class="input-base flex-1 font-mono-code text-mono-code" type="text" value="#6366f1"/>
+</div>
+</div>
+<!-- Verbose Logs Toggle -->
+<div class="col-span-1 md:col-span-12 flex items-center justify-between p-md bg-panel-2-dark rounded-xl border border-outline-variant/20 mt-sm">
+<div class="flex flex-col gap-1">
+<span class="font-subtitle-header text-subtitle-header text-on-surface">Verbose Logs</span>
+<span class="font-body text-[12px] text-muted-dark">Enable detailed output for debugging</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" type="checkbox"/>
+<div class="w-[48px] h-[28px] bg-surface-bright rounded-full border border-outline-variant/30 toggle-track relative">
+<div class="absolute left-[2px] top-[2px] w-[22px] h-[22px] bg-white rounded-full toggle-thumb shadow-sm"></div>
+</div>
+</label>
+</div>
+</div>
+</div>
+<!-- Section Divider -->
+<div class="flex items-center gap-md">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-[1px]">Notes</span>
+<div class="flex-1 h-px bg-outline-variant/20"></div>
+</div>
+<!-- Section 2: Notes -->
+<div>
+<div class="flex flex-col gap-xs">
+<label class="font-subtitle-header text-subtitle-header text-muted-dark">Site Notes</label>
+<textarea class="input-base font-mono-code text-mono-code h-[80px] resize-none whitespace-pre" spellcheck="false">Bay 3, ground floor.
+Mounted on west pillar.
+Key under reception.</textarea>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-lg border-t border-outline-variant/10 mt-sm">
+<button class="w-full flex items-center justify-center gap-sm py-md rounded-xl bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] text-white font-button text-button shadow-btn hover:-translate-y-[2px] transition-all duration-200">
+<i class="w-4 h-4" data-lucide="save"></i>
+                        Save settings
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body></html>

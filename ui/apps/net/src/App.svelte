@@ -86,19 +86,31 @@
   const stateLabel = ["idle","connecting","connected","portal","failed"];
 </script>
 
-<header class="sticky top-0 z-10 flex items-center gap-3.5 px-5 py-3.5 border-b border-[color:var(--color-line)] backdrop-blur-xl
-               bg-[color-mix(in_srgb,var(--color-bg)_75%,transparent)]">
-  <div class="w-9 h-9 grid place-items-center rounded-[11px] text-white"
-       style="background:var(--grad);box-shadow:0 8px 24px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">
-    <Wifi size={18} strokeWidth={2.2}/>
+<header class="sticky top-0 z-50 backdrop-blur-xl border-b border-[color:var(--color-line)]"
+        style="background:color-mix(in srgb,var(--color-bg) 80%,transparent)">
+  <div class="max-w-[600px] mx-auto px-6 h-16 flex items-center gap-3">
+    <div class="w-8 h-8 grid place-items-center rounded-[10px] text-white"
+         style="background:var(--grad);box-shadow:0 6px 20px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">
+      <Wifi size={16} strokeWidth={2.4}/>
+    </div>
+    <div class="flex flex-col min-w-0">
+      <div class="flex items-center gap-2">
+        <h1 class="font-semibold text-[15px] tracking-tight text-[color:var(--color-ink)] truncate">{title}</h1>
+        {#if status?.state === 2}
+          <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-mono text-[10px]
+                       bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] border border-[color:var(--color-line)]"
+                style="color:var(--color-ok)">
+            <span class="w-[6px] h-[6px] rounded-full" style="background:var(--color-ok);box-shadow:0 0 0 4px color-mix(in srgb,var(--color-ok) 18%,transparent)"></span>
+            Connected
+          </span>
+        {/if}
+      </div>
+      <span class="text-[11.5px] text-[color:var(--color-muted)] font-medium">pick a network · apply settings</span>
+    </div>
+    <div class="flex-1"></div>
+    <button onclick={cycleTheme} aria-label="theme"
+      class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition cursor-pointer">◐</button>
   </div>
-  <div class="flex-1">
-    <div class="font-semibold text-[15.5px] text-[color:var(--color-ink)]">{title}</div>
-    <div class="text-[11.5px] text-[color:var(--color-muted)]">pick a network · apply settings</div>
-  </div>
-  <button onclick={cycleTheme} aria-label="theme"
-    class="w-9 h-9 grid place-items-center rounded-[11px] border border-[color:var(--color-line)] text-[color:var(--color-ink)]
-           bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] hover:text-[color:var(--color-brand)] hover:border-[color:var(--color-brand)] transition cursor-pointer">◐</button>
 </header>
 
 <main class="max-w-[600px] mx-auto px-5 py-5">

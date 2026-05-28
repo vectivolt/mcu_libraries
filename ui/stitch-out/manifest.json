@@ -1,0 +1,122 @@
+[
+  {
+    "slug": "net-mobile",
+    "screenName": "projects/16086657541908603661/screens/3c5ecc2ef3334acb90c3edfad98bc4e0",
+    "title": "JouleNet Wi-Fi Portal (Mobile)",
+    "deviceType": "MOBILE"
+  },
+  {
+    "slug": "net-status-desktop",
+    "screenName": "projects/16086657541908603661/screens/9225b0d1d98141eeaeff9967f668603c",
+    "title": "JouleNet Status Tab",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "dash-energy-desktop",
+    "screenName": "projects/16086657541908603661/screens/4d554700fcc0486a967b4b9542aa7d6e",
+    "title": "JouleDash Energy Overview",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "serial-mobile",
+    "screenName": "projects/16086657541908603661/screens/c50e83dd6dc941c9b9fef458090576e5",
+    "title": "JouleSerial Mobile Console",
+    "deviceType": "MOBILE"
+  },
+  {
+    "slug": "dash-overview-mobile",
+    "screenName": "projects/16086657541908603661/screens/0ca4739122bb4d609c5c9040fbf8dda2",
+    "title": "JouleDash Overview (Mobile)",
+    "deviceType": "MOBILE"
+  },
+  {
+    "slug": "ota-uploading-desktop",
+    "screenName": "projects/16086657541908603661/screens/91033835ea694b19bcef5740ef586339",
+    "title": "JouleOTA Uploading Firmware",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "net-advanced-desktop",
+    "screenName": "projects/16086657541908603661/screens/42fdb8531d4840a69b843c3068c6e797",
+    "title": "JouleNet Advanced Configuration Expanded",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "dash-overview-desktop",
+    "screenName": "projects/16086657541908603661/screens/af9def69fd074e158eed3bc3aaaaf757",
+    "title": "JouleDash Overview",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "ota-success-desktop",
+    "screenName": "projects/16086657541908603661/screens/3a24a3e55e8541e2b948b464845449dd",
+    "title": "JouleOTA Update Success",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "dash-widget-gallery",
+    "screenName": "projects/16086657541908603661/screens/d680d2b6ea544dbabd577875d1c5b475",
+    "title": "JouleDash Widget Gallery",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "net-connecting-desktop",
+    "screenName": "projects/16086657541908603661/screens/09fe57e170fa4128b3de0a567d22850c",
+    "title": "JouleNet Connecting State",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "serial-active-desktop",
+    "screenName": "projects/16086657541908603661/screens/b6bb8b386ece4390acb0cbdc8693aed5",
+    "title": "JouleSerial Wireless Console",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "net-setup-desktop",
+    "screenName": "projects/16086657541908603661/screens/1422534384e9416d87f342b83f58f721",
+    "title": "JouleNet Setup (Parameters)",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "dash-diag-desktop",
+    "screenName": "projects/16086657541908603661/screens/fbfb3ebe3d73423288db22d9cff606f2",
+    "title": "JouleDash Diagnostics",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "ota-pull-desktop",
+    "screenName": "projects/16086657541908603661/screens/2ae9c1e4e53e4481bad7c00ce1e9413d",
+    "title": "JouleOTA Pull URL Mode",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "net-list-desktop",
+    "screenName": "projects/16086657541908603661/screens/51bdf9466b244426b01139c7eddfd312",
+    "title": "JouleNet Wi-Fi Portal (Networks List)",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "dash-controls-desktop",
+    "screenName": "projects/16086657541908603661/screens/e0ef1518b3f444f7bf4756e40e3f5d1f",
+    "title": "JouleDash Controls",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "serial-hex-desktop",
+    "screenName": "projects/16086657541908603661/screens/2910617db9564949912a3631338b092d",
+    "title": "JouleSerial Hex View Console",
+    "deviceType": "DESKTOP"
+  },
+  {
+    "slug": "ota-mobile",
+    "screenName": "projects/16086657541908603661/screens/6644c5d5d23340439e1c375e5269533a",
+    "title": "JouleOTA Mobile (Idle)",
+    "deviceType": "MOBILE"
+  },
+  {
+    "slug": "serial-filter-desktop",
+    "screenName": "projects/16086657541908603661/screens/613ebb3dc39548ea9ad617cedf4ff48c",
+    "title": "JouleSerial Console - Filtered (wifi|rssi)",
+    "deviceType": "DESKTOP"
+  }
+]

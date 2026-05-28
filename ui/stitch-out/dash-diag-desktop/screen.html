@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleDash - Diagnostics</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "panel-dark": "#11131c",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "background": "#13131b",
+                    "surface-container-lowest": "#0d0d15",
+                    "bg-light": "#f6f7fb",
+                    "outline": "#908fa0",
+                    "bg-soft-dark": "#0d0f17",
+                    "surface": "#13131b",
+                    "inverse-primary": "#494bd6",
+                    "tertiary-container": "#d97721",
+                    "muted-dark": "#7a809a",
+                    "on-tertiary-container": "#452000",
+                    "on-primary-container": "#0d0096",
+                    "error": "#ffb4ab",
+                    "bg-dark": "#08090f",
+                    "surface-dim": "#13131b",
+                    "secondary-container": "#571bc1",
+                    "secondary-fixed": "#e9ddff",
+                    "panel-light": "#ffffff",
+                    "on-primary-fixed": "#07006c",
+                    "surface-container-highest": "#34343d",
+                    "on-primary": "#1000a9",
+                    "ink-light": "#0b0d18",
+                    "on-tertiary": "#4f2500",
+                    "muted-light": "#7d8398",
+                    "surface-container": "#1f1f27",
+                    "surface-container-low": "#1b1b23",
+                    "panel-2-light": "#f9fafc",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "inverse-on-surface": "#303038",
+                    "ok": "#10b981",
+                    "ink-dark": "#f1f3fa",
+                    "secondary": "#d0bcff",
+                    "primary-container": "#8083ff",
+                    "panel-2-dark": "#161824",
+                    "ink-2-dark": "#b5bbd0",
+                    "error-container": "#93000a",
+                    "err": "#ef4444",
+                    "surface-container-high": "#292932",
+                    "on-tertiary-fixed-variant": "#703700",
+                    "on-tertiary-fixed": "#301400",
+                    "surface-variant": "#34343d",
+                    "primary-fixed": "#e1e0ff",
+                    "outline-variant": "#464554",
+                    "tertiary": "#ffb783",
+                    "on-secondary-container": "#c4abff",
+                    "ink-2-light": "#42485c",
+                    "on-secondary-fixed": "#23005c",
+                    "on-error-container": "#ffdad6",
+                    "inverse-surface": "#e4e1ed",
+                    "primary": "#c0c1ff",
+                    "on-secondary": "#3c0091",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "on-surface-variant": "#c7c4d7",
+                    "warn": "#f59e0b",
+                    "surface-bright": "#393841",
+                    "info": "#06b6d4",
+                    "on-background": "#e4e1ed",
+                    "on-surface": "#e4e1ed",
+                    "tertiary-fixed": "#ffdcc5",
+                    "tertiary-fixed-dim": "#ffb783",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "surface-tint": "#c0c1ff",
+                    "on-error": "#690005"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "lg": "16px",
+                    "grid-gap-mobile": "10px",
+                    "md": "12px",
+                    "3xl": "40px",
+                    "xl": "20px",
+                    "sm": "8px",
+                    "2xl": "28px",
+                    "xs": "4px",
+                    "grid-gap-desktop": "14px",
+                    "card-padding": "20px"
+            },
+            "fontFamily": {
+                    "title-header": ["Inter", "sans-serif"],
+                    "mono-code": ["JetBrains Mono", "monospace"],
+                    "subtitle-header": ["Inter", "sans-serif"],
+                    "section-label": ["Inter", "sans-serif"],
+                    "kpi-lg": ["Inter", "sans-serif"],
+                    "button": ["Inter", "sans-serif"],
+                    "kpi-sm": ["Inter", "sans-serif"],
+                    "body": ["Inter", "sans-serif"]
+            },
+            "fontSize": {
+                    "title-header": ["15.5px", {"lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600"}],
+                    "mono-code": ["12.5px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500"}],
+                    "subtitle-header": ["11.5px", {"lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                    "section-label": ["11px", {"lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600"}],
+                    "kpi-lg": ["40px", {"lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300"}],
+                    "button": ["13.5px", {"lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600"}],
+                    "kpi-sm": ["26px", {"lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300"}],
+                    "body": ["14.5px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}]
+            },
+            "boxShadow": {
+                'card': '0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.04)',
+                'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3), inset 0 1px 0 0 rgba(255, 255, 255, 0.04), 0 0 20px 0 rgba(99, 102, 241, 0.15)',
+                'btn': '0 2px 4px 0 rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)',
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .material-symbols-outlined.fill {
+          font-variation-settings: 'FILL' 1;
+        }
+        
+        .card-sheen {
+            background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%);
+        }
+
+        .blur-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(120px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: rgba(99, 102, 241, 0.15); }
+        .blob-2 { bottom: -20%; right: -10%; width: 60vw; height: 60vw; background: rgba(139, 92, 246, 0.12); }
+        .blob-3 { top: 40%; left: 40%; width: 30vw; height: 30vw; background: rgba(79, 70, 229, 0.08); }
+
+        .brand-gradient {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .lucide-icon {
+            stroke-width: 2.2px;
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .status-dot-pulse {
+            animation: pulse-ok 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-ok {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: .5; transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body class="bg-bg-dark text-on-surface font-body text-body min-h-screen relative overflow-x-hidden selection:bg-primary-container/30 selection:text-primary">
+<!-- Atmospheric Blur Blobs -->
+<div class="blur-blob blob-1"></div>
+<div class="blur-blob blob-2"></div>
+<div class="blur-blob blob-3"></div>
+<!-- TopNavBar -->
+<header class="bg-surface/80 dark:bg-surface/80 text-primary dark:text-primary font-body text-body fixed top-0 w-full z-50 backdrop-blur-[20px] saturate-[160%] border-b border-outline-variant/20 shadow-sm flex justify-between items-center px-lg h-16 w-full">
+<!-- Brand / Logo Anchor -->
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-[11px] brand-gradient flex items-center justify-center shadow-btn">
+<svg fill="none" height="18" viewbox="0 0 14 18" width="14" xmlns="http://www.w3.org/2000/svg">
+<path d="M13.625 7.625H8L9.875 0.5L0.5 10.375H6.125L4.25 17.5L13.625 7.625Z" fill="white"></path>
+</svg>
+</div>
+<span class="font-title-header text-title-header font-bold text-on-surface">charge_os</span>
+</div>
+<!-- Navigation Cluster (Hidden on Mobile) -->
+<nav class="hidden md:flex items-center gap-xl h-full pt-1">
+<a class="h-full flex items-center text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 px-md active:scale-95 transition-transform" href="#">Overview</a>
+<a class="h-full flex items-center text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 px-md active:scale-95 transition-transform" href="#">Energy</a>
+<a class="h-full flex items-center text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 px-md active:scale-95 transition-transform" href="#">Controls</a>
+<a class="h-full flex items-center text-primary border-b-2 border-primary pb-1 px-md active:scale-95 transition-transform" href="#">Diagnostics</a>
+</nav>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-sm">
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-muted-dark hover:text-on-surface hover:bg-surface-variant/10 transition-colors active:scale-95">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-muted-dark hover:text-on-surface hover:bg-surface-variant/10 transition-colors active:scale-95">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-muted-dark hover:text-on-surface hover:bg-surface-variant/10 transition-colors active:scale-95">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-xl px-xl md:px-3xl max-w-[1400px] mx-auto">
+<!-- Page Header -->
+<div class="mb-xl">
+<h1 class="font-title-header text-title-header text-on-surface">Diagnostics Dashboard</h1>
+<p class="font-subtitle-header text-subtitle-header text-muted-dark mt-xs">Real-time telemetry &amp; hardware health</p>
+</div>
+<!-- 12-Column Grid Layout -->
+<div class="grid grid-cols-2 md:grid-cols-6 lg:grid-cols-12 gap-grid-gap-mobile lg:gap-grid-gap-desktop">
+<!-- 1. PCB TEMPERATURE -->
+<div class="col-span-2 md:col-span-3 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-warn z-10"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">PCB Temperature</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><path d="M14 4v10.54a4 4 0 1 1-4 0V4a2 2 0 0 1 4 0Z"></path></svg>
+</div>
+<div>
+<div class="flex items-baseline gap-sm">
+<span class="font-kpi-sm text-kpi-sm text-warn tabular-nums tracking-tighter">38.4</span>
+<span class="font-mono-code text-mono-code text-muted-dark">°C</span>
+</div>
+<div class="mt-md h-8 w-full">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 100 30" width="100%">
+<path d="M0 20 L20 18 L40 22 L60 15 L80 10 L100 5" fill="none" stroke="#6366f1" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 20 L20 18 L40 22 L60 15 L80 10 L100 5 L100 30 L0 30 Z" fill="url(#grad-warn)" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- 2. CABINET HUMIDITY -->
+<div class="col-span-2 md:col-span-3 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="absolute left-0 top-0 bottom-0 w-[3px] bg-info z-10"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Cabinet Humidity</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><path d="M12 22a5 5 0 0 0 5-5c0-2-5-10-5-10S7 15 7 17a5 5 0 0 0 5 5z"></path></svg>
+</div>
+<div>
+<div class="flex items-baseline gap-sm">
+<span class="font-kpi-sm text-kpi-sm text-info tabular-nums tracking-tighter">43.1</span>
+<span class="font-mono-code text-mono-code text-muted-dark">%</span>
+</div>
+<div class="mt-md h-8 w-full">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 100 30" width="100%">
+<path d="M0 25 L20 23 L40 24 L60 21 L80 18 L100 15" fill="none" stroke="#6366f1" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 25 L20 23 L40 24 L60 21 L80 18 L100 15 L100 30 L0 30 Z" fill="url(#grad-info)" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- 3. Wi-Fi RSSI -->
+<div class="col-span-2 md:col-span-3 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Wi-Fi RSSI</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" x2="12.01" y1="20" y2="20"></line></svg>
+</div>
+<div>
+<div class="flex items-baseline gap-sm">
+<span class="font-kpi-sm text-kpi-sm text-on-surface tabular-nums tracking-tighter">-86</span>
+<span class="font-mono-code text-mono-code text-muted-dark">dBm</span>
+</div>
+<div class="mt-md h-8 w-full">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 100 30" width="100%">
+<path d="M0 10 L20 15 L40 12 L60 18 L80 14 L100 20" fill="none" stroke="#6366f1" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 10 L20 15 L40 12 L60 18 L80 14 L100 20 L100 30 L0 30 Z" fill="url(#grad-primary)" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- 4. FREE HEAP -->
+<div class="col-span-2 md:col-span-3 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Free Heap</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><path d="M4 22h14a2 2 0 0 0 2-2V7.5L14.5 2H6a2 2 0 0 0-2 2v4"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M2 15h10"></path><path d="m9 18 3-3-3-3"></path></svg>
+</div>
+<div>
+<div class="flex items-baseline gap-sm">
+<span class="font-kpi-sm text-kpi-sm text-on-surface tabular-nums tracking-tighter">248</span>
+<span class="font-mono-code text-mono-code text-muted-dark">KB</span>
+</div>
+<div class="mt-md h-8 w-full">
+<svg height="100%" preserveaspectratio="none" viewbox="0 0 100 30" width="100%">
+<path d="M0 20 L20 21 L40 19 L60 22 L80 20 L100 21" fill="none" stroke="#6366f1" stroke-linejoin="round" stroke-width="1.6"></path>
+<path d="M0 20 L20 21 L40 19 L60 22 L80 20 L100 21 L100 30 L0 30 Z" fill="url(#grad-primary)" opacity="0.1"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+<!-- 5. UPTIME -->
+<div class="col-span-2 md:col-span-4 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Uptime</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+</div>
+<div class="flex items-baseline gap-sm mt-auto">
+<span class="font-kpi-sm text-kpi-sm text-on-surface tabular-nums tracking-tighter">246</span>
+<span class="font-mono-code text-mono-code text-muted-dark">s</span>
+</div>
+</div>
+</div>
+<!-- 6. NETWORK LINK -->
+<div class="col-span-2 md:col-span-4 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Network Link</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+</div>
+<div class="flex items-center gap-sm mt-auto">
+<div class="flex items-center gap-2 bg-panel-2-dark border border-outline-variant/30 rounded-full px-3 py-1">
+<div class="relative w-2 h-2">
+<div class="absolute inset-0 bg-ok rounded-full opacity-18 w-3 h-3 -left-0.5 -top-0.5"></div>
+<div class="absolute inset-0 bg-ok rounded-full status-dot-pulse"></div>
+</div>
+<span class="font-mono-code text-mono-code text-ok uppercase">ok</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 7. OCPP BACKEND -->
+<div class="col-span-2 md:col-span-4 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card hover:shadow-card-hover hover:-translate-y-[2px] transition-all duration-300 relative overflow-hidden group">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="relative z-10 flex flex-col h-full justify-between gap-xl">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">OCPP Backend</span>
+<svg class="lucide-icon text-muted-dark" viewbox="0 0 24 24"><rect height="14" rx="2" width="20" x="2" y="3"></rect><line x1="8" x2="16" y1="21" y2="21"></line><line x1="12" x2="12" y1="17" y2="21"></line></svg>
+</div>
+<div class="flex items-center gap-sm mt-auto">
+<div class="flex items-center gap-2 bg-panel-2-dark border border-outline-variant/30 rounded-full px-3 py-1">
+<div class="relative w-2 h-2">
+<div class="absolute inset-0 bg-ok rounded-full opacity-18 w-3 h-3 -left-0.5 -top-0.5"></div>
+<div class="absolute inset-0 bg-ok rounded-full status-dot-pulse"></div>
+</div>
+<span class="font-mono-code text-mono-code text-ok uppercase">ok</span>
+</div>
+</div>
+</div>
+</div>
+<!-- 8. RSSI HISTORY CHART -->
+<div class="col-span-2 md:col-span-6 lg:col-span-12 bg-panel-dark rounded-[20px] p-card-padding border border-white/[0.06] shadow-card relative overflow-hidden">
+<div class="card-sheen absolute inset-0 z-0 pointer-events-none"></div>
+<div class="relative z-10">
+<div class="flex justify-between items-center mb-xl">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">RSSI History (Last 1h)</span>
+</div>
+<div class="h-[180px] w-full relative">
+<!-- Grid Lines -->
+<div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
+<div class="border-t border-outline-variant/10 w-full"></div>
+<div class="border-t border-outline-variant/10 w-full"></div>
+<div class="border-t border-outline-variant/10 w-full"></div>
+<div class="border-t border-outline-variant/10 w-full"></div>
+</div>
+<!-- Y-Axis Labels -->
+<div class="absolute left-0 inset-y-0 flex flex-col justify-between font-mono-code text-[10px] text-muted-dark/50 -translate-x-full pr-sm py-1">
+<span>-50</span>
+<span>-70</span>
+<span>-90</span>
+<span>-110</span>
+</div>
+<!-- Main SVG Chart -->
+<svg class="absolute inset-0" height="100%" preserveaspectratio="none" viewbox="0 0 1000 180" width="100%">
+<defs>
+<lineargradient id="chart-line-grad" x1="0%" x2="100%" y1="0%" y2="0%">
+<stop offset="0%" stop-color="#6366f1"></stop>
+<stop offset="100%" stop-color="#8b5cf6"></stop>
+</lineargradient>
+<lineargradient id="chart-fill-grad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#6366f1" stop-opacity="0.2"></stop>
+<stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+<!-- Area Fill -->
+<path d="M0,120 L100,130 L200,110 L300,140 L400,125 L500,135 L600,150 L700,110 L800,90 L900,105 L1000,95 L1000,180 L0,180 Z" fill="url(#chart-fill-grad)"></path>
+<!-- Stroke Line -->
+<path d="M0,120 L100,130 L200,110 L300,140 L400,125 L500,135 L600,150 L700,110 L800,90 L900,105 L1000,95" fill="none" stroke="url(#chart-line-grad)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path>
+</svg>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Success Toast (Bottom Right) -->
+<div class="fixed bottom-xl right-xl z-50 transform translate-y-0 opacity-100 transition-all duration-300">
+<div class="bg-panel-2-dark shadow-lg rounded-xl flex items-stretch overflow-hidden border border-outline-variant/10">
+<div class="w-1.5 bg-ok"></div>
+<div class="px-md py-sm flex items-center gap-md">
+<span class="material-symbols-outlined text-ok" style="font-size: 20px;">check_circle</span>
+<span class="font-mono-code text-mono-code text-on-surface">Energy delivered: 3.132 kWh</span>
+</div>
+</div>
+</div>
+<!-- SVG Definitions for Gradients -->
+<svg class="absolute" height="0" width="0">
+<defs>
+<lineargradient id="grad-warn" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#f59e0b" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#f59e0b" stop-opacity="0"></stop>
+</lineargradient>
+<lineargradient id="grad-info" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#06b6d4" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#06b6d4" stop-opacity="0"></stop>
+</lineargradient>
+<lineargradient id="grad-primary" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" stop-color="#6366f1" stop-opacity="0.35"></stop>
+<stop offset="100%" stop-color="#6366f1" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+</svg>
+</body></html>

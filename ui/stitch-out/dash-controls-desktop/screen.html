@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleDash - Controls</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary": "#c0c1ff",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "inverse-primary": "#494bd6",
+                        "surface-container-high": "#292932",
+                        "on-secondary": "#3c0091",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "tertiary-container": "#d97721",
+                        "surface-container": "#1f1f27",
+                        "outline": "#908fa0",
+                        "warn": "#f59e0b",
+                        "on-background": "#e4e1ed",
+                        "ink-dark": "#f1f3fa",
+                        "surface-tint": "#c0c1ff",
+                        "on-error-container": "#ffdad6",
+                        "primary-fixed": "#e1e0ff",
+                        "panel-light": "#ffffff",
+                        "tertiary": "#ffb783",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed": "#301400",
+                        "on-surface-variant": "#c7c4d7",
+                        "surface-dim": "#13131b",
+                        "outline-variant": "#464554",
+                        "on-primary-container": "#0d0096",
+                        "ink-2-light": "#42485c",
+                        "surface": "#13131b",
+                        "on-surface": "#e4e1ed",
+                        "on-primary": "#1000a9",
+                        "bg-light": "#f6f7fb",
+                        "surface-container-lowest": "#0d0d15",
+                        "secondary-container": "#571bc1",
+                        "info": "#06b6d4",
+                        "ink-light": "#0b0d18",
+                        "on-secondary-container": "#c4abff",
+                        "error": "#ffb4ab",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "on-error": "#690005",
+                        "primary-container": "#8083ff",
+                        "ok": "#10b981",
+                        "surface-container-highest": "#34343d",
+                        "panel-2-dark": "#161824",
+                        "ink-2-dark": "#b5bbd0",
+                        "tertiary-fixed": "#ffdcc5",
+                        "secondary-fixed": "#e9ddff",
+                        "on-tertiary-container": "#452000",
+                        "muted-dark": "#7a809a",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "panel-dark": "#11131c",
+                        "muted-light": "#7d8398",
+                        "err": "#ef4444",
+                        "on-tertiary": "#4f2500",
+                        "on-secondary-fixed": "#23005c",
+                        "inverse-on-surface": "#303038",
+                        "bg-soft-dark": "#0d0f17",
+                        "surface-bright": "#393841",
+                        "panel-2-light": "#f9fafc",
+                        "bg-dark": "#08090f",
+                        "secondary": "#d0bcff",
+                        "surface-container-low": "#1b1b23",
+                        "surface-variant": "#34343d",
+                        "inverse-surface": "#e4e1ed",
+                        "background": "#13131b",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-primary-fixed": "#07006c"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "12px",
+                        "xs": "4px",
+                        "3xl": "40px",
+                        "grid-gap-mobile": "10px",
+                        "card-padding": "20px",
+                        "xl": "20px",
+                        "sm": "8px",
+                        "grid-gap-desktop": "14px",
+                        "2xl": "28px",
+                        "lg": "16px"
+                    },
+                    "fontFamily": {
+                        "subtitle-header": ["Inter"],
+                        "section-label": ["Inter"],
+                        "title-header": ["Inter"],
+                        "body": ["Inter"],
+                        "kpi-sm": ["Inter"],
+                        "mono-code": ["JetBrains Mono"],
+                        "kpi-lg": ["Inter"],
+                        "button": ["Inter"]
+                    },
+                    "fontSize": {
+                        "subtitle-header": ["11.5px", { "lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "section-label": ["11px", { "lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600" }],
+                        "title-header": ["15.5px", { "lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600" }],
+                        "body": ["14.5px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "kpi-sm": ["26px", { "lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300" }],
+                        "mono-code": ["12.5px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "kpi-lg": ["40px", { "lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300" }],
+                        "button": ["13.5px", { "lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600" }]
+                    },
+                    boxShadow: {
+                        'btn': '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06), inset 0 1px 0 0 rgba(255, 255, 255, 0.04)',
+                        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05), 0 0 20px 0 rgba(99, 102, 241, 0.15), inset 0 1px 0 0 rgba(255, 255, 255, 0.04)',
+                        'glow': '0 0 20px 0 rgba(99, 102, 241, 0.5)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #08090f; color: #e4e1ed; }
+        .blob { position: fixed; border-radius: 50%; filter: blur(80px); z-index: -1; pointer-events: none; }
+        .blob-1 { top: -10%; left: -10%; width: 500px; height: 500px; background: rgba(99, 102, 241, 0.15); }
+        .blob-2 { bottom: -20%; right: -10%; width: 600px; height: 600px; background: rgba(139, 92, 246, 0.12); }
+        .blob-3 { top: 40%; left: 50%; width: 400px; height: 400px; background: rgba(73, 75, 214, 0.08); transform: translate(-50%, -50%); }
+        
+        .card-surface { background-color: #11131c; border: 1px solid rgba(70, 69, 84, 0.5); border-radius: 20px; position: relative; overflow: hidden; transition: transform 0.2s ease, box-shadow 0.2s ease; box-shadow: var(--tw-shadow-card); }
+        .card-surface::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 100%); pointer-events: none; }
+        .card-surface:hover { transform: translateY(-2px); box-shadow: var(--tw-shadow-card-hover); }
+
+        .lucide { stroke-width: 2.2px; }
+        
+        /* Input Range Styling */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: #ffffff; border: 2px solid #ffffff; cursor: pointer; margin-top: -5px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%); border-radius: 3px; }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #34343d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #464554; }
+    </style>
+</head>
+<body class="min-h-screen font-body text-body antialiased selection:bg-primary selection:text-on-primary">
+<!-- Ambient Blobs -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<!-- TopNavBar -->
+<nav class="bg-surface/80 dark:bg-surface/80 fixed top-0 w-full z-50 backdrop-blur-[20px] saturate-[160%] shadow-sm flex justify-between items-center px-lg h-16">
+<div class="flex items-center gap-sm">
+<div class="w-8 h-8 rounded-[11px] bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] flex items-center justify-center shadow-btn">
+<i class="text-white w-4 h-4" data-lucide="zap" style="stroke-width: 2.5px;"></i>
+</div>
+<span class="font-title-header text-title-header font-bold text-on-surface">charge_os</span>
+</div>
+<!-- Desktop Nav Cluster -->
+<div class="hidden md:flex items-center gap-md h-full">
+<a class="h-full flex items-center px-sm text-muted-dark hover:text-on-surface-variant transition-colors" href="#">Overview</a>
+<a class="h-full flex items-center px-sm text-muted-dark hover:text-on-surface-variant transition-colors" href="#">Energy</a>
+<a class="h-full flex items-center px-sm text-primary border-b-2 border-primary" href="#">Controls</a>
+<a class="h-full flex items-center px-sm text-muted-dark hover:text-on-surface-variant transition-colors" href="#">Diagnostics</a>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 p-xs rounded-full active:scale-95 transition-transform"><i class="w-5 h-5" data-lucide="bell"></i></button>
+<button class="text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 p-xs rounded-full active:scale-95 transition-transform"><i class="w-5 h-5" data-lucide="settings"></i></button>
+<button class="text-muted-dark hover:text-on-surface-variant transition-colors hover:bg-surface-variant/10 p-xs rounded-full active:scale-95 transition-transform"><i class="w-5 h-5" data-lucide="user"></i></button>
+</div>
+</nav>
+<!-- Main Content -->
+<main class="pt-24 pb-16 px-md md:px-3xl max-w-7xl mx-auto w-full">
+<!-- Header -->
+<div class="mb-lg">
+<h1 class="font-kpi-lg text-kpi-lg text-on-surface mb-xs">Active Controls</h1>
+<p class="font-body text-body text-muted-dark">Direct management interface for JouleDash Terminal A4.</p>
+</div>
+<!-- 12-Column Grid -->
+<div class="grid grid-cols-2 md:grid-cols-12 gap-grid-mobile md:gap-grid-desktop">
+<!-- 1. Start Session (col-span-3) -->
+<div class="card-surface col-span-2 md:col-span-3 p-card-padding flex flex-col justify-between min-h-[160px]">
+<div class="flex justify-between items-start">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Session</span>
+<div class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+<div class="w-[6px] h-[6px] rounded-full bg-ok shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse"></div>
+</div>
+</div>
+<div class="flex items-center justify-between mt-auto">
+<span class="font-subtitle-header text-subtitle-header text-on-surface">Energize</span>
+<!-- Toggle Switch -->
+<div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 border-[#6366f1] appearance-none cursor-pointer transition-transform duration-300 ease-[cubic-bezier(0.175,0.885,0.32,1.275)] transform translate-x-6 z-10" id="toggle1" name="toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-6 rounded-full bg-gradient-to-r from-[#6366f1] to-[#8b5cf6] cursor-pointer shadow-glow" for="toggle1"></label>
+</div>
+</div>
+</div>
+<!-- 2. Current Limit (col-span-6) -->
+<div class="card-surface col-span-2 md:col-span-6 p-card-padding flex flex-col justify-center min-h-[160px]">
+<div class="flex justify-between items-center mb-md">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Current Limit</span>
+<span class="font-mono-code text-mono-code text-primary bg-panel-2-dark px-sm py-[2px] rounded border border-outline-variant/30">22 A</span>
+</div>
+<div class="relative pt-md pb-sm w-full">
+<!-- Floating Bubble -->
+<div class="absolute -top-1 left-[61%] transform -translate-x-1/2 bg-primary text-on-primary font-mono-code text-[10px] px-2 py-1 rounded shadow-glow pointer-events-none before:content-[''] before:absolute before:-bottom-1 before:left-1/2 before:-translate-x-1/2 before:border-l-4 before:border-l-transparent before:border-r-4 before:border-r-transparent before:border-t-4 before:border-t-primary">
+                        22 A
+                    </div>
+<input class="w-full" max="32" min="6" type="range" value="22"/>
+<div class="flex justify-between text-[10px] text-muted-dark font-mono-code mt-xs">
+<span>6A</span>
+<span>16A</span>
+<span>32A</span>
+</div>
+</div>
+</div>
+<!-- 3. Charge Mode (col-span-3) -->
+<div class="card-surface col-span-2 md:col-span-3 p-card-padding flex flex-col justify-between min-h-[160px]">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">Charge Mode</span>
+<div class="mt-auto space-y-2">
+<div class="flex justify-between items-center text-sm">
+<span class="text-on-surface">Standard</span>
+<div class="w-3 h-3 rounded-full bg-outline-variant"></div>
+</div>
+<div class="flex justify-between items-center text-sm">
+<span class="text-primary font-medium">Eco</span>
+<div class="w-3 h-3 rounded-full bg-primary shadow-[0_0_8px_rgba(192,193,255,0.5)]"></div>
+</div>
+<div class="flex justify-between items-center text-sm text-muted-dark">
+<span>Boost</span>
+<div class="w-3 h-3 rounded-full bg-surface-variant border border-outline-variant"></div>
+</div>
+<div class="flex justify-between items-center text-sm text-muted-dark">
+<span>Solar</span>
+<div class="w-3 h-3 rounded-full bg-surface-variant border border-outline-variant"></div>
+</div>
+</div>
+</div>
+<!-- 4. LED Ring Color (col-span-3) -->
+<div class="card-surface col-span-2 md:col-span-3 p-card-padding flex flex-col justify-between min-h-[160px]">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">LED Ring</span>
+<div class="flex items-center gap-md mt-auto">
+<div class="w-12 h-12 rounded-full bg-[#6366f1] shadow-[0_0_15px_rgba(99,102,241,0.4)] border-2 border-white/10 flex items-center justify-center">
+<div class="w-8 h-8 rounded-full border-2 border-dashed border-white/30"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-mono-code text-mono-code text-on-surface">#6366F1</span>
+<span class="text-[10px] text-muted-dark font-body">Brand Default</span>
+</div>
+</div>
+</div>
+<!-- 5. Emergency STOP (col-span-3) -->
+<div class="card-surface col-span-2 md:col-span-3 p-card-padding flex flex-col justify-center items-center min-h-[160px] relative overflow-hidden group cursor-pointer border-err/30">
+<div class="absolute inset-0 bg-gradient-to-b from-err/5 to-err/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<button class="w-full py-md rounded-lg bg-gradient-to-r from-[#ef4444] to-[#f87171] text-white font-button text-button shadow-[0_4px_14px_0_rgba(239,68,68,0.39)] flex items-center justify-center gap-sm hover:-translate-y-[2px] transition-transform active:scale-95">
+<i class="w-5 h-5" data-lucide="octagon-alert"></i>
+                    E-STOP
+                </button>
+</div>
+<!-- 6. Reboot Device (col-span-3) -->
+<div class="card-surface col-span-2 md:col-span-3 p-card-padding flex flex-col justify-center items-center min-h-[160px] cursor-pointer group hover:border-warn transition-colors">
+<button class="w-full py-md rounded-lg bg-panel-2-dark border border-warn text-warn font-button text-button flex items-center justify-center gap-sm hover:-translate-y-[2px] transition-all hover:bg-warn/10 active:scale-95">
+<i class="w-5 h-5" data-lucide="power"></i>
+                    Reboot
+                </button>
+</div>
+<!-- 7. Camera Joystick (col-span-6) -->
+<div class="card-surface col-span-2 md:col-span-6 p-card-padding flex items-center justify-between min-h-[200px]">
+<div class="flex flex-col justify-between h-full">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest">PTZ Camera</span>
+<div class="bg-panel-2-dark border border-outline-variant/30 rounded p-sm inline-block w-max mt-auto">
+<span class="font-mono-code text-mono-code text-on-surface block">x:  0.0</span>
+<span class="font-mono-code text-mono-code text-on-surface block">y:  0.0</span>
+</div>
+</div>
+<div class="relative w-[140px] h-[140px] rounded-full bg-surface-container border border-outline-variant/20 flex items-center justify-center shadow-inner">
+<!-- Dashed Inner Ring -->
+<div class="absolute w-[100px] h-[100px] rounded-full border border-dashed border-outline-variant/40"></div>
+<!-- Nub -->
+<div class="w-[50px] h-[50px] rounded-full bg-gradient-to-br from-[#6366f1] to-[#8b5cf6] shadow-btn cursor-pointer hover:scale-105 transition-transform flex items-center justify-center z-10">
+<div class="w-[20px] h-[20px] rounded-full bg-white/20"></div>
+</div>
+<!-- Arrows -->
+<i class="absolute top-2 text-muted-dark w-4 h-4" data-lucide="chevron-up"></i>
+<i class="absolute bottom-2 text-muted-dark w-4 h-4" data-lucide="chevron-down"></i>
+<i class="absolute left-2 text-muted-dark w-4 h-4" data-lucide="chevron-left"></i>
+<i class="absolute right-2 text-muted-dark w-4 h-4" data-lucide="chevron-right"></i>
+</div>
+</div>
+<!-- 8. Driver RFID (col-span-6) -->
+<div class="card-surface col-span-2 md:col-span-6 p-card-padding flex flex-col justify-center min-h-[200px]">
+<span class="font-section-label text-section-label text-muted-dark uppercase tracking-widest mb-md">Manual RFID Auth</span>
+<div class="relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<i class="w-5 h-5 text-muted-dark" data-lucide="nfc"></i>
+</div>
+<input class="w-full bg-panel-2-dark border border-outline-variant/40 rounded-lg py-3 pl-10 pr-4 text-on-surface font-mono-code placeholder-muted-dark focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-shadow shadow-inner" placeholder="scan or type tag UID" type="text"/>
+<button class="absolute inset-y-2 right-2 px-3 bg-surface-variant hover:bg-outline-variant/50 text-on-surface rounded text-xs font-button transition-colors">
+                        Simulate
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<script>
+        lucide.createIcons();
+    </script>
+</body></html>

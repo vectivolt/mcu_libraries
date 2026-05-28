@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleNet Wi-Fi Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#c4abff",
+                    "bg-soft-dark": "#0d0f17",
+                    "outline": "#908fa0",
+                    "on-surface-variant": "#c7c4d7",
+                    "on-primary-container": "#0d0096",
+                    "inverse-on-surface": "#303038",
+                    "surface-dim": "#13131b",
+                    "panel-dark": "#11131c",
+                    "on-tertiary-fixed": "#301400",
+                    "on-secondary": "#3c0091",
+                    "bg-dark": "#08090f",
+                    "tertiary-fixed-dim": "#ffb783",
+                    "ink-light": "#0b0d18",
+                    "surface-container-lowest": "#0d0d15",
+                    "warn": "#f59e0b",
+                    "ink-2-light": "#42485c",
+                    "ink-2-dark": "#b5bbd0",
+                    "primary-fixed-dim": "#c0c1ff",
+                    "ink-dark": "#f1f3fa",
+                    "info": "#06b6d4",
+                    "surface-container-high": "#292932",
+                    "panel-2-light": "#f9fafc",
+                    "surface": "#13131b",
+                    "surface-variant": "#34343d",
+                    "on-tertiary": "#4f2500",
+                    "panel-light": "#ffffff",
+                    "on-primary-fixed-variant": "#2f2ebe",
+                    "secondary-fixed": "#e9ddff",
+                    "on-background": "#e4e1ed",
+                    "primary-fixed": "#e1e0ff",
+                    "tertiary-container": "#d97721",
+                    "surface-container-low": "#1b1b23",
+                    "surface-container-highest": "#34343d",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "background": "#13131b",
+                    "error": "#ffb4ab",
+                    "on-primary-fixed": "#07006c",
+                    "surface-bright": "#393841",
+                    "err": "#ef4444",
+                    "bg-light": "#f6f7fb",
+                    "on-tertiary-fixed-variant": "#703700",
+                    "inverse-primary": "#494bd6",
+                    "tertiary": "#ffb783",
+                    "outline-variant": "#464554",
+                    "inverse-surface": "#e4e1ed",
+                    "on-tertiary-container": "#452000",
+                    "muted-light": "#7d8398",
+                    "on-error-container": "#ffdad6",
+                    "on-surface": "#e4e1ed",
+                    "secondary-container": "#571bc1",
+                    "on-secondary-fixed": "#23005c",
+                    "on-primary": "#1000a9",
+                    "panel-2-dark": "#161824",
+                    "error-container": "#93000a",
+                    "muted-dark": "#7a809a",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "primary": "#c0c1ff",
+                    "on-error": "#690005",
+                    "ok": "#10b981",
+                    "surface-tint": "#c0c1ff",
+                    "surface-container": "#1f1f27",
+                    "secondary": "#d0bcff",
+                    "primary-container": "#8083ff",
+                    "tertiary-fixed": "#ffdcc5"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px",
+                    "2xl": "1.25rem"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "xl": "20px",
+                    "grid-gap-mobile": "10px",
+                    "2xl": "28px",
+                    "grid-gap-desktop": "14px",
+                    "md": "12px",
+                    "3xl": "40px",
+                    "card-padding": "20px",
+                    "lg": "16px",
+                    "xs": "4px"
+            },
+            "fontFamily": {
+                    "body": ["Inter"],
+                    "title-header": ["Inter"],
+                    "subtitle-header": ["Inter"],
+                    "kpi-lg": ["Inter"],
+                    "mono-code": ["JetBrains Mono"],
+                    "kpi-sm": ["Inter"],
+                    "section-label": ["Inter"],
+                    "button": ["Inter"]
+            },
+            "fontSize": {
+                    "body": ["14.5px", {"lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400"}],
+                    "title-header": ["15.5px", {"lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600"}],
+                    "subtitle-header": ["11.5px", {"lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500"}],
+                    "kpi-lg": ["40px", {"lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300"}],
+                    "mono-code": ["12.5px", {"lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500"}],
+                    "kpi-sm": ["26px", {"lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300"}],
+                    "section-label": ["11px", {"lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600"}],
+                    "button": ["13.5px", {"lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600"}]
+            },
+            "boxShadow": {
+                "btn": "0 2px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1)",
+                "ambient": "0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04)",
+                "glow": "0 0 15px rgba(99, 102, 241, 0.35)"
+            },
+            "backgroundImage": {
+                "brand-gradient": "linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)",
+                "card-sheen": "linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%)",
+                "shimmer": "linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%)"
+            },
+            "keyframes": {
+                "shimmer": {
+                    "100%": { "transform": "translateX(100%)" }
+                },
+                "pulse-slow": {
+                    "0%, 100%": { "opacity": "1" },
+                    "50%": { "opacity": "0.5" }
+                }
+            },
+            "animation": {
+                "shimmer": "shimmer 2s infinite",
+                "pulse-slow": "pulse-slow 2.4s cubic-bezier(0.4, 0, 0.6, 1) infinite"
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body {
+            background-color: #08090f;
+            color: #e4e1ed;
+        }
+        
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        
+        .blob-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(79, 70, 229, 0.12);
+            top: -100px;
+            left: 20%;
+        }
+        
+        .blob-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(124, 58, 237, 0.15);
+            bottom: -50px;
+            right: 10%;
+        }
+        
+        .blob-3 {
+            width: 200px;
+            height: 200px;
+            background: rgba(99, 102, 241, 0.08);
+            top: 40%;
+            left: -50px;
+        }
+
+        .card-surface {
+            background-color: #11131c;
+            border: 1px solid rgba(144, 143, 160, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.04);
+            background-image: linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 50%);
+            transition: all 0.3s ease;
+        }
+        
+        .card-surface:hover {
+            box-shadow: 0 15px 40px -10px rgba(0,0,0,0.6), 0 0 15px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255,255,255,0.06);
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-image: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+        }
+
+        .segmented-control {
+            background-color: rgba(31, 31, 39, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 4px;
+        }
+
+        .shimmer-wrapper {
+            position: relative;
+            overflow: hidden;
+            background-color: #161824;
+            border-radius: 12px;
+        }
+        
+        .shimmer-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-image: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(99, 102, 241, 0.05) 50%, rgba(255,255,255,0) 100%);
+            animation: shimmer 1.5s infinite;
+        }
+
+        .custom-input {
+            background-color: #161824;
+            border: 1px solid rgba(144, 143, 160, 0.2);
+            border-radius: 8px;
+            color: #e4e1ed;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        
+        .custom-input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        
+        /* Webkit specific styles to remove default input styling */
+        input[type="password"]::-webkit-textfield-decoration-container {
+            display: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center font-body text-body p-xl">
+<!-- Atmospheric Blobs -->
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<main class="w-full max-w-[600px] flex flex-col gap-2xl z-10">
+<!-- Header Section -->
+<header class="flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-[36px] h-[36px] rounded-[11px] bg-brand-gradient flex items-center justify-center shadow-btn">
+<i class="text-white w-[18px] h-[18px]" data-lucide="wifi" stroke-width="2.2"></i>
+</div>
+<div>
+<h1 class="font-title-header text-title-header text-on-surface">JouleSuite Setup</h1>
+<p class="font-subtitle-header text-subtitle-header text-muted-dark tracking-wide">pick a network · apply settings</p>
+</div>
+</div>
+<button class="p-sm rounded-lg hover:bg-surface-variant/50 transition-colors text-muted-dark hover:text-on-surface">
+<i class="w-[18px] h-[18px]" data-lucide="moon" stroke-width="2.2"></i>
+</button>
+</header>
+<!-- Navigation Segmented Control -->
+<nav class="segmented-control flex w-full">
+<button class="flex-1 py-md font-button text-button rounded-lg bg-brand-gradient text-white shadow-glow">
+                Wi-Fi
+            </button>
+<button class="flex-1 py-md font-button text-button rounded-lg text-muted-dark hover:text-on-surface transition-colors">
+                Setup
+            </button>
+<button class="flex-1 py-md font-button text-button rounded-lg text-muted-dark hover:text-on-surface transition-colors">
+                Status
+            </button>
+</nav>
+<!-- Main Card -->
+<section class="card-surface p-card-padding flex flex-col gap-xl">
+<!-- Network List Header -->
+<div class="flex items-center justify-between p-md bg-panel-2-dark border border-outline-variant/10 border-l-[3px] border-l-info rounded-lg mb-md">
+<div class="flex items-center gap-sm">
+<i class="w-[16px] h-[16px] text-info" data-lucide="info"></i>
+<span class="font-body text-on-surface">Trying <span class="font-semibold text-info">Rajesh k</span>…</span>
+</div>
+<span class="font-mono-code text-[10px] text-muted-dark uppercase tracking-tight">attempt 1 of 3</span>
+</div><div class="flex justify-between items-center border-b border-outline-variant/10 pb-md">
+<h2 class="font-section-label text-section-label text-muted-dark uppercase tracking-wider">AVAILABLE NETWORKS</h2>
+<button class="flex items-center gap-sm px-md py-sm rounded-lg border border-outline-variant/20 bg-panel-2-dark hover:border-primary hover:text-primary transition-colors text-muted-dark font-button text-button group">
+<i class="w-[14px] h-[14px] group-hover:animate-spin" data-lucide="rotate-ccw" stroke-width="2.2"></i>
+                    Rescan
+                </button>
+</div>
+<!-- Shimmer Network List -->
+<div class="flex flex-col gap-sm"><div class="flex flex-col gap-xs">
+<!-- Network 1 -->
+<div class="flex items-center justify-between p-md rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-8 h-6 flex items-end gap-[2px]">
+<div class="w-[3px] h-[30%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[50%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[75%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[100%] rounded-full bg-brand-gradient"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-title-header text-on-surface">JouleSuite_HQ</span>
+<span class="font-mono-code text-[11px] text-muted-dark">ch 6 · -42 dBm · 00:1A:2B:3C:4D:5E</span>
+</div>
+</div>
+<i class="text-muted-dark" data-lucide="lock" size="16" stroke-width="2.2"></i>
+</div>
+<!-- Network 2 -->
+<div class="flex items-center justify-between p-md rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-8 h-6 flex items-end gap-[2px]">
+<div class="w-[3px] h-[30%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[50%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[75%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[100%] rounded-full bg-brand-gradient"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-title-header text-on-surface">Guest_Access</span>
+<span class="font-mono-code text-[11px] text-muted-dark">ch 1 · -48 dBm · 00:1A:2B:3C:4D:5F</span>
+</div>
+</div>
+<span class="font-section-label text-[9px] text-ok border border-ok/30 px-sm py-[2px] rounded-full">OPEN</span>
+</div>
+<!-- Network 3 (SELECTED) -->
+<div class="flex items-center justify-between p-md rounded-xl bg-brand/10 border border-brand/50 shadow-glow transition-all cursor-pointer">
+<div class="flex items-center gap-md">
+<div class="w-8 h-6 flex items-end gap-[2px]">
+<div class="w-[3px] h-[30%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[50%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[75%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[100%] rounded-full bg-white/20"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-title-header text-brand">Rajesh k</span>
+<span class="font-mono-code text-[11px] text-brand/80">ch 10 · -52 dBm · 28:EE:52:EA:23:FC</span>
+</div>
+</div>
+<i class="text-brand" data-lucide="lock" size="16" stroke-width="2.2"></i>
+</div>
+<!-- Network 4 -->
+<div class="flex items-center justify-between p-md rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-8 h-6 flex items-end gap-[2px]">
+<div class="w-[3px] h-[30%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[50%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[75%] rounded-full bg-white/20"></div>
+<div class="w-[3px] h-[100%] rounded-full bg-white/20"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-title-header text-on-surface">Tesla_Supercharger</span>
+<span class="font-mono-code text-[11px] text-muted-dark">ch 11 · -72 dBm · 00:1A:2B:3C:4D:60</span>
+</div>
+</div>
+<i class="text-muted-dark" data-lucide="lock" size="16" stroke-width="2.2"></i>
+</div>
+<!-- Network 5 -->
+<div class="flex items-center justify-between p-md rounded-xl hover:bg-white/5 transition-all cursor-pointer group">
+<div class="flex items-center gap-md">
+<div class="w-8 h-6 flex items-end gap-[2px]">
+<div class="w-[3px] h-[30%] rounded-full bg-brand-gradient"></div>
+<div class="w-[3px] h-[50%] rounded-full bg-white/20"></div>
+<div class="w-[3px] h-[75%] rounded-full bg-white/20"></div>
+<div class="w-[3px] h-[100%] rounded-full bg-white/20"></div>
+</div>
+<div class="flex flex-col">
+<span class="font-title-header text-on-surface">Linksys_Hidden</span>
+<span class="font-mono-code text-[11px] text-muted-dark">ch 13 · -85 dBm · 00:1A:2B:3C:4D:61</span>
+</div>
+</div>
+<i class="text-muted-dark" data-lucide="lock" size="16" stroke-width="2.2"></i>
+</div>
+</div></div>
+<!-- Form Section -->
+<div class="flex flex-col gap-lg mt-md">
+<div class="flex flex-col gap-sm">
+<label class="font-mono-code text-mono-code text-muted-dark uppercase text-[10px]">PASSWORD</label>
+<input class="custom-input w-full px-md py-sm font-mono-code text-body" placeholder="••••••••" type="password" value="•••••••••"/>
+</div>
+<div class="flex flex-col gap-sm">
+<label class="font-mono-code text-mono-code text-muted-dark uppercase text-[10px]">OR JOIN HIDDEN SSID</label>
+<input class="custom-input w-full px-md py-sm font-mono-code text-body" disabled="" placeholder="network_name" type="text"/>
+</div>
+</div>
+<!-- Advanced Link -->
+<div class="mt-sm">
+<button class="text-inverse-primary hover:text-primary font-subtitle-header text-subtitle-header flex items-center gap-xs transition-colors">
+<i class="w-[14px] h-[14px]" data-lucide="chevron-right" stroke-width="2.2"></i>
+                    Advanced (static IP · hostname · country)
+                </button>
+</div>
+</section>
+<!-- Primary CTA -->
+<button class="btn-primary w-full py-lg rounded-xl flex items-center justify-center gap-md font-button text-button text-white shadow-glow opacity-75 cursor-not-allowed pointer-events-none" disabled="true"><i class="w-[16px] h-[16px] animate-spin" data-lucide="rotate-ccw"></i>
+Connecting…</button>
+<!-- Footer -->
+<footer class="mt-xl text-center">
+<p class="font-mono-code text-mono-code text-muted-dark/50 text-[10px]">JouleNet · MIT · ESP32 / ESP8266 · Chinmoy Bhuyan</p>
+</footer>
+</main>
+<script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+<script>lucide.createIcons();</script><script>lucide.createIcons();</script></body></html>

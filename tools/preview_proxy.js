@@ -27,9 +27,15 @@ const server = http.createServer((req, res) => {
     res.writeHead(up.statusCode, up.headers);
     up.pipe(res);
   });
-  upstream.on("error", e => { res.writeHead(502); res.end("upstream: " + e.message); });
+  upstream.on("error", e => {
+    if (!res.headersSent) { try { res.writeHead(502); res.end("upstream: " + e.message); } catch {} }
+    else { try { res.end(); } catch {} }
+  });
   req.pipe(upstream);
 });
+
+server.on("clientError", () => {});
+process.on("uncaughtException", () => {});
 
 // WebSocket upgrade pass-through (raw TCP after the handshake).
 server.on("upgrade", (req, clientSock, head) => {

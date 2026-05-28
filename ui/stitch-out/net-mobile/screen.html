@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>JouleNet Wi-Fi Portal</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#c0c1ff",
+                        "primary": "#c0c1ff",
+                        "primary-fixed": "#e1e0ff",
+                        "tertiary": "#ffb783",
+                        "tertiary-fixed-dim": "#ffb783",
+                        "panel-2-light": "#f9fafc",
+                        "panel-2-dark": "#161824",
+                        "ok": "#10b981",
+                        "secondary-fixed": "#e9ddff",
+                        "on-secondary-fixed": "#23005c",
+                        "on-primary-fixed": "#07006c",
+                        "on-tertiary-fixed-variant": "#703700",
+                        "bg-light": "#f6f7fb",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "on-primary": "#1000a9",
+                        "surface-container-low": "#1b1b23",
+                        "ink-light": "#0b0d18",
+                        "surface-bright": "#393841",
+                        "inverse-on-surface": "#303038",
+                        "surface-variant": "#34343d",
+                        "surface-container-high": "#292932",
+                        "err": "#ef4444",
+                        "on-tertiary-fixed": "#301400",
+                        "on-error": "#690005",
+                        "on-error-container": "#ffdad6",
+                        "on-primary-container": "#0d0096",
+                        "panel-dark": "#11131c",
+                        "surface": "#13131b",
+                        "secondary-container": "#571bc1",
+                        "bg-soft-dark": "#0d0f17",
+                        "on-tertiary": "#4f2500",
+                        "inverse-primary": "#494bd6",
+                        "muted-light": "#7d8398",
+                        "inverse-surface": "#e4e1ed",
+                        "ink-2-dark": "#b5bbd0",
+                        "tertiary-container": "#d97721",
+                        "surface-container": "#1f1f27",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "error-container": "#93000a",
+                        "ink-dark": "#f1f3fa",
+                        "surface-dim": "#13131b",
+                        "panel-light": "#ffffff",
+                        "on-surface-variant": "#c7c4d7",
+                        "on-surface": "#e4e1ed",
+                        "ink-2-light": "#42485c",
+                        "info": "#06b6d4",
+                        "muted-dark": "#7a809a",
+                        "background": "#13131b",
+                        "tertiary-fixed": "#ffdcc5",
+                        "on-background": "#e4e1ed",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "surface-container-highest": "#34343d",
+                        "outline": "#908fa0",
+                        "error": "#ffb4ab",
+                        "warn": "#f59e0b",
+                        "on-tertiary-container": "#452000",
+                        "secondary": "#d0bcff",
+                        "outline-variant": "#464554",
+                        "surface-container-lowest": "#0d0d15",
+                        "on-secondary": "#3c0091",
+                        "bg-dark": "#08090f",
+                        "on-secondary-container": "#c4abff",
+                        "primary-container": "#8083ff",
+                        "surface-tint": "#c0c1ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px",
+                        "card": "20px"
+                    },
+                    "spacing": {
+                        "md": "12px",
+                        "3xl": "40px",
+                        "xl": "20px",
+                        "2xl": "28px",
+                        "grid-gap-desktop": "14px",
+                        "sm": "8px",
+                        "card-padding": "20px",
+                        "xs": "4px",
+                        "grid-gap-mobile": "10px",
+                        "lg": "16px"
+                    },
+                    "fontFamily": {
+                        "section-label": ["Inter"],
+                        "kpi-sm": ["Inter"],
+                        "button": ["Inter"],
+                        "subtitle-header": ["Inter"],
+                        "mono-code": ["JetBrains Mono"],
+                        "kpi-lg": ["Inter"],
+                        "body": ["Inter"],
+                        "title-header": ["Inter"]
+                    },
+                    "fontSize": {
+                        "section-label": ["11px", { "lineHeight": "1", "letterSpacing": "1px", "fontWeight": "600" }],
+                        "kpi-sm": ["26px", { "lineHeight": "1", "letterSpacing": "-0.6px", "fontWeight": "300" }],
+                        "button": ["13.5px", { "lineHeight": "1", "letterSpacing": "-0.1px", "fontWeight": "600" }],
+                        "subtitle-header": ["11.5px", { "lineHeight": "1.2", "letterSpacing": "0.1px", "fontWeight": "500" }],
+                        "mono-code": ["12.5px", { "lineHeight": "1.4", "letterSpacing": "0", "fontWeight": "500" }],
+                        "kpi-lg": ["40px", { "lineHeight": "1", "letterSpacing": "-1px", "fontWeight": "300" }],
+                        "body": ["14.5px", { "lineHeight": "1.5", "letterSpacing": "0", "fontWeight": "400" }],
+                        "title-header": ["15.5px", { "lineHeight": "1.2", "letterSpacing": "-0.2px", "fontWeight": "600" }]
+                    },
+                    backgroundImage: {
+                        'brand-gradient': 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                        'card-sheen': 'linear-gradient(to bottom, rgba(255,255,255,0.05) 0%, transparent 50%)',
+                        'error-gradient': 'linear-gradient(135deg, #ef4444 0%, #f87171 100%)'
+                    },
+                    boxShadow: {
+                        'btn': '0 4px 14px 0 rgba(99, 102, 241, 0.39)',
+                        'card': '0 8px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255,255,255,0.04)'
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #08090f;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* Blur Blobs */
+        .blur-blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: -1;
+            pointer-events: none;
+        }
+        .blob-1 { top: -10%; left: -10%; width: 300px; height: 300px; background: rgba(99, 102, 241, 0.15); }
+        .blob-2 { bottom: -10%; right: -10%; width: 400px; height: 400px; background: rgba(139, 92, 246, 0.12); }
+        
+        /* Custom Scrollbar for list */
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+        /* Animation */
+        @keyframes pulse-ok {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.18); }
+            70% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+        .status-ok {
+            animation: pulse-ok 2.4s infinite;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="text-on-surface flex flex-col h-screen max-w-[390px] mx-auto relative border-x border-outline-variant/10 shadow-2xl bg-bg-dark">
+<!-- Ambient Background -->
+<div class="blur-blob blob-1"></div>
+<div class="blur-blob blob-2"></div>
+<!-- Header -->
+<header class="sticky top-0 z-50 bg-background/80 backdrop-blur-[20px] saturate-160 px-xl py-lg border-b border-outline-variant/10 flex items-center justify-between">
+<div class="flex items-center gap-sm">
+<div class="w-[22px] h-[22px] rounded-[6px] bg-brand-gradient flex items-center justify-center shadow-btn">
+<span class="material-symbols-outlined text-[14px] text-panel-light" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<h1 class="font-title-header text-title-header tracking-tight">JouleNet</h1>
+</div>
+<div class="flex items-center gap-xs">
+<div class="w-1.5 h-1.5 rounded-full bg-ok status-ok ring-4 ring-ok/20"></div>
+<span class="font-mono-code text-[10px] text-muted-dark">ONLINE</span>
+</div>
+</header>
+<!-- Segmented Tabs -->
+<div class="px-xl pt-lg pb-md">
+<div class="flex bg-panel-2-dark rounded-lg p-1 border border-outline-variant/10">
+<button class="flex-1 py-1.5 rounded-md bg-surface-variant text-on-surface font-subtitle-header text-subtitle-header shadow-sm transition-all duration-200">Wi-Fi</button>
+<button class="flex-1 py-1.5 rounded-md text-muted-dark hover:text-on-surface font-subtitle-header text-subtitle-header transition-all duration-200">Setup</button>
+<button class="flex-1 py-1.5 rounded-md text-muted-dark hover:text-on-surface font-subtitle-header text-subtitle-header transition-all duration-200">Status</button>
+</div>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-1 px-md overflow-hidden flex flex-col gap-md pb-[140px]">
+<h2 class="font-section-label text-section-label text-muted-dark uppercase px-sm">Available Networks</h2>
+<!-- Networks Card -->
+<div class="bg-panel-dark rounded-card border border-outline-variant/20 shadow-card bg-card-sheen flex-1 overflow-hidden flex flex-col relative transition-transform hover:-translate-y-[1px] duration-300">
+<div class="overflow-y-auto custom-scrollbar flex-1 p-xs">
+<!-- Network Item 1 (Active/Connected) -->
+<div class="flex items-center gap-md p-md rounded-xl hover:bg-surface-variant/30 cursor-pointer transition-colors group relative overflow-hidden bg-surface-variant/10">
+<div class="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[60%] bg-ok rounded-r-full"></div>
+<i class="w-5 h-5 text-ok stroke-[2.2px]" data-lucide="wifi"></i>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-body text-body text-on-surface truncate pr-2 font-medium">JouleSuite_HQ</span>
+<i class="w-3.5 h-3.5 text-muted-dark stroke-[2.2px]" data-lucide="lock"></i>
+</div>
+<div class="font-mono-code text-mono-code text-muted-dark flex items-center gap-2 mt-0.5 opacity-80">
+<span>CH 11</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>-45 dBm</span>
+</div>
+</div>
+</div>
+<!-- Network Item 2 -->
+<div class="flex items-center gap-md p-md rounded-xl hover:bg-surface-variant/30 cursor-pointer transition-colors group">
+<i class="w-5 h-5 text-on-surface stroke-[2.2px]" data-lucide="wifi"></i>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-body text-body text-on-surface truncate pr-2">Guest_Access</span>
+<i class="w-3.5 h-3.5 text-muted-dark stroke-[2.2px]" data-lucide="unlock"></i>
+</div>
+<div class="font-mono-code text-mono-code text-muted-dark flex items-center gap-2 mt-0.5 opacity-80">
+<span>CH 6</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>-62 dBm</span>
+</div>
+</div>
+</div>
+<!-- Network Item 3 -->
+<div class="flex items-center gap-md p-md rounded-xl hover:bg-surface-variant/30 cursor-pointer transition-colors group">
+<i class="w-5 h-5 text-muted-light stroke-[2.2px] opacity-70" data-lucide="wifi"></i>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-body text-body text-muted-light truncate pr-2">Dev_IoT_Net</span>
+<i class="w-3.5 h-3.5 text-muted-dark stroke-[2.2px]" data-lucide="lock"></i>
+</div>
+<div class="font-mono-code text-mono-code text-muted-dark flex items-center gap-2 mt-0.5 opacity-80">
+<span>CH 1</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>-78 dBm</span>
+</div>
+</div>
+</div>
+<!-- Network Item 4 -->
+<div class="flex items-center gap-md p-md rounded-xl hover:bg-surface-variant/30 cursor-pointer transition-colors group">
+<i class="w-5 h-5 text-muted-light stroke-[2.2px] opacity-50" data-lucide="wifi"></i>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-body text-body text-muted-light truncate pr-2">Lab_Sensors</span>
+<i class="w-3.5 h-3.5 text-muted-dark stroke-[2.2px]" data-lucide="lock"></i>
+</div>
+<div class="font-mono-code text-mono-code text-muted-dark flex items-center gap-2 mt-0.5 opacity-80">
+<span>CH 36</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>-85 dBm</span>
+</div>
+</div>
+</div>
+<!-- Network Item 5 -->
+<div class="flex items-center gap-md p-md rounded-xl hover:bg-surface-variant/30 cursor-pointer transition-colors group">
+<i class="w-5 h-5 text-muted-light stroke-[2.2px] opacity-30" data-lucide="wifi"></i>
+<div class="flex-1 min-w-0">
+<div class="flex items-center justify-between">
+<span class="font-body text-body text-muted-dark truncate pr-2">Hidden Network</span>
+<i class="w-3.5 h-3.5 text-muted-dark stroke-[2.2px]" data-lucide="eye-off"></i>
+</div>
+<div class="font-mono-code text-mono-code text-muted-dark flex items-center gap-2 mt-0.5 opacity-50">
+<span>CH ?</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span>-92 dBm</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Section -->
+<div class="fixed bottom-0 left-0 w-full max-w-[390px] bg-bg-dark/90 backdrop-blur-xl border-t border-outline-variant/10 p-md pb-[max(env(safe-area-inset-bottom),16px)] z-40">
+<div class="flex flex-col gap-sm">
+<div class="relative">
+<i class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-dark stroke-[2.2px]" data-lucide="key"></i>
+<input class="w-full bg-panel-2-dark border border-outline-variant/20 rounded-lg py-2.5 pl-9 pr-3 text-on-surface font-body text-body placeholder:text-muted-dark focus:outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all" placeholder="Enter network password" type="password"/>
+</div>
+<button class="w-full bg-brand-gradient text-panel-light font-button text-button py-3 rounded-full shadow-btn hover:-translate-y-[2px] transition-transform duration-200 flex items-center justify-center gap-2">
+<span>Connect</span>
+<i class="w-4 h-4 stroke-[2.2px]" data-lucide="arrow-right"></i>
+</button>
+</div>
+</div>
+<script>
+        lucide.createIcons();
+    </script>
+</body></html>

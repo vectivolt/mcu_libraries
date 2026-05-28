@@ -1,17 +1,19 @@
 <!-- ---------------------------------------------------------------------------
-  JouleOTA — drag-drop firmware updater SPA. Svelte 5 + Tailwind v4.
+  JouleOTA — firmware updater SPA. Svelte 5 + Tailwind v4. Design ported
+  from Google Stitch screens.
   Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
 --------------------------------------------------------------------------- -->
 <script>
   import { onMount } from "svelte";
   import Card from "$shared/components/Card.svelte";
-  import { Upload, Cpu, RefreshCw, Cloud, FileDown } from "lucide-svelte";
+  import { Upload, Cpu, RefreshCw, Cloud, Sun, Moon, Monitor } from "lucide-svelte";
 
   let info = $state({});
   let mode = $state("firmware");
   let dragging = $state(false);
   let busy = $state(false);
   let pct = $state(0);
+  let bytes = $state("");
   let speed = $state("");
   let logLines = $state([]);
   let pullUrl = $state("");
@@ -35,7 +37,7 @@
   function upload(file){
     if (busy) return;
     if (mode === "pull") { log("✗ switch to Firmware/Filesystem tab first"); return; }
-    busy = true; pct = 0; logLines = [];
+    busy = true; pct = 0; logLines = []; bytes = ""; speed = "";
     log("→ " + file.name + "  " + fmtBytes(file.size) + "  as " + mode);
     const fd = new FormData(); fd.append("update", file);
     const xhr = new XMLHttpRequest();
@@ -43,6 +45,7 @@
     xhr.upload.onprogress = e => {
       if (!e.lengthComputable) return;
       pct = e.loaded * 100 / e.total;
+      bytes = fmtBytes(e.loaded) + " / " + fmtBytes(e.total);
       const dt = (Date.now() - t0) / 1000;
       if (dt > 0.4) speed = fmtBytes(e.loaded / dt) + "/s";
     };
@@ -63,15 +66,12 @@
       body: JSON.stringify({ url: pullUrl, mode: "firmware" })});
     log(r.ok ? "✓ pull queued" : "✗ pull rejected");
   }
-
   async function commit(){ const r = await fetch("/ota/commit", { method:"POST" }); log(r.ok ? "✓ committed" : "✗ commit failed"); refreshInfo(); }
   async function rollback(){ if(!confirm("Roll back to previous slot?")) return; const r = await fetch("/ota/rollback", { method:"POST" }); log(r.ok ? "↺ rolling back" : "✗ rollback failed"); }
 
-  // Progress ring SVG path math (circumference = 2πr where r=44)
   let circ = 2 * Math.PI * 44;
   let ringDash = $derived(`${(pct/100) * circ} ${circ}`);
 
-  // SSE — server pushes pull-mode progress events while we wait
   let es;
   onMount(() => {
     refreshInfo(); const t = setInterval(refreshInfo, 4000);
@@ -84,29 +84,39 @@
   });
 </script>
 
-<header class="sticky top-0 z-10 flex items-center gap-3.5 px-6 py-4 border-b border-[color:var(--color-line)] backdrop-blur-xl
-               bg-[color-mix(in_srgb,var(--color-bg)_75%,transparent)]">
-  <div class="w-9 h-9 grid place-items-center rounded-[11px] text-white"
-       style="background:var(--grad);box-shadow:0 8px 24px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">
-    <Upload size={18} strokeWidth={2.2}/>
+<!-- ============================== HEADER ============================== -->
+<header class="sticky top-0 z-50 backdrop-blur-xl border-b border-[color:var(--color-line)]"
+        style="background:color-mix(in srgb,var(--color-bg) 80%,transparent)">
+  <div class="max-w-[780px] mx-auto px-6 h-16 flex items-center gap-3">
+    <div class="w-8 h-8 grid place-items-center rounded-[10px] text-white"
+         style="background:var(--grad);box-shadow:0 6px 20px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">
+      <Upload size={16} strokeWidth={2.4}/>
+    </div>
+    <div class="flex flex-col min-w-0">
+      <div class="flex items-center gap-2">
+        <h1 class="font-semibold text-[15px] tracking-tight text-[color:var(--color-ink)] truncate">{info.title || "JouleOTA"}</h1>
+        <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-mono text-[10px]
+                     bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] border border-[color:var(--color-line)]"
+              style:color={info.updating ? "var(--color-warn)" : "var(--color-ok)"}>
+          <span class="w-[6px] h-[6px] rounded-full"
+                style:background={info.updating ? "var(--color-warn)" : "var(--color-ok)"}
+                style:box-shadow="0 0 0 4px color-mix(in srgb,currentColor 18%,transparent)"></span>
+          {info.updating ? "Updating" : "Live"}
+        </span>
+      </div>
+      <span class="text-[11.5px] text-[color:var(--color-muted)] font-medium">drag a firmware to flash</span>
+    </div>
+    <div class="flex-1"></div>
+    <button onclick={cycleTheme} aria-label="theme"
+      class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition-colors cursor-pointer">
+      {#if theme === "light"}<Sun size={16} strokeWidth={2.2}/>{:else if theme === "dark"}<Moon size={16} strokeWidth={2.2}/>{:else}<Monitor size={16} strokeWidth={2.2}/>{/if}
+    </button>
   </div>
-  <div class="flex-1">
-    <div class="font-semibold text-[15.5px] tracking-tight text-[color:var(--color-ink)]">{info.title || "JouleOTA"}</div>
-    <div class="text-[11.5px] text-[color:var(--color-muted)]">drag a firmware to flash</div>
-  </div>
-  <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border border-[color:var(--color-line)]
-               bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[color:var(--color-ink-2)]">
-    <span class="w-[6px] h-[6px] rounded-full bg-[color:var(--color-ok)]" style="box-shadow:0 0 0 4px color-mix(in srgb,var(--color-ok) 18%,transparent)"></span>
-    {info.updating ? "updating" : "live"}
-  </span>
-  <button onclick={cycleTheme} aria-label="theme"
-    class="w-9 h-9 grid place-items-center rounded-[11px] border border-[color:var(--color-line)] text-[color:var(--color-ink)]
-           bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] hover:text-[color:var(--color-brand)] hover:border-[color:var(--color-brand)] transition-all hover:-translate-y-px cursor-pointer">◐</button>
 </header>
 
 <main class="max-w-[780px] mx-auto px-5 py-6 grid gap-4" style="grid-template-columns:repeat(12,minmax(0,1fr))">
 
-  <!-- Device card -->
+  <!-- DEVICE -->
   <Card span={12} label="Device">
     <div class="grid gap-2.5 mt-1" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
       {#each [
@@ -117,16 +127,15 @@
         ["Free for OTA", fmtBytes(info.freeOta)],
         ["Free heap",    fmtBytes(info.freeHeap)],
       ] as [k,v]}
-        <div class="flex justify-between items-center px-3 py-2.5 rounded-xl text-[13px]
-                    bg-[color-mix(in_srgb,var(--color-line)_60%,transparent)]">
-          <span class="text-[color:var(--color-muted)] text-[11px] uppercase tracking-wider font-semibold">{k}</span>
+        <div class="flex justify-between items-center px-3 py-2.5 rounded-xl text-[13px] bg-[color-mix(in_srgb,var(--color-line)_60%,transparent)]">
+          <span class="text-[color:var(--color-muted)] text-[10.5px] uppercase tracking-[1.6px] font-semibold">{k}</span>
           <span class="font-mono font-semibold text-[12.5px] text-[color:var(--color-ink)]">{v}</span>
         </div>
       {/each}
     </div>
   </Card>
 
-  <!-- Upload card -->
+  <!-- UPLOAD -->
   <Card span={12} label="Upload">
     <div class="flex gap-2 mb-2 -mt-1">
       {#each [["firmware","🔧 Firmware"],["filesystem","📁 Filesystem"],["pull","☁ Pull URL"]] as [k,t]}
@@ -164,7 +173,7 @@
       {#if busy || pct > 0}
         <div class="flex items-center gap-5 mt-5">
           <svg viewBox="0 0 100 100" class="w-24 h-24 flex-shrink-0">
-            <circle cx="50" cy="50" r="44" fill="none" stroke="var(--color-line)" stroke-width="8" />
+            <circle cx="50" cy="50" r="44" fill="none" stroke="var(--color-line)" stroke-width="8"/>
             <circle cx="50" cy="50" r="44" fill="none" stroke="url(#og)" stroke-width="8"
               stroke-linecap="round" stroke-dasharray={ringDash} transform="rotate(-90 50 50)" style="transition:stroke-dasharray .3s ease"/>
             <defs><linearGradient id="og" x1="0" x2="1" y1="0" y2="1">
@@ -173,22 +182,19 @@
           </svg>
           <div class="flex-1">
             <div class="text-[28px] font-bold font-mono tabular-nums" style="background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">{pct.toFixed(1)}%</div>
-            {#if speed}<div class="text-[12px] text-[color:var(--color-muted)]">{speed}</div>{/if}
+            {#if bytes}<div class="text-[12px] text-[color:var(--color-muted)] font-mono">{bytes}</div>{/if}
+            {#if speed}<div class="text-[12px] text-[color:var(--color-muted)] font-mono">{speed}</div>{/if}
           </div>
         </div>
       {/if}
 
       {#if logLines.length}
-        <pre class="mt-4 p-3 rounded-xl text-[11.5px] font-mono leading-relaxed overflow-auto max-h-32
-                    bg-[color-mix(in_srgb,#000_30%,transparent)] text-[color:var(--color-ink-2)]
-                    border border-[color:var(--color-line)]">{logLines.join("\n")}</pre>
+        <pre class="mt-4 p-3 rounded-xl text-[11.5px] font-mono leading-relaxed overflow-auto max-h-32 bg-[color-mix(in_srgb,#000_30%,transparent)] text-[color:var(--color-ink-2)] border border-[color:var(--color-line)]">{logLines.join("\n")}</pre>
       {/if}
 
     {:else}
       <input type="url" bind:value={pullUrl} placeholder="https://example.com/firmware.bin"
-        class="w-full px-3.5 py-3 rounded-xl border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)]
-               text-[color:var(--color-ink)] font-mono text-[13px] outline-none transition-all
-               focus:border-[color:var(--color-brand)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-brand)_22%,transparent)]"/>
+        class="w-full px-3.5 py-3 rounded-xl border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[color:var(--color-ink)] font-mono text-[13px] outline-none transition-all focus:border-[color:var(--color-brand)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-brand)_22%,transparent)]"/>
       <div class="flex gap-2 mt-3">
         <button onclick={pullFromUrl}
           class="flex-1 px-4 py-2.5 rounded-xl text-white font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5"
@@ -196,25 +202,21 @@
           <Cloud size={16} strokeWidth={2.2}/> Pull &amp; flash
         </button>
         <button onclick={() => pullUrl=''}
-          class="flex-1 px-4 py-2.5 rounded-xl font-semibold border border-[color:var(--color-line)] text-[color:var(--color-ink)]
-                 bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] cursor-pointer">Cancel</button>
+          class="flex-1 px-4 py-2.5 rounded-xl font-semibold border border-[color:var(--color-line)] text-[color:var(--color-ink)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] cursor-pointer">Cancel</button>
       </div>
     {/if}
   </Card>
 
-  <!-- Maintenance -->
+  <!-- MAINTENANCE -->
   <Card span={12} label="Maintenance">
     <div class="text-[12.5px] text-[color:var(--color-muted)] mb-2">Commit marks the current firmware as known-good. Rollback returns to the previous slot.</div>
     <div class="flex gap-2 flex-wrap">
       <button onclick={commit}
-        class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-semibold border border-[color:var(--color-line)]
-               text-[color:var(--color-ink)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] flex items-center justify-center gap-2 cursor-pointer
-               hover:border-[color:var(--color-ok)] hover:text-[color:var(--color-ok)] transition-all">
+        class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-semibold border border-[color:var(--color-line)] text-[color:var(--color-ink)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] flex items-center justify-center gap-2 cursor-pointer hover:border-[color:var(--color-ok)] hover:text-[color:var(--color-ok)] transition-all">
         <Cpu size={16} strokeWidth={2.2}/> Commit current
       </button>
       <button onclick={rollback}
-        class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-semibold text-white flex items-center justify-center gap-2 cursor-pointer
-               transition-all hover:-translate-y-0.5"
+        class="flex-1 min-w-[140px] px-4 py-2.5 rounded-xl font-semibold text-white flex items-center justify-center gap-2 cursor-pointer transition-all hover:-translate-y-0.5"
         style="background:linear-gradient(135deg,var(--color-err),#f87171);box-shadow:0 8px 24px -8px color-mix(in srgb,var(--color-err) 70%,transparent)">
         <RefreshCw size={16} strokeWidth={2.2}/> Rollback
       </button>
