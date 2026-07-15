@@ -6,9 +6,13 @@
 <script>
   import { onMount, onDestroy } from "svelte";
   import Card from "$shared/components/Card.svelte";
-  import { Wifi, Settings, Activity, Lock, RotateCcw, Trash2, RefreshCw, Power } from "lucide-svelte";
+  import { Wifi, Settings, Activity, Lock, RotateCcw, Trash2, RefreshCw, Power, Copy, Check } from "lucide-svelte";
 
   let tab = $state("wifi");
+  let tabTouched = $state(false);   // user clicked a tab → stop auto-applying the firmware default
+  let hideWifi = $state(false);     // firmware-driven: AP-only appliance hides the Wi-Fi picker
+  let uiReady = $state(false);      // first /wifi/status has been applied
+  let copiedKey = $state(null);     // which Display field just flashed "copied"
   let networks = $state([]);
   let scanning = $state(true);
   let selected = $state(null);
@@ -24,6 +28,14 @@
   let theme = $state(localStorage.getItem("joule-theme") || "dark");
   let title = $state("JouleNet");
   let statusTimer;
+
+  // Tab set is firmware-shaped: AP-only setup appliances hide the Wi-Fi
+  // picker (setUiHideWifiTab) so the operator only sees Setup + Status.
+  let tabs = $derived([
+    ...(hideWifi ? [] : [["wifi", "📶 Wi-Fi"]]),
+    ["params", "⚙ Setup"],
+    ["status", "📊 Status"],
+  ]);
 
   $effect(() => document.documentElement.setAttribute("data-theme", theme));
   function cycleTheme(){ theme = theme==="dark" ? "light" : theme==="light" ? "auto" : "dark"; localStorage.setItem("joule-theme", theme); }
@@ -48,7 +60,23 @@
       if (j.brand) { document.documentElement.style.setProperty("--color-brand", j.brand);
                      document.querySelector('meta[name="theme-color"]')?.setAttribute("content", j.brand); }
       status = j;
+      // First status response carries the firmware's UX hints. Apply them
+      // once: hide the Wi-Fi tab if asked, and open on the preferred tab
+      // unless the operator has already navigated.
+      if (!uiReady) {
+        hideWifi = !!j.uiHideWifi;
+        const want = j.uiDefaultTab;
+        if (!tabTouched && (want === "wifi" || want === "params" || want === "status")
+            && !(want === "wifi" && hideWifi)) tab = want;
+        if (hideWifi && tab === "wifi") tab = "params";
+        if (tab === "params") loadParams();
+      }
     } catch {}
+    // Reveal the UI only after the first status attempt — even on failure,
+    // where we fall back to the default (Wi-Fi-visible) layout. This both
+    // prevents a flash of the wrong tab before the firmware's UX hints arrive
+    // and guarantees a status hiccup can't leave the page stuck on a spinner.
+    finally { uiReady = true; }
   }
 
   async function loadParams() {
@@ -75,11 +103,42 @@
     connecting = false;
   }
 
+  // Copy a read-only Display value. The async Clipboard API only works in a
+  // secure context — a captive portal at http://192.168.4.1 is NOT secure —
+  // so fall back to the legacy execCommand path, and finally to a "select it
+  // yourself" hint. The field itself is select-all for that last resort.
+  async function copyVal(key, val) {
+    const text = (val ?? "").toString();
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        copiedKey = key; setTimeout(() => { if (copiedKey === key) copiedKey = null; }, 1400);
+        return;
+      }
+    } catch {}
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.focus(); ta.select();
+      const ok = document.execCommand("copy"); document.body.removeChild(ta);
+      if (ok) { copiedKey = key; setTimeout(() => { if (copiedKey === key) copiedKey = null; }, 1400); }
+      else toast("select & copy manually", "err");
+    } catch { toast("select & copy manually", "err"); }
+  }
+
   async function restart(){ await fetch("/wifi/restart", { method:"POST" }); toast("restarting", "ok"); }
   async function erase(){ if (!confirm("Erase ALL Wi-Fi credentials + settings, then reboot?")) return;
     await fetch("/wifi/reset", { method:"POST" }); toast("erased — rebooting", "ok"); }
 
-  onMount(() => { scan(); loadStatus(); statusTimer = setInterval(() => { if (tab === "status") loadStatus(); }, 3000); });
+  onMount(async () => {
+    // Load status FIRST so we know whether the Wi-Fi tab exists before
+    // deciding to scan. A scan in SoftAP mode briefly hops channels and can
+    // drop the very phone the operator is configuring from — so on an
+    // AP-only appliance (hideWifi) we never scan at all.
+    await loadStatus();
+    if (!hideWifi) scan(); else scanning = false;
+    statusTimer = setInterval(() => { if (tab === "status") loadStatus(); }, 3000);
+  });
   onDestroy(() => clearInterval(statusTimer));
 
   function bars(rssi){ return Math.max(0, Math.min(4, Math.round((rssi + 90) / 10))); }
@@ -114,10 +173,17 @@
 </header>
 
 <main class="max-w-[600px] mx-auto px-5 py-5">
+  {#if !uiReady}
+    <!-- Hold the first paint until the firmware's UX hints arrive, so the
+         operator never sees the layout reshuffle (tabs + opening tab). -->
+    <div class="py-24 grid place-items-center text-[color:var(--color-muted)]">
+      <RotateCcw size={22} class="animate-spin"/>
+    </div>
+  {:else}
   <!-- Tab segmented control -->
   <div class="flex gap-1 p-1 mb-4 rounded-[14px] border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-panel)_60%,transparent)]">
-    {#each [["wifi","📶 Wi-Fi"],["params","⚙ Setup"],["status","📊 Status"]] as [k,t]}
-      <button onclick={() => { tab = k; if (k === "params") loadParams(); if (k === "status") loadStatus(); }}
+    {#each tabs as [k,t]}
+      <button onclick={() => { tabTouched = true; tab = k; if (k === "params") loadParams(); if (k === "status") loadStatus(); }}
         class="flex-1 px-3 py-2 rounded-[10px] text-[13px] font-semibold transition-all cursor-pointer"
         class:text-white={tab === k}
         class:text-[color:var(--color-muted)]={tab !== k}
@@ -250,6 +316,17 @@
               {:else if p.type === "textarea"}
                 <textarea bind:value={paramValues[p.key]} placeholder={p.hint} rows="4"
                   class="w-full px-3 py-2.5 rounded-xl border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[color:var(--color-ink)] outline-none font-mono text-[12.5px] focus:border-[color:var(--color-brand)] resize-y"></textarea>
+              {:else if p.type === "display"}
+                <div class="flex items-stretch gap-2">
+                  <div class="flex-1 px-3 py-2.5 rounded-xl border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[color:var(--color-ink)] font-mono text-[12.5px] leading-relaxed break-all select-all">{p.value || "—"}</div>
+                  <button type="button" onclick={() => copyVal(p.key, p.value)} aria-label={"copy " + p.label}
+                    class="shrink-0 w-11 rounded-xl border grid place-items-center cursor-pointer transition
+                           text-[color:var(--color-muted)] hover:text-[color:var(--color-brand)]"
+                    style:border-color={copiedKey === p.key ? "var(--color-ok)" : "var(--color-line)"}
+                    style:color={copiedKey === p.key ? "var(--color-ok)" : ""}>
+                    {#if copiedKey === p.key}<Check size={15}/>{:else}<Copy size={14}/>{/if}
+                  </button>
+                </div>
               {:else}
                 <input bind:value={paramValues[p.key]} placeholder={p.hint}
                   class="w-full px-3 py-2.5 rounded-xl border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[color:var(--color-ink)] outline-none focus:border-[color:var(--color-brand)]"/>
@@ -305,6 +382,7 @@
         </div>
       {/if}
     </Card>
+  {/if}
   {/if}
 </main>
 
