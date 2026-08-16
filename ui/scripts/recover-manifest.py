@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 VectiSuite UI · recover-manifest.py
-Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
+Author: VectiVolt <team@vectivolt.com>  (c) 2026 VectiVolt — Apache-2.0
 
 Walk the project's actual screen list from Stitch, map each screen title
 back to one of our slugs, and pull HTML + PNG into ui/stitch-out/<slug>/.

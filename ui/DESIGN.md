@@ -206,4 +206,4 @@ Tab bar sits sticky right under the header, also blurred.
 
 ---
 
-Author: Chinmoy Bhuyan · Email: chinmoy@joulepoint.com · © 2026 · Apache-2.0
+Author: VectiVolt · Email: team@vectivolt.com · © 2026 · Apache-2.0

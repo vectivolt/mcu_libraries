@@ -5,7 +5,7 @@
 > (VectiOTA), a wireless serial console (VectiSerial), Wi-Fi provisioning with a
 > captive portal (VectiNet), and a realtime dashboard with 50 DashType types —
 > 49 widgets plus Custom, the raw-HTML escape hatch (VectiDash). All four mount onto one AsyncWebServer. Vendor: VectiVolt.
-> Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>.
+> Author: VectiVolt <team@vectivolt.com>.
 
 Three rules that prevent most broken generated code:
 1. Every library has a mandatory per-loop hook. Skip it and the library silently does nothing.

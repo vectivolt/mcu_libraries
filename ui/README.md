@@ -87,4 +87,4 @@ Apache-2.0 — see [LICENSE](../LICENSE).
 
 ---
 
-<sub>**Author:** Chinmoy Bhuyan · **Email:** chinmoy@joulepoint.com · **(c)** 2026 — Apache-2.0</sub>
+<sub>**Author:** VectiVolt · **Email:** team@vectivolt.com · **(c)** 2026 — Apache-2.0</sub>

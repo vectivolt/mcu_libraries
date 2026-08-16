@@ -616,4 +616,4 @@ PRs welcome.
 attribution required. See the LGPL note under [Honest limitations](#-honest-limitations)
 for what the async dependency adds on top.
 
-<sub>Author: <b>Chinmoy Bhuyan</b> · <a href="mailto:chinmoy@joulepoint.com">chinmoy@joulepoint.com</a> · © 2026 VectiVolt</sub>
+<sub>Author: <b>VectiVolt</b> · <a href="mailto:team@vectivolt.com">team@vectivolt.com</a> · © 2026 VectiVolt</sub>

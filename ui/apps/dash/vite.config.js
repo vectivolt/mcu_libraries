@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // VectiSuite UI · VectiDash
-// Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
+// Author: VectiVolt <team@vectivolt.com>  (c) 2026 VectiVolt — Apache-2.0
 // ---------------------------------------------------------------------------
 //
 // Builds the VectiDash Svelte 5 SPA into a SINGLE self-contained HTML file

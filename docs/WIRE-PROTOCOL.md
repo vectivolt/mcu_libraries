@@ -962,4 +962,4 @@ falls back to an in-memory map — access throws outright in Safari private mode
 
 ---
 
-<sub>**Author:** Chinmoy Bhuyan · chinmoy@joulepoint.com · (c) 2026 VectiVolt — Apache-2.0</sub>
+<sub>**Author:** VectiVolt · team@vectivolt.com · (c) 2026 VectiVolt — Apache-2.0</sub>

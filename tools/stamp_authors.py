@@ -10,8 +10,8 @@ Run from the repo root:
 """
 import pathlib, re, json
 
-AUTHOR = "Chinmoy Bhuyan"
-EMAIL  = "chinmoy@joulepoint.com"
+AUTHOR = "VectiVolt"
+EMAIL  = "team@vectivolt.com"
 YEAR   = "2026"
 ROOT   = pathlib.Path(__file__).resolve().parent.parent
 
@@ -26,7 +26,7 @@ COMMENT = {
 
 SKIP_DIRS = {".pio", "build", ".git", ".pioenvs", ".vscode", "__pycache__"}
 
-HEADER_MARK = "Author: Chinmoy Bhuyan"  # presence test for idempotency
+HEADER_MARK = "Author: VectiVolt"  # presence test for idempotency
 
 # Words in library.json that came from the reference projects. We swap them
 # for our own brand-aligned keywords.

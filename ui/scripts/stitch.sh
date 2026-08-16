@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
 # VectiSuite UI · stitch helper
-# Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
+# Author: VectiVolt <team@vectivolt.com>  (c) 2026 VectiVolt — Apache-2.0
 # ---------------------------------------------------------------------------
 #
 # Thin wrapper around the Google Stitch MCP server. Each subcommand POSTs

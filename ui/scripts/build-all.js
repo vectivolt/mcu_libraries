@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
 // VectiSuite UI · build-all
-// Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
+// Author: VectiVolt <team@vectivolt.com>  (c) 2026 VectiVolt — Apache-2.0
 // ---------------------------------------------------------------------------
 //
 // Sequentially builds every Svelte app under apps/, then runs the embed

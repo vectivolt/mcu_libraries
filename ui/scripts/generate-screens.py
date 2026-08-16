@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 VectiSuite UI · generate-screens.py
-Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
+Author: VectiVolt <team@vectivolt.com>  (c) 2026 VectiVolt — Apache-2.0
 
 Bulk-generate every VectiSuite UI screen from text prompts via Google
 Stitch's MCP. Each entry specifies a slug, target device, and a detailed
@@ -347,7 +347,7 @@ input. Indigo link "Advanced (static IP · hostname · country)" — collapsed.
 Bottom of card: full-width primary brand-gradient "Connect" button with
 Lucide Power icon (disabled / dimmed because no SSID picked).
 
-Footer: "VectiNet · Apache-2.0 · ESP32 / ESP8266 · Chinmoy Bhuyan".
+Footer: "VectiNet · Apache-2.0 · ESP32 / ESP8266 · VectiVolt".
 """},
     {"lib":"net","slug":"net-list-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
 VectiNet Wi-Fi portal — networks list — desktop.
