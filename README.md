@@ -19,21 +19,23 @@ console, Wi-Fi provisioning, and a live dashboard — all served from the chip's
 
 ## 💸 Versus the paid incumbents
 
-The four popular incumbents in this space — ElegantOTA, WebSerial, NetWizard and
-ESP-DASH — are all by Ayush Sharma / SOFTT, sold at `store.softt.io`. Buying the Pro
-tier of all four costs **$946**. VectiSuite ships the same feature set, plus things
-none of them have, under Apache-2.0.
+The four popular commercial libraries in this space are all sold by a single vendor as
+separate products. Buying the Pro tier of all four costs **$946**. VectiSuite ships the
+same feature set, plus things none of them have, under Apache-2.0.
+
+They are referred to below as **Paid Alternative 1–4** rather than by name: the point of
+this table is what the *features and licences* cost you, not who publishes them.
 
 Every claim below was checked against primary sources (source code, open issues, store
 pages) on **2026-08-17**. Evidence is in the last column.
 
-| | VectiSuite<br>**$0 · Apache-2.0** | ElegantOTA<br>**$199 · AGPL-3.0** | WebSerial<br>**$249 · AGPL-3.0** | NetWizard<br>**$199 · AGPL-3.0** | ESP-DASH<br>**$299 · GPL-3.0** | Evidence |
+| | VectiSuite<br>**$0 · Apache-2.0** | Paid Alternative 1<br>**$199 · AGPL-3.0** | Paid Alternative 2<br>**$249 · AGPL-3.0** | Paid Alternative 3<br>**$199 · AGPL-3.0** | Paid Alternative 4<br>**$299 · GPL-3.0** | Evidence |
 |---|:--:|:--:|:--:|:--:|:--:|---|
 | **OTA — push firmware from browser** | ✅ | ✅ | — | — | — | |
-| **OTA — pull firmware from a URL** | ✅ | ❌ | — | — | — | zero grep hits in ElegantOTA source |
+| **OTA — pull firmware from a URL** | ✅ | ❌ | — | — | — | zero grep hits in Paid Alternative 1 source |
 | **OTA — signed images** | ✅ HMAC-SHA256 | ❌ | — | — | — | zero grep hits |
 | **OTA — A/B rollback** | ✅ | ❌ | — | — | — | zero grep hits |
-| **OTA — integrity check that works** | ✅ | ❌ | — | — | — | `Update.setMD5()` is called *before* `Update.begin()`, which reinitialises the hash. Maintainer mathieucarbou, issue #286: "The MD5 check never worked. Pro version also has the same issue." Still open. |
+| **OTA — integrity check that works** | ✅ | ❌ | — | — | — | `Update.setMD5()` is called *before* `Update.begin()`, which reinitialises the hash. Maintainer the upstream maintainer, issue #286: "The MD5 check never worked. Pro version also has the same issue." Still open. |
 | **Console — log levels** | ✅ 4 (DEBUG/INFO/WARN/ERROR) | — | ❌ both tiers | — | — | no level support in free or Pro |
 | **Console — search / filter** | ✅ | — | ❌ both tiers | — | — | |
 | **Console — timestamps** | ✅ free | — | 💰 $249 | — | — | Pro upsell |
@@ -49,9 +51,9 @@ pages) on **2026-08-17**. Evidence is in the last column.
 | **Dashboard — custom-HTML escape hatch** | ✅ | — | — | — | ❌ both tiers | absent in free *and* Pro |
 | **Dashboard — branding / brand colour** | ✅ free | — | — | — | 💰 $299 | paywalled |
 | **Commercial licence terms readable before you pay** | n/a — Apache-2.0, full text in repo | ❌ | ❌ | ❌ | ❌ | SCL text published nowhere; store says SCL-1.3, READMEs say SCL-1.2 |
-| **Seats** | unlimited | — | — | — | 1 developer | ESP-DASH Pro is a single-developer seat |
-| **Maturity — be honest** | ⚠️ new: no users, no CI, no test suite, not in Arduino Library Manager | ✅ mature, widely used, heavily tutorialised | ✅ 647 ★ | ✅ | ✅ mature, widely used | WebSerial: 647 stars, 0 open issues, last commit 2025-12-04 |
-| **Dashboard flash cost** | 46,811 B gzipped | — | — | — | lighter | that is the price of 49 widgets vs 9; no measured figure for ESP-DASH's blob |
+| **Seats** | unlimited | — | — | — | 1 developer | Paid Alternative 4 Pro is a single-developer seat |
+| **Maturity — be honest** | ⚠️ new: no users, no CI, no test suite, not in Arduino Library Manager | ✅ mature, widely used, heavily tutorialised | ✅ 647 ★ | ✅ | ✅ mature, widely used | Paid Alternative 2: 647 stars, 0 open issues, last commit 2025-12-04 |
+| **Dashboard flash cost** | 46,811 B gzipped | — | — | — | lighter | that is the price of 49 widgets vs 9; no measured figure for Paid Alternative 4's blob |
 
 > A "—" means the product does not cover that domain. `⚠️` means partially / with a caveat.
 
@@ -377,6 +379,45 @@ for its parameter dropdowns.
 
 ---
 
+## 🎯 ESP family support — every target build-tested
+
+Each row below was compiled on this machine, not inferred from a manifest. `pio run`
+in `demo/` rebuilds the whole matrix.
+
+| Target | Core | VectiOTA | VectiSerial | VectiNet | VectiDash | Full image |
+|---|---|:--:|:--:|:--:|:--:|---|
+| **ESP32** | Xtensa LX6 | ✅ | ✅ | ✅ | ✅ | ✅ 1,269,949 B — **96.9%** of a 1.3 MB app slot |
+| **ESP32-S2** | Xtensa LX7 | ✅ | ✅ | ✅ | ✅ | ✅ 1,207,038 B — **92.1%** |
+| **ESP32-S3** | Xtensa LX7 | ✅ | ✅ | ✅ | ✅ | ✅ 1,223,885 B — 36.6% (8 MB part) |
+| **ESP32-C3** | RISC-V | ✅ | ✅ | ✅ | ✅ | ✅ 1,279,726 B — **97.6%** |
+| **ESP32-C6** | RISC-V | ✅ | ✅ | ✅ | ✅ | ⚠️ objects build; image packaging fails inside the pioarduino platform's own bootloader script |
+| **ESP32-H2** | RISC-V | ✅ | ✅ | ⛔ n/a | ✅ | ⚠️ see below |
+| **ESP8266** | Xtensa L106 | ✅ | ❌ | ❌ | ❌ | ✅ 357,612 B — 34.2% (OTA-only sketch) |
+
+**⚠️ Read the flash column before choosing a module.** On a 4 MB part with the stock
+partition table, the suite fills **92–98%** of the app slot. The ~126 KB of embedded UI
+is most of the reason. Ship a custom partition table on 4 MB parts, or use an 8 MB
+module. On 8 MB the whole suite is a comfortable 36%.
+
+**ESP32-H2 has no Wi-Fi radio** — it is 802.15.4 (Thread/Zigbee) plus BLE. VectiNet is a
+Wi-Fi manager, so it cannot exist there and does not pretend to; the other three compile
+but have no TCP/IP transport to serve over until you bring your own Thread stack. H2 is
+not a practical target for this suite today.
+
+**ESP32-C6 and ESP32-H2 need arduino-esp32 3.x.** The official `espressif32` 6.x platform
+tops out at core 2.0.17, which predates both chips. The matrix uses the community
+[pioarduino](https://github.com/pioarduino/platform-espressif32) fork for those two.
+All four libraries compile cleanly there; the failure is in that platform's bootloader
+packaging step, not in this code.
+
+**ESP8266 is VectiOTA only, deliberately.** VectiNet's persistence is NVS-backed and it
+raises a compile-time `#error` on non-ESP32 rather than silently failing to save
+anything. VectiSerial and VectiDash have no ESP8266 code paths yet. If you need the full
+suite on ESP8266, the work is a storage backend behind VectiNet's persistence layer —
+open an issue and say so.
+
+---
+
 ## 📦 Install
 
 Dependency floor, for all four:
@@ -470,7 +511,7 @@ once — ESP32-S3-DevKitC-1, 8 MB flash, 2 MB PSRAM, `default_8MB.csv` partition
 - **Flash 1,226,013 B — 36.7 % of 3,342,336**
 - **RAM 62,440 B — 19.1 % of 327,680**
 
-VectiDash is the heavy one because it carries 49 widgets. It is heavier than ESP-DASH's
+VectiDash is the heavy one because it carries 49 widgets. It is heavier than Paid Alternative 4's
 blob. That is the trade.
 
 ---

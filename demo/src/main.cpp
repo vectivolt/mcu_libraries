@@ -163,6 +163,13 @@ static DashCard *const kWidgetTour[] = {
 
 // ---- helpers -----------------------------------------------------------
 
+// Not every ESP board variant defines LED_BUILTIN — esp32dev and several
+// bare modules do not. Pick a sane default so the demo builds across the whole
+// family rather than only on dev kits that happen to declare one.
+#ifndef LED_BUILTIN
+  #define LED_BUILTIN 2
+#endif
+
 // Deferred reboot. Both the WebSocket command handler and the dashboard button
 // callback run on the AsyncTCP task; calling delay() + ESP.restart() from there
 // stalls every other socket on the device and tears the stack down underneath
