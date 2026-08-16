@@ -1,0 +1,133 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" width="1200" height="300" role="img" aria-label="VectiSuite — OTA, console, Wi-Fi and dashboard served from the MCU's own flash">
+  <title>VectiSuite</title>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0fd08c"/>
+      <stop offset="1" stop-color="#10b7ce"/>
+    </linearGradient>
+    <linearGradient id="boltFill" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#0fd08c"/>
+      <stop offset="1" stop-color="#10b7ce"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#0fd08c" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#0fd08c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#10b7ce" stop-opacity="0"/>
+      <stop offset="0.5" stop-color="#10b7ce" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#10b7ce" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0fd08c" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#0fd08c" stop-opacity="0"/>
+    </linearGradient>
+    <pattern id="grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M30 0H0V30" fill="none" stroke="#0fd08c" stroke-opacity="0.07" stroke-width="1"/>
+    </pattern>
+    <clipPath id="frame"><rect x="0" y="0" width="1200" height="300" rx="20"/></clipPath>
+    <clipPath id="boltClip"><path d="M712 96 L676 158 H702 L692 214 L734 146 H706 Z"/></clipPath>
+    <clipPath id="screenClip"><rect x="892" y="96" width="252" height="140"/></clipPath>
+  </defs>
+
+  <g clip-path="url(#frame)">
+    <rect width="1200" height="300" fill="#071310"/>
+    <rect width="1200" height="300" fill="url(#grid)"/>
+    <ellipse cx="700" cy="150" rx="430" ry="230" fill="url(#glow)"/>
+
+    <!-- scanning sweep -->
+    <rect x="-360" y="0" width="360" height="300" fill="url(#sweep)">
+      <animate attributeName="x" values="-360;1200" dur="6s" repeatCount="indefinite"/>
+    </rect>
+
+    <!-- ================= left: wordmark ================= -->
+    <g font-family="system-ui, sans-serif">
+      <text x="60" y="86" font-size="14" letter-spacing="4" fill="#0fd08c" fill-opacity="0.75">V E C T I V O L T</text>
+      <text x="58" y="152" font-size="58" font-weight="700" fill="url(#brand)">VectiSuite</text>
+      <text x="60" y="188" font-size="17" fill="#8fb5ab">OTA · console · Wi-Fi setup · 49-widget dashboard</text>
+      <text x="60" y="212" font-size="17" fill="#5d7d75">served from the MCU&#8217;s own flash</text>
+
+      <g font-size="13" text-anchor="middle">
+        <rect x="60" y="234" width="96" height="26" rx="13" fill="#0fd08c" fill-opacity="0.12" stroke="#0fd08c" stroke-opacity="0.45"/>
+        <text x="108" y="251" fill="#0fd08c">Apache-2.0</text>
+        <rect x="166" y="234" width="64" height="26" rx="13" fill="#10b7ce" fill-opacity="0.12" stroke="#10b7ce" stroke-opacity="0.45"/>
+        <text x="198" y="251" fill="#10b7ce">ESP32</text>
+        <rect x="240" y="234" width="98" height="26" rx="13" fill="#0fd08c" fill-opacity="0.12" stroke="#0fd08c" stroke-opacity="0.45"/>
+        <text x="289" y="251" fill="#0fd08c">49 widgets</text>
+        <rect x="348" y="234" width="104" height="26" rx="13" fill="#10b7ce" fill-opacity="0.12" stroke="#10b7ce" stroke-opacity="0.45"/>
+        <text x="400" y="251" fill="#10b7ce">~126 KB UI</text>
+      </g>
+    </g>
+
+    <!-- ================= right: chip -> browser ================= -->
+    <!-- chip pins -->
+    <g stroke="#1d4a41" stroke-width="4" stroke-linecap="round">
+      <path d="M636 118H650M636 150H650M636 182H650"/>
+      <path d="M676 76V90M712 76V90M748 76V90"/>
+      <path d="M676 210V224M712 210V224M748 210V224"/>
+    </g>
+    <rect x="648" y="86" width="128" height="128" rx="20" fill="#0b1f1a" stroke="#0fd08c" stroke-opacity="0.55" stroke-width="2"/>
+    <rect x="664" y="102" width="96" height="96" rx="12" fill="none" stroke="#0fd08c" stroke-opacity="0.18"/>
+
+    <!-- charging bolt: outline is the poster frame, the fill rises -->
+    <path d="M712 96 L676 158 H702 L692 214 L734 146 H706 Z" fill="#0fd08c" fill-opacity="0.14"/>
+    <g clip-path="url(#boltClip)">
+      <rect x="668" y="90" width="76" height="130" fill="url(#boltFill)">
+        <animate attributeName="y" values="220;90;90;220" keyTimes="0;0.45;0.85;1" dur="4s" repeatCount="indefinite"/>
+        <animate attributeName="height" values="0;130;130;0" keyTimes="0;0.45;0.85;1" dur="4s" repeatCount="indefinite"/>
+      </rect>
+    </g>
+    <text x="712" y="240" font-family="system-ui, sans-serif" font-size="12" letter-spacing="2" text-anchor="middle" fill="#3f6f65">ESP32</text>
+
+    <!-- traces chip -> browser -->
+    <g fill="none" stroke="#0fd08c" stroke-opacity="0.30" stroke-width="2">
+      <path d="M776 118 H830 V88 H884"/>
+      <path d="M776 150 H884"/>
+      <path d="M776 182 H830 V216 H884"/>
+    </g>
+    <!-- pulses: a single dash chasing along each trace (static frame = tidy dashes) -->
+    <g fill="none" stroke-width="4" stroke-linecap="round">
+      <path d="M776 118 H830 V88 H884" stroke="#0fd08c" stroke-dasharray="14 124" stroke-dashoffset="104">
+        <animate attributeName="stroke-dashoffset" values="138;0" dur="2.4s" repeatCount="indefinite"/>
+      </path>
+      <path d="M776 150 H884" stroke="#10b7ce" stroke-dasharray="14 94" stroke-dashoffset="48">
+        <animate attributeName="stroke-dashoffset" values="108;0" dur="2.4s" repeatCount="indefinite"/>
+      </path>
+      <path d="M776 182 H830 V216 H884" stroke="#0fd08c" stroke-dasharray="14 128" stroke-dashoffset="16">
+        <animate attributeName="stroke-dashoffset" values="142;0" dur="2.4s" repeatCount="indefinite"/>
+      </path>
+    </g>
+
+    <!-- browser window -->
+    <rect x="884" y="60" width="268" height="184" rx="14" fill="#0a1c18" stroke="#0fd08c" stroke-opacity="0.35" stroke-width="2"/>
+    <path d="M884 88 H1152" stroke="#0fd08c" stroke-opacity="0.22" stroke-width="2"/>
+    <g fill="#0fd08c" fill-opacity="0.55">
+      <circle cx="902" cy="74" r="4"/><circle cx="916" cy="74" r="4"/><circle cx="930" cy="74" r="4"/>
+    </g>
+    <rect x="944" y="68" width="192" height="12" rx="6" fill="#0fd08c" fill-opacity="0.10"/>
+
+    <g clip-path="url(#screenClip)">
+      <!-- sparkline area fill + self-drawing stroke -->
+      <path d="M900 190 L928 168 L956 176 L984 140 L1012 152 L1040 118 L1068 132 L1096 106 L1124 116 V236 H900 Z" fill="url(#fade)"/>
+      <path d="M900 190 L928 168 L956 176 L984 140 L1012 152 L1040 118 L1068 132 L1096 106 L1124 116"
+            fill="none" stroke="url(#brand)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"
+            stroke-dasharray="300" stroke-dashoffset="0">
+        <animate attributeName="stroke-dashoffset" values="300;0;0" keyTimes="0;0.7;1" dur="5s" repeatCount="indefinite"/>
+      </path>
+      <circle cx="1124" cy="116" r="4" fill="#10b7ce">
+        <animate attributeName="r" values="4;7;4" dur="1.6s" repeatCount="indefinite"/>
+      </circle>
+      <!-- mini widget row -->
+      <g fill="#0fd08c">
+        <rect x="900" y="208" width="60" height="20" rx="6" fill-opacity="0.16"/>
+        <rect x="968" y="208" width="60" height="20" rx="6" fill-opacity="0.10"/>
+        <rect x="1036" y="208" width="88" height="20" rx="10" fill-opacity="0.10"/>
+        <circle cx="1110" cy="218" r="7" fill-opacity="0.9">
+          <animate attributeName="cx" values="1110;1052;1110" dur="4s" repeatCount="indefinite"/>
+        </circle>
+      </g>
+    </g>
+
+    <rect x="0" y="0" width="1200" height="300" rx="20" fill="none" stroke="#0fd08c" stroke-opacity="0.25" stroke-width="2"/>
+  </g>
+</svg>

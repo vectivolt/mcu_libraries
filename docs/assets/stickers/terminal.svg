@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Terminal prompt">
+  <title>Terminal prompt</title>
+  <defs>
+    <linearGradient id="vs-terminal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0fd08c"/>
+      <stop offset="1" stop-color="#10b7ce"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="32" fill="url(#vs-terminal)"/>
+  <rect x="6" y="6" width="116" height="116" rx="32" fill="none" stroke="#071310" stroke-opacity="0.18" stroke-width="3"/>
+
+    <rect x="24" y="30" width="80" height="68" rx="12" fill="#071310"/>
+    <path d="M24 46h80" stroke="#ffffff" stroke-opacity="0.25" stroke-width="4"/>
+    <g fill="#ffffff" fill-opacity="0.35"><circle cx="35" cy="38" r="3.5"/><circle cx="46" cy="38" r="3.5"/><circle cx="57" cy="38" r="3.5"/></g>
+    <path d="M38 62l10 9-10 9" fill="none" stroke="#0fd08c" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="58" y="76" width="26" height="6" rx="3" fill="#10b7ce"/>
+</svg>

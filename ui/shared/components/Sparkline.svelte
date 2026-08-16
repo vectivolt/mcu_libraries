@@ -6,7 +6,7 @@
   sparkline resolved url(#spk-grad) to whichever instance mounted last and
   inherited that one's colour.
 
-  (c) 2026 VectiVolt — MIT License
+  (c) 2026 VectiVolt — Apache-2.0 License
 --------------------------------------------------------------------------- -->
 <script>
   let { data = [], height = 36, color = 'var(--color-brand)', fill = true } = $props();

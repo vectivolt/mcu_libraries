@@ -14,7 +14,7 @@
   import { store, uid, fmtBytes, num } from "$shared/lib/net.js";
   import Icon from "$shared/components/Icon.svelte";
 
-  // Mirrors joule::NetState in JouleNet.h — /wifi/status sends the raw enum.
+  // Mirrors vecti::NetState in VectiNet.h — /wifi/status sends the raw enum.
   const STATES = [
     { label: "Idle",         tone: "muted" },
     { label: "Connecting",   tone: "warn"  },

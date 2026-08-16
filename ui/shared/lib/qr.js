@@ -16,7 +16,7 @@
  * error is correct; a caller that renders a truncated symbol is not, which is
  * why this never truncates.
  *
- * (c) 2026 VectiVolt — MIT License
+ * (c) 2026 VectiVolt — Apache-2.0 License
  * ------------------------------------------------------------------------- */
 
 /* Table 1: total codewords (data + ECC) per version, indexed 1..10. */

@@ -1,9 +1,9 @@
 {
-  "name": "joulesuite-ui",
+  "name": "vectisuite-ui",
   "version": "1.0.0",
-  "description": "Svelte 5 source for the four JouleSuite web UIs. Built into self-contained HTML blobs and embedded as gzipped PROGMEM into the C++ libraries.",
-  "author": "Chinmoy Bhuyan <dikibhuyan@gmail.com>",
-  "license": "MIT",
+  "description": "Svelte 5 source for the four VectiSuite web UIs. Built into self-contained HTML blobs and embedded as gzipped PROGMEM into the C++ libraries.",
+  "author": "Chinmoy Bhuyan <chinmoy@joulepoint.com>",
+  "license": "Apache-2.0",
   "private": true,
   "type": "module",
   "scripts": {

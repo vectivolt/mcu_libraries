@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-JouleSuite UI · pull-screens.py
-Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+VectiSuite UI · pull-screens.py
+Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 
 Walks ui/stitch-out/manifest.json, extracts each Stitch screen's real
 resource name + htmlCode.downloadUrl + screenshot.downloadUrl, then

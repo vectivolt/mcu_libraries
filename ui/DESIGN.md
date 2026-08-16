@@ -1,6 +1,6 @@
-# JouleSuite — Design System
+# VectiSuite — Design System
 
-A clean, professional design system for embedded device web UIs. Linear/Vercel-inspired neutral dark base with one cool indigo accent; semantic colors used only for status. All four JouleSuite UIs (Dashboard, Firmware Updater, Wireless Console, Wi-Fi Portal) share this system.
+A clean, professional design system for embedded device web UIs. Linear/Vercel-inspired neutral dark base with one cool indigo accent; semantic colors used only for status. All four VectiSuite UIs (Dashboard, Firmware Updater, Wireless Console, Wi-Fi Portal) share this system.
 
 ## Brand identity
 
@@ -202,8 +202,8 @@ Tab bar sits sticky right under the header, also blurred.
 
 * All interactive widgets carry an aria-label when the label is purely visual (icon-only).
 * Touch targets ≥ 44 × 44 px.
-* `prefers-color-scheme: light` automatically switches the theme tokens; user may pin a choice via the ◐ icon (`localStorage["joule-theme"]` = "dark" / "light" / "auto").
+* `prefers-color-scheme: light` automatically switches the theme tokens; user may pin a choice via the ◐ icon (`localStorage["vecti-theme"]` = "dark" / "light" / "auto").
 
 ---
 
-Author: Chinmoy Bhuyan · Email: dikibhuyan@gmail.com · © 2026 · MIT
+Author: Chinmoy Bhuyan · Email: chinmoy@joulepoint.com · © 2026 · Apache-2.0

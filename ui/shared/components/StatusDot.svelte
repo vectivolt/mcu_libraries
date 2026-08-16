@@ -6,7 +6,7 @@
   for a screen reader. Only "ok" pulses — an animated error dot competing
   with an animated ok dot tells you nothing at a glance.
 
-  (c) 2026 VectiVolt — MIT License
+  (c) 2026 VectiVolt — Apache-2.0 License
 --------------------------------------------------------------------------- -->
 <script>
   /** @type {'ok'|'warn'|'err'|'muted'} */

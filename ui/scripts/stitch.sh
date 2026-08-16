@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# JouleSuite UI · stitch helper
-# Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+# VectiSuite UI · stitch helper
+# Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 # ---------------------------------------------------------------------------
 #
 # Thin wrapper around the Google Stitch MCP server. Each subcommand POSTs
@@ -9,7 +9,7 @@
 # pretty-printed result. Designed to be called from other scripts.
 #
 #   ./stitch.sh tools-list
-#   ./stitch.sh call create_project '{"title":"JouleSuite"}'
+#   ./stitch.sh call create_project '{"title":"VectiSuite"}'
 #   ./stitch.sh call generate_screen_from_text '{"projectId":"…","prompt":"…","device":"DESKTOP"}'
 
 set -u

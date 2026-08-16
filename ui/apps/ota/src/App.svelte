@@ -1,6 +1,6 @@
 <!-- ---------------------------------------------------------------------------
   VectiOTA — firmware updater SPA. Svelte 5 + Tailwind v4.
-  (c) 2026 VectiVolt — MIT License
+  (c) 2026 VectiVolt — Apache-2.0 License
 --------------------------------------------------------------------------- -->
 <script>
   import { onMount } from "svelte";

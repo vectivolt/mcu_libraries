@@ -1,0 +1,150 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 832" width="1180" height="832" role="img" aria-label="VectiSuite architecture: browser talks to one AsyncWebServer, which fans out to VectiOTA, VectiSerial, VectiNet and VectiDash; each library serves a gzipped UI blob from flash">
+  <title>VectiSuite architecture</title>
+  <desc>One ESPAsyncWebServer instance. Four libraries register their own routes on it. Each library carries its own gzipped UI blob in PROGMEM.</desc>
+  <defs>
+    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#0fd08c"/>
+    </marker>
+    <marker id="arb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#10b7ce"/>
+    </marker>
+    <marker id="ard" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 Z" fill="#5f8f85"/>
+    </marker>
+  </defs>
+
+  <g font-family="system-ui, sans-serif">
+    <text x="60" y="32" font-size="18" font-weight="700" fill="#12a48c">VectiSuite — one web server, four libraries, zero external assets</text>
+
+    <!-- ================= browser ================= -->
+    <g>
+      <rect x="340" y="52" width="500" height="92" rx="12" fill="#0e2731" stroke="#10b7ce" stroke-width="2"/>
+      <path d="M340 80 H840" stroke="#10b7ce" stroke-opacity="0.45" stroke-width="1.5"/>
+      <circle cx="358" cy="66" r="4" fill="#10b7ce" fill-opacity="0.7"/>
+      <circle cx="372" cy="66" r="4" fill="#10b7ce" fill-opacity="0.7"/>
+      <circle cx="386" cy="66" r="4" fill="#10b7ce" fill-opacity="0.7"/>
+      <text x="404" y="70" font-size="12" fill="#8fc9d8" font-family="ui-monospace, monospace">http://vecti-demo.local/</text>
+      <text x="590" y="104" font-size="17" font-weight="600" text-anchor="middle" fill="#cfeef6">Any browser on the LAN — phone or desktop</text>
+      <text x="590" y="128" font-size="13" text-anchor="middle" fill="#7fb2c2">No app, no cloud account, no CDN. One origin, one port.</text>
+    </g>
+
+    <path d="M590 144 V190" stroke="#10b7ce" stroke-width="2.5" marker-end="url(#arb)"/>
+    <text x="606" y="162" font-size="13" fill="#12a6bd">HTTP GET</text>
+    <text x="606" y="180" font-size="13" fill="#12a6bd">WebSocket &#183; SSE</text>
+    <text x="574" y="171" font-size="13" text-anchor="end" fill="#5f8f85">port 80</text>
+
+    <!-- ================= async web server ================= -->
+    <rect x="60" y="196" width="1060" height="78" rx="12" fill="#0d2b24" stroke="#0fd08c" stroke-width="2"/>
+    <text x="80" y="228" font-size="17" font-weight="700" fill="#0fd08c">AsyncWebServer</text>
+    <text x="80" y="252" font-size="13" fill="#9dc4bb">One instance that you own and pass in. Every library registers onto it — nothing spawns a second server or a second port.</text>
+    <text x="1100" y="228" font-size="12.5" text-anchor="end" fill="#7fb2c2" font-family="ui-monospace, monospace">ESPAsyncWebServer ^3.11.0</text>
+    <text x="1100" y="252" font-size="12.5" text-anchor="end" fill="#7fb2c2" font-family="ui-monospace, monospace">AsyncTCP ^3.4.0</text>
+
+    <!-- fan-out arrows -->
+    <g stroke="#0fd08c" stroke-width="2" fill="none" marker-end="url(#ar)">
+      <path d="M185 274 V330"/>
+      <path d="M455 274 V330"/>
+      <path d="M725 274 V330"/>
+      <path d="M995 274 V330"/>
+    </g>
+
+    <!-- ================= the four libraries ================= -->
+    <g font-size="12.5" font-family="ui-monospace, monospace">
+
+      <!-- VectiOTA -->
+      <g>
+        <rect x="60" y="336" width="250" height="222" rx="12" fill="#0b211c" stroke="#0fd08c" stroke-opacity="0.6" stroke-width="1.5"/>
+        <text x="78" y="364" font-size="16" font-weight="700" fill="#0fd08c" font-family="system-ui, sans-serif">VectiOTA</text>
+        <text x="78" y="384" font-size="12.5" fill="#7d9e96" font-family="system-ui, sans-serif">firmware updates + rollback</text>
+        <g fill="#a9cfc6">
+          <text x="78" y="410"><tspan fill="#0fd08c">GET </tspan> /ota</text>
+          <text x="78" y="429"><tspan fill="#0fd08c">GET </tspan> /ota/info</text>
+          <text x="78" y="448"><tspan fill="#10b7ce">SSE </tspan> /ota/events</text>
+          <text x="78" y="467"><tspan fill="#0fd08c">POST</tspan> /ota/upload</text>
+          <text x="78" y="486"><tspan fill="#0fd08c">POST</tspan> /ota/pull</text>
+          <text x="78" y="505"><tspan fill="#0fd08c">POST</tspan> /ota/commit</text>
+          <text x="78" y="524"><tspan fill="#0fd08c">POST</tspan> /ota/rollback</text>
+        </g>
+        <text x="78" y="545" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">also builds for ESP8266</text>
+      </g>
+
+      <!-- VectiSerial -->
+      <g>
+        <rect x="330" y="336" width="250" height="222" rx="12" fill="#0b211c" stroke="#0fd08c" stroke-opacity="0.6" stroke-width="1.5"/>
+        <text x="348" y="364" font-size="16" font-weight="700" fill="#0fd08c" font-family="system-ui, sans-serif">VectiSerial</text>
+        <text x="348" y="384" font-size="12.5" fill="#7d9e96" font-family="system-ui, sans-serif">wireless console</text>
+        <g fill="#a9cfc6">
+          <text x="348" y="410"><tspan fill="#0fd08c">GET </tspan> /serial</text>
+          <text x="348" y="429"><tspan fill="#10b7ce">WS  </tspan> /serial/ws</text>
+        </g>
+        <text x="348" y="462" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">log levels, search and filter</text>
+        <text x="348" y="480" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">live in the browser, not in a</text>
+        <text x="348" y="498" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">paid tier</text>
+        <text x="348" y="530" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">history replays to a client</text>
+        <text x="348" y="548" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">that reconnects</text>
+      </g>
+
+      <!-- VectiNet -->
+      <g>
+        <rect x="600" y="336" width="250" height="222" rx="12" fill="#0b211c" stroke="#0fd08c" stroke-opacity="0.6" stroke-width="1.5"/>
+        <text x="618" y="364" font-size="16" font-weight="700" fill="#0fd08c" font-family="system-ui, sans-serif">VectiNet</text>
+        <text x="618" y="384" font-size="12.5" fill="#7d9e96" font-family="system-ui, sans-serif">Wi-Fi provisioning</text>
+        <g fill="#a9cfc6">
+          <text x="618" y="410"><tspan fill="#0fd08c">GET </tspan> /wifi</text>
+          <text x="618" y="429"><tspan fill="#0fd08c">GET </tspan> /wifi/scan</text>
+          <text x="618" y="448"><tspan fill="#0fd08c">GET </tspan> /wifi/status</text>
+          <text x="618" y="467"><tspan fill="#0fd08c">G/P </tspan> /wifi/params</text>
+          <text x="618" y="486"><tspan fill="#0fd08c">POST</tspan> /wifi/connect</text>
+          <text x="618" y="505"><tspan fill="#0fd08c">POST</tspan> /wifi/reset</text>
+          <text x="618" y="524"><tspan fill="#0fd08c">POST</tspan> /wifi/restart</text>
+        </g>
+        <text x="618" y="545" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">+ 4 captive-portal probes</text>
+      </g>
+
+      <!-- VectiDash -->
+      <g>
+        <rect x="870" y="336" width="250" height="222" rx="12" fill="#0b211c" stroke="#10b7ce" stroke-opacity="0.7" stroke-width="1.5"/>
+        <text x="888" y="364" font-size="16" font-weight="700" fill="#10b7ce" font-family="system-ui, sans-serif">VectiDash</text>
+        <text x="888" y="384" font-size="12.5" fill="#7d9e96" font-family="system-ui, sans-serif">realtime dashboard</text>
+        <g fill="#a9cfc6">
+          <text x="888" y="410"><tspan fill="#0fd08c">GET </tspan> /</text>
+          <text x="888" y="429"><tspan fill="#0fd08c">GET </tspan> /dash</text>
+          <text x="888" y="448"><tspan fill="#0fd08c">GET </tspan> /dash/login</text>
+          <text x="888" y="467"><tspan fill="#10b7ce">WS  </tspan> /dash/ws</text>
+        </g>
+        <text x="888" y="500" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">49 widget types, all free</text>
+        <text x="888" y="518" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">every value crosses the</text>
+        <text x="888" y="536" font-size="11.5" fill="#5f8f85" font-family="system-ui, sans-serif">socket as a string</text>
+      </g>
+    </g>
+
+    <!-- ================= flash ================= -->
+    <g stroke="#5f8f85" stroke-width="1.5" fill="none" stroke-dasharray="5 5" marker-end="url(#ard)">
+      <path d="M185 558 V626"/>
+      <path d="M455 558 V626"/>
+      <path d="M725 558 V626"/>
+      <path d="M995 558 V626"/>
+    </g>
+
+    <rect x="60" y="632" width="1060" height="118" rx="12" fill="#101d1a" stroke="#5f8f85" stroke-width="1.5" stroke-dasharray="6 4"/>
+    <text x="80" y="662" font-size="15" font-weight="700" fill="#12a48c">PROGMEM &#8212; the UI lives in the same flash image as your firmware</text>
+    <text x="80" y="684" font-size="12.5" fill="#7d9e96">Each library carries its own gzip-compressed Svelte build as a byte array. Nothing is fetched at runtime, so the device works with no internet at all.</text>
+
+    <g font-family="ui-monospace, monospace" font-size="11.5" text-anchor="middle">
+      <rect x="72" y="700" width="226" height="34" rx="8" fill="#0b211c" stroke="#0fd08c" stroke-opacity="0.35"/>
+      <text x="185" y="722" fill="#a9cfc6">VectiOTA_ui_gz.h <tspan fill="#0fd08c">25,822 B</tspan></text>
+      <rect x="342" y="700" width="226" height="34" rx="8" fill="#0b211c" stroke="#0fd08c" stroke-opacity="0.35"/>
+      <text x="455" y="722" fill="#a9cfc6">VectiSerial_ui_gz.h <tspan fill="#0fd08c">24,862 B</tspan></text>
+      <rect x="612" y="700" width="226" height="34" rx="8" fill="#0b211c" stroke="#0fd08c" stroke-opacity="0.35"/>
+      <text x="725" y="722" fill="#a9cfc6">VectiNet_ui_gz.h <tspan fill="#0fd08c">28,498 B</tspan></text>
+      <rect x="882" y="700" width="226" height="34" rx="8" fill="#0b211c" stroke="#10b7ce" stroke-opacity="0.45"/>
+      <text x="995" y="722" fill="#a9cfc6">VectiDash_ui_gz.h <tspan fill="#10b7ce">46,811 B</tspan></text>
+    </g>
+    <text x="1100" y="662" text-anchor="end" font-size="14" font-weight="700" fill="#12a48c">&#8776; 126 KB total</text>
+
+    <!-- footnotes -->
+    <text x="60" y="776" font-size="12.5" fill="#4e8f7f">Server callbacks run on the AsyncTCP task; your <tspan font-family="ui-monospace, monospace">loop()</tspan> runs on the Arduino task. Never block inside a callback &#8212; set a flag and act in <tspan font-family="ui-monospace, monospace">loop()</tspan>.</text>
+    <text x="60" y="795" font-size="12.5" fill="#4e8f7f">VectiNet&#8217;s captive-portal probes, all registered: <tspan font-family="ui-monospace, monospace" fill="#3f8272">/generate_204 &#183; /gen_204 &#183; /hotspot-detect.html &#183; /ncsi.txt</tspan></text>
+    <text x="60" y="814" font-size="12.5" fill="#4e8f7f">Blob sizes are measured. A demo running all four fits in 1,226,013 B of flash (36.7%) and 62,440 B of RAM (19.1%) on an ESP32-S3 with 8 MB flash.</text>
+  </g>
+</svg>

@@ -1,8 +1,8 @@
 // ---------------------------------------------------------------------------
-// JouleSuite for ESP32 / ESP8266 — JouleOTA · JouleSerial · JouleNet · JouleDash
+// VectiSuite for ESP32 / ESP8266 — VectiOTA · VectiSerial · VectiNet · VectiDash
 // Author: Chinmoy Bhuyan
-// Email:  dikibhuyan@gmail.com
-// (c) 2026 — MIT License
+// Email:  chinmoy@joulepoint.com
+// (c) 2026 VectiVolt — Apache-2.0 License
 // ---------------------------------------------------------------------------
 //
 // Tiny HTTP/WebSocket proxy used to drive headless-browser screenshots of

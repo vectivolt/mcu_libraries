@@ -1,10 +1,10 @@
-# JouleSuite UI · Svelte 5 source
+# VectiSuite UI · Svelte 5 source
 
-Source for the four web UIs that ship inside the JouleSuite C++ libraries.
+Source for the four web UIs that ship inside the VectiSuite C++ libraries.
 Each app is a self-contained **Svelte 5 + Tailwind v4 + bits-ui** SPA;
 `vite build` inlines all CSS/JS into a single HTML file, and
 `scripts/embed-progmem.js` gzips that file and writes it as a PROGMEM byte
-array into the matching `libraries/Joule*/src/Joule*_ui_gz.h`. The C++
+array into the matching `libraries/Vecti*/src/Vecti*_ui_gz.h`. The C++
 side serves the bytes directly with `Content-Encoding: gzip`.
 
 ```
@@ -14,10 +14,10 @@ ui/
 │   ├── theme.css                ← Tailwind v4 tokens + dark/light themes
 │   └── components/              ← Card.svelte, Value.svelte, StatusDot.svelte, Sparkline.svelte
 ├── apps/
-│   ├── dash/                    ← JouleDash dashboard SPA
-│   ├── ota/                     ← JouleOTA drag-drop updater SPA
-│   ├── serial/                  ← JouleSerial wireless console SPA
-│   └── net/                     ← JouleNet captive portal SPA
+│   ├── dash/                    ← VectiDash dashboard SPA
+│   ├── ota/                     ← VectiOTA drag-drop updater SPA
+│   ├── serial/                  ← VectiSerial wireless console SPA
+│   └── net/                     ← VectiNet captive portal SPA
 └── scripts/
     ├── build-all.js             ← runs vite build for every app
     └── embed-progmem.js         ← gzips dist HTML → PROGMEM .h files
@@ -31,7 +31,7 @@ npm install
 npm run build          # builds all four apps + embeds the gz blobs
 ```
 
-After a successful build, the matching `libraries/Joule*/src/Joule*_ui_gz.h`
+After a successful build, the matching `libraries/Vecti*/src/Vecti*_ui_gz.h`
 files are overwritten. Run `pio run` in the firmware project to pick the
 new bytes up.
 
@@ -54,10 +54,10 @@ relative paths in the source.
 
 | App         | raw HTML | gzipped | typical ESP RAM cost |
 |-------------|---------:|--------:|---------------------:|
-| JouleDash   |    79 KB |   26 KB | ~0 KB (PROGMEM, served straight from flash) |
-| JouleOTA    |    82 KB |   27 KB | ~0 KB |
-| JouleSerial |    83 KB |   27 KB | ~0 KB |
-| JouleNet    |    91 KB |   28 KB | ~0 KB |
+| VectiDash   |    79 KB |   26 KB | ~0 KB (PROGMEM, served straight from flash) |
+| VectiOTA    |    82 KB |   27 KB | ~0 KB |
+| VectiSerial |    83 KB |   27 KB | ~0 KB |
+| VectiNet    |    91 KB |   28 KB | ~0 KB |
 
 All four blobs live in flash (PROGMEM); RAM usage on the device is
 unchanged regardless of UI complexity. The numbers grow whenever you add
@@ -83,8 +83,8 @@ endpoint (`/ota/info`, `/wifi/status`, `/serial/ws` history frame).
 
 ## License
 
-MIT — see [LICENSE](../LICENSE).
+Apache-2.0 — see [LICENSE](../LICENSE).
 
 ---
 
-<sub>**Author:** Chinmoy Bhuyan · **Email:** dikibhuyan@gmail.com · **(c)** 2026 — MIT</sub>
+<sub>**Author:** Chinmoy Bhuyan · **Email:** chinmoy@joulepoint.com · **(c)** 2026 — Apache-2.0</sub>

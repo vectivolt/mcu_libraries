@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Rocket">
+  <title>Rocket</title>
+  <defs>
+    <linearGradient id="vs-rocket" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0fd08c"/>
+      <stop offset="1" stop-color="#10b7ce"/>
+    </linearGradient>
+  </defs>
+  <rect x="6" y="6" width="116" height="116" rx="32" fill="url(#vs-rocket)"/>
+  <rect x="6" y="6" width="116" height="116" rx="32" fill="none" stroke="#071310" stroke-opacity="0.18" stroke-width="3"/>
+
+    <path d="M64 20c14 12 21 28 21 44 0 9-2 17-6 24H49c-4-7-6-15-6-24 0-16 7-32 21-44Z" fill="#071310"/>
+    <path d="M64 20c-14 12-21 28-21 44 0 9 2 17 6 24h6c-4-7-6-15-6-24 0-16 5-32 15-44Z" fill="#ffffff" fill-opacity="0.22"/>
+    <circle cx="64" cy="54" r="10" fill="#10b7ce"/>
+    <path d="M43 70 30 84l4 12 11-10Zm42 0 13 14-4 12-11-10Z" fill="#071310" fill-opacity="0.75"/>
+    <path d="M56 94h16l-8 18Z" fill="#071310"/>
+</svg>

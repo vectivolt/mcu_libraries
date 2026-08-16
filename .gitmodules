@@ -1,16 +1,16 @@
-[submodule "libraries/JouleOTA"]
-	path = libraries/JouleOTA
-	url  = https://github.com/hyndex/JouleOTA.git
+[submodule "libraries/VectiOTA"]
+	path = libraries/VectiOTA
+	url  = https://github.com/vectivolt/VectiOTA.git
 	branch = main
-[submodule "libraries/JouleSerial"]
-	path = libraries/JouleSerial
-	url  = https://github.com/hyndex/JouleSerial.git
+[submodule "libraries/VectiSerial"]
+	path = libraries/VectiSerial
+	url  = https://github.com/vectivolt/VectiSerial.git
 	branch = main
-[submodule "libraries/JouleNet"]
-	path = libraries/JouleNet
-	url  = https://github.com/hyndex/JouleNet.git
+[submodule "libraries/VectiNet"]
+	path = libraries/VectiNet
+	url  = https://github.com/vectivolt/VectiNet.git
 	branch = main
-[submodule "libraries/JouleDash"]
-	path = libraries/JouleDash
-	url  = https://github.com/hyndex/JouleDash.git
+[submodule "libraries/VectiDash"]
+	path = libraries/VectiDash
+	url  = https://github.com/vectivolt/VectiDash.git
 	branch = main

@@ -1,0 +1,284 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1186 1398" width="1186" height="1398" role="img" aria-label="VectiDash widget catalogue — 49 widget types plus a custom HTML escape hatch">
+  <title>VectiDash widget catalogue</title>
+  <defs>
+    <linearGradient id="brand" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0fd08c"/><stop offset="1" stop-color="#10b7ce"/>
+    </linearGradient>
+    <pattern id="grid" width="28" height="28" patternUnits="userSpaceOnUse">
+      <path d="M28 0H0V28" fill="none" stroke="#0fd08c" stroke-opacity="0.05" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1186" height="1398" fill="#071310"/>
+  <rect width="1186" height="1398" fill="url(#grid)"/>
+  <g font-family="system-ui, sans-serif">
+    <text x="40" y="66" font-size="34" font-weight="700" fill="url(#brand)">VectiDash widget catalogue</text>
+    <text x="40" y="98" font-size="16" fill="#8fb5ab">49 widget types, every one in the free library &#8212; plus <tspan fill="#10b7ce">custom</tspan>, a raw-HTML escape hatch.</text>
+    <text x="40" y="122" font-size="14" fill="#3f6f65">Labels are the registry keys: the exact strings VectiDash puts on the wire.</text>
+<text x="40" y="168" font-size="19" font-weight="700" fill="#0fd08c">Readouts</text>
+<text x="140" y="168" font-size="15" fill="#3f6f65">14</text>
+<path d="M40 180 H1146" stroke="#0fd08c" stroke-opacity=".25" stroke-width="1.5"/>
+<g transform="translate(40 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><text x="28" y="30" font-size="26" font-weight="600" text-anchor="middle" fill="#0fd08c">42</text></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">number</text>
+</g>
+<g transform="translate(180 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="12" width="40" height="4" rx="2" fill="#3f6f65" fill-opacity="0.8"/><rect x="8" y="20" width="32" height="4" rx="2" fill="#0fd08c" fill-opacity="0.9"/><rect x="8" y="28" width="24" height="4" rx="2" fill="#3f6f65" fill-opacity="0.8"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">text</text>
+</g>
+<g transform="translate(320 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="14" cy="20" r="6" fill="#0fd08c" fill-opacity="1.0"/><rect x="24" y="17" width="24" height="6" rx="3" fill="#3f6f65" fill-opacity="0.7"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">status</text>
+</g>
+<g transform="translate(460 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="13" width="40" height="14" rx="7" fill="#0fd08c" fill-opacity="0.18"/><text x="28" y="25" font-size="11" font-weight="600" text-anchor="middle" fill="#0fd08c">OK</text></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">badge</text>
+</g>
+<g transform="translate(600 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="20" r="9" fill="#0fd08c" fill-opacity="0.25"/><circle cx="28" cy="20" r="5" fill="#0fd08c" fill-opacity="1.0"/><path d="M28 6V2" fill="none" stroke="#0fd08c" stroke-width="2" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">led</text>
+</g>
+<g transform="translate(740 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M28 8v14" fill="none" stroke="#0fd08c" stroke-width="3" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="28" r="6" fill="#0fd08c" fill-opacity="1"/><path d="M22 8h12" fill="none" stroke="#3f6f65" stroke-width="2" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">temperature</text>
+</g>
+<g transform="translate(880 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M28 8 C20 18 18 22 18 26 a10 10 0 0 0 20 0 c0-4-2-8-10-18Z" fill="none" stroke="#10b7ce" stroke-width="2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">humidity</text>
+</g>
+<g transform="translate(1020 198)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="10" y="12" width="32" height="16" rx="3" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><rect x="13" y="15" width="18" height="10" rx="2" fill="#0fd08c" fill-opacity="1"/><rect x="42" y="17" width="4" height="6" rx="1" fill="#3f6f65" fill-opacity="0.8"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">battery</text>
+</g>
+<g transform="translate(40 316)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="12" y="26" width="6" height="6" rx="1" fill="#0fd08c" fill-opacity="1.0"/><rect x="22" y="21" width="6" height="11" rx="1" fill="#0fd08c" fill-opacity="1.0"/><rect x="32" y="16" width="6" height="16" rx="1" fill="#0fd08c" fill-opacity="1.0"/><rect x="42" y="11" width="6" height="21" rx="1" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">signal</text>
+</g>
+<g transform="translate(180 316)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle stroke-width="2" cx="28" cy="20" r="11" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><path d="M28 13v8l6 4" fill="none" stroke="#0fd08c" stroke-width="2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">uptime</text>
+</g>
+<g transform="translate(320 316)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="10" width="40" height="20" rx="3" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><path d="M8 17h40M24 10v20" fill="none" stroke="#3f6f65" stroke-width="1.5" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="10" y="12" width="10" height="3" rx="1" fill="#0fd08c" fill-opacity="0.9"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">table</text>
+</g>
+<g transform="translate(460 316)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="10" width="40" height="4" rx="1" fill="#0fd08c" fill-opacity="0.85"/><rect x="8" y="18" width="34" height="4" rx="1" fill="#3f6f65" fill-opacity="0.8"/><rect x="8" y="26" width="40" height="4" rx="1" fill="#3f6f65" fill-opacity="0.8"/><rect x="44" y="18" width="4" height="4" rx="1" fill="#10b7ce" fill-opacity="0.9"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">logview</text>
+</g>
+<g transform="translate(600 316)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="10" width="40" height="22" rx="3" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><circle cx="18" cy="18" r="3" fill="#10b7ce" fill-opacity="1.0"/><path d="M11 30 22 20l7 6 6-5 10 9" fill="none" stroke="#0fd08c" stroke-width="2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">image</text>
+</g>
+<g transform="translate(740 316)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M8 28 L15 20 L22 24 L29 13 L36 19 L43 10 L48 16" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">sparkline</text>
+</g>
+<text x="40" y="452" font-size="19" font-weight="700" fill="#0fd08c">Meters</text>
+<text x="118" y="452" font-size="15" fill="#3f6f65">8</text>
+<path d="M40 464 H1146" stroke="#0fd08c" stroke-opacity=".25" stroke-width="1.5"/>
+<g transform="translate(40 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M10 30a18 18 0 0 1 36 0" fill="none" stroke="#3f6f65" stroke-width="4" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 30a18 18 0 0 1 12-17" fill="none" stroke="#0fd08c" stroke-width="4" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 30 20 17" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">gauge</text>
+</g>
+<g transform="translate(180 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="22" r="13" fill="none" stroke="#3f6f65" stroke-opacity=".7" stroke-width="2"/><path d="M28 22 36 15" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><circle cx="28" cy="22" r="2.5" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">dial</text>
+</g>
+<g transform="translate(320 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="20" r="12" fill="none" stroke="#3f6f65" stroke-opacity=".5" stroke-width="6"/><path d="M28 8a12 12 0 0 1 10 18" fill="none" stroke="#0fd08c" stroke-width="6" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">donut</text>
+</g>
+<g transform="translate(460 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="6" y="17" width="44" height="7" rx="4" fill="#3f6f65" fill-opacity="0.5"/><rect x="6" y="17" width="28" height="7" rx="4" fill="#0fd08c" fill-opacity="1"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">progress</text>
+</g>
+<g transform="translate(600 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="10" y="24" width="6" height="8" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="20" y="14" width="6" height="18" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="30" y="20" width="6" height="12" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="40" y="8" width="6" height="24" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="50" y="16" width="6" height="16" rx="1" fill="#0fd08c" fill-opacity="0.95"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">bar</text>
+</g>
+<g transform="translate(740 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="18" y="6" width="20" height="28" rx="4" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><rect x="20" y="18" width="16" height="14" rx="2" fill="#10b7ce" fill-opacity="0.9"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">level</text>
+</g>
+<g transform="translate(880 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="20" r="13" fill="none" stroke="#3f6f65" stroke-opacity=".7" stroke-width="2"/><path d="M22 26 34 14 28 27Z" fill="#0fd08c" stroke="#0fd08c" stroke-width="2" stroke-opacity="1" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">compass</text>
+</g>
+<g transform="translate(1020 482)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="24" y="6" width="8" height="20" rx="4" fill="#3f6f65" fill-opacity="0.5"/><circle cx="28" cy="29" r="7" fill="#0fd08c" fill-opacity="1.0"/><rect x="25" y="14" width="6" height="14" rx="3" fill="#0fd08c" fill-opacity="1"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">thermo</text>
+</g>
+<text x="40" y="618" font-size="19" font-weight="700" fill="#10b7ce">Charts</text>
+<text x="118" y="618" font-size="15" fill="#3f6f65">5</text>
+<path d="M40 630 H1146" stroke="#10b7ce" stroke-opacity=".25" stroke-width="1.5"/>
+<g transform="translate(40 648)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M8 32V8" fill="none" stroke="#3f6f65" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 32h42" fill="none" stroke="#3f6f65" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 28 L19 18 L28 23 L37 11 L48 15" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">chart</text>
+</g>
+<g transform="translate(180 648)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M8 32h42" fill="none" stroke="#3f6f65" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 26 L20 16 L30 21 L48 10" fill="none" stroke="#0fd08c" stroke-width="2.2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><path d="M10 31 L20 27 L30 29 L48 22" fill="none" stroke="#10b7ce" stroke-width="2.2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">multichart</text>
+</g>
+<g transform="translate(320 648)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="22" width="7" height="10" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="18" y="12" width="7" height="20" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="28" y="6" width="7" height="26" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="38" y="16" width="7" height="16" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="48" y="24" width="7" height="8" rx="1" fill="#0fd08c" fill-opacity="0.95"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">histogram</text>
+</g>
+<g transform="translate(460 648)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M8 32V8M8 32h42" fill="none" stroke="#3f6f65" stroke-width="1.5" stroke-opacity="0.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="15" cy="25" r="2.5" fill="#0fd08c" fill-opacity="1.0"/><circle cx="22" cy="18" r="2.5" fill="#0fd08c" fill-opacity="1.0"/><circle cx="29" cy="26" r="2.5" fill="#10b7ce" fill-opacity="1.0"/><circle cx="34" cy="13" r="2.5" fill="#0fd08c" fill-opacity="1.0"/><circle cx="41" cy="20" r="2.5" fill="#10b7ce" fill-opacity="1.0"/><circle cx="46" cy="11" r="2.5" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">scatter</text>
+</g>
+<g transform="translate(600 648)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="10" y="8" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="20" y="8" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.5"/><rect x="30" y="8" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.85"/><rect x="40" y="8" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.35"/><rect x="10" y="16" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.6"/><rect x="20" y="16" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="30" y="16" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.4"/><rect x="40" y="16" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.15"/><rect x="10" y="24" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.3"/><rect x="20" y="24" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.7"/><rect x="30" y="24" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.5"/><rect x="40" y="24" width="8" height="6" rx="1" fill="#0fd08c" fill-opacity="0.9"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">heatmap</text>
+</g>
+<text x="40" y="784" font-size="19" font-weight="700" fill="#0fd08c">Controls</text>
+<text x="140" y="784" font-size="15" fill="#3f6f65">20</text>
+<path d="M40 796 H1146" stroke="#0fd08c" stroke-opacity=".25" stroke-width="1.5"/>
+<g transform="translate(40 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="10" y="12" width="36" height="16" rx="8" fill="#0fd08c" fill-opacity="0.9"/><text x="28" y="24" font-size="10" font-weight="600" text-anchor="middle" fill="#071310">RUN</text></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">button</text>
+</g>
+<g transform="translate(180 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="10" y="12" width="36" height="16" rx="8" fill="none" stroke="#0fd08c"/><path d="M19 20l5 5 12-12" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">confirm</text>
+</g>
+<g transform="translate(320 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="20" r="12" fill="#0fd08c" fill-opacity="0.18"/><circle cx="28" cy="20" r="7" fill="#0fd08c" fill-opacity="1.0"/><path d="M28 4v4" fill="none" stroke="#3f6f65" stroke-width="2" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">momentary</text>
+</g>
+<g transform="translate(460 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="12" width="40" height="18" rx="9" fill="#0fd08c" fill-opacity="0.85"/><circle cx="39" cy="21" r="6" fill="#071310" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">switch</text>
+</g>
+<g transform="translate(600 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M8 20h40" fill="none" stroke="#3f6f65" stroke-width="3" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 20h22" fill="none" stroke="#0fd08c" stroke-width="3" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><circle cx="30" cy="20" r="6" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">slider</text>
+</g>
+<g transform="translate(740 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M8 20h40" fill="none" stroke="#3f6f65" stroke-width="3" stroke-opacity="0.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M17 20h22" fill="none" stroke="#0fd08c" stroke-width="3" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><circle cx="17" cy="20" r="5" fill="#0fd08c" fill-opacity="1.0"/><circle cx="39" cy="20" r="5" fill="#10b7ce" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">range</text>
+</g>
+<g transform="translate(880 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="6" y="12" width="44" height="16" rx="8" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><path d="M13 20h6M37 20h6M40 17v6" fill="none" stroke="#0fd08c" stroke-width="2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><text x="28" y="25" font-size="13" font-weight="600" text-anchor="middle" fill="#0fd08c">7</text></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">stepper</text>
+</g>
+<g transform="translate(1020 814)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="12" width="40" height="16" rx="4" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><path d="M36 18l4 4 4-4" fill="none" stroke="#0fd08c" stroke-width="2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><rect x="13" y="18" width="14" height="4" rx="2" fill="#3f6f65" fill-opacity="0.8"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">dropdown</text>
+</g>
+<g transform="translate(40 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="14" cy="13" r="5" fill="none" stroke="#0fd08c" stroke-width="2"/><circle cx="14" cy="13" r="2.5" fill="#0fd08c" fill-opacity="1.0"/><rect x="24" y="11" width="22" height="4" rx="2" fill="#3f6f65" fill-opacity="0.8"/><circle cx="14" cy="28" r="5" fill="none" stroke="#3f6f65" stroke-width="2" stroke-opacity=".8"/><rect x="24" y="26" width="16" height="4" rx="2" fill="#3f6f65" fill-opacity="0.6"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">radio</text>
+</g>
+<g transform="translate(180 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="9" y="8" width="10" height="10" rx="3" fill="#0fd08c" fill-opacity="0.9"/><path d="M11.5 13l2 2 4-4" fill="none" stroke="#071310" stroke-width="2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><rect x="24" y="11" width="22" height="4" rx="2" fill="#3f6f65" fill-opacity="0.8"/><rect x="9" y="23" width="10" height="10" rx="3" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><rect x="24" y="26" width="16" height="4" rx="2" fill="#3f6f65" fill-opacity="0.6"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">checklist</text>
+</g>
+<g transform="translate(320 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="12" width="40" height="16" rx="4" fill="none" stroke="#0fd08c" stroke-opacity=".8"/><path d="M14 16v8" fill="none" stroke="#0fd08c" stroke-width="2" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><rect x="18" y="18" width="16" height="4" rx="2" fill="#3f6f65" fill-opacity="0.7"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">input</text>
+</g>
+<g transform="translate(460 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="8" width="40" height="24" rx="4" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><rect x="12" y="13" width="28" height="3" rx="1" fill="#0fd08c" fill-opacity="0.8"/><rect x="12" y="19" width="24" height="3" rx="1" fill="#3f6f65" fill-opacity="0.8"/><rect x="12" y="25" width="18" height="3" rx="1" fill="#3f6f65" fill-opacity="0.8"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">textarea</text>
+</g>
+<g transform="translate(600 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="12" width="40" height="16" rx="4" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><circle cx="15" cy="20" r="3" fill="#0fd08c" fill-opacity="1.0"/><circle cx="22" cy="20" r="3" fill="#0fd08c" fill-opacity="1.0"/><circle cx="29" cy="20" r="3" fill="#0fd08c" fill-opacity="1.0"/><circle cx="36" cy="20" r="3" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">password</text>
+</g>
+<g transform="translate(740 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="12" y="6" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="24" y="6" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="36" y="6" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="12" y="16" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="24" y="16" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.95"/><rect x="36" y="16" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="12" y="26" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="24" y="26" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/><rect x="36" y="26" width="9" height="7" rx="2" fill="#0fd08c" fill-opacity="0.35"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">keypad</text>
+</g>
+<g transform="translate(880 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="20" r="14" fill="none" stroke="#3f6f65" stroke-opacity=".7" stroke-width="2"/><path d="M28 20 35 14" fill="none" stroke="#0fd08c" stroke-width="3" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><circle cx="35" cy="14" r="6" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">joystick</text>
+</g>
+<g transform="translate(1020 932)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="9" y="4" width="38" height="32" rx="4" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><path d="M9 20h38M28 4v32" fill="none" stroke="#3f6f65" stroke-width="1" stroke-opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="37" cy="13" r="5" fill="#0fd08c" fill-opacity="1.0"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">xypad</text>
+</g>
+<g transform="translate(40 1050)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="28" cy="21" r="13" fill="none" stroke="#3f6f65" stroke-opacity=".5" stroke-width="3"/><path d="M18 30a13 13 0 1 1 20-16" fill="none" stroke="#0fd08c" stroke-width="3" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/><path d="M28 21V11" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="1.0" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">knob</text>
+</g>
+<g transform="translate(180 1050)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><circle cx="20" cy="20" r="9" fill="#0fd08c" fill-opacity="1.0"/><circle cx="30" cy="15" r="9" fill="#10b7ce" fill-opacity="0.9"/><circle cx="34" cy="25" r="9" fill="#e0b341" fill-opacity="0.9"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">color</text>
+</g>
+<g transform="translate(320 1050)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="9" width="40" height="24" rx="4" fill="none" stroke="#3f6f65" stroke-opacity=".8"/><path d="M8 17h40" fill="none" stroke="#3f6f65" stroke-width="1.5" stroke-opacity="0.8" stroke-linecap="round" stroke-linejoin="round"/><rect x="13" y="21" width="6" height="5" rx="1" fill="#0fd08c" fill-opacity="0.9"/><rect x="23" y="21" width="6" height="5" rx="1" fill="#3f6f65" fill-opacity="0.7"/><rect x="33" y="21" width="6" height="5" rx="1" fill="#3f6f65" fill-opacity="0.7"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">datetime</text>
+</g>
+<g transform="translate(460 1050)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="10" y="6" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="17" y="6" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="24" y="6" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="31" y="6" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="38" y="6" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="10" y="13" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="17" y="13" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="24" y="13" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.6"/><rect x="31" y="13" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="38" y="13" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="10" y="20" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="17" y="20" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.6"/><rect x="24" y="20" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="31" y="20" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.6"/><rect x="38" y="20" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="10" y="27" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="17" y="27" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="24" y="27" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.6"/><rect x="31" y="27" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="38" y="27" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="10" y="34" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="17" y="34" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="24" y="34" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.2"/><rect x="31" y="34" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/><rect x="38" y="34" width="5" height="5" rx="1" fill="#0fd08c" fill-opacity="0.95"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">qrcode</text>
+</g>
+<text x="40" y="1186" font-size="19" font-weight="700" fill="#10b7ce">Layout</text>
+<text x="118" y="1186" font-size="15" fill="#3f6f65">2 + custom</text>
+<path d="M40 1198 H1146" stroke="#10b7ce" stroke-opacity=".25" stroke-width="1.5"/>
+<g transform="translate(40 1216)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="12" width="28" height="7" rx="2" fill="#0fd08c" fill-opacity="0.95"/><rect x="8" y="23" width="40" height="4" rx="2" fill="#3f6f65" fill-opacity="0.7"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">header</text>
+</g>
+<g transform="translate(180 1216)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><path d="M6 20h44" fill="none" stroke="#0fd08c" stroke-width="2.5" stroke-opacity="0.9" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12h20M30 28h20" fill="none" stroke="#3f6f65" stroke-width="2" stroke-opacity="0.55" stroke-linecap="round" stroke-linejoin="round"/></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">divider</text>
+</g>
+<g transform="translate(320 1216)">
+<rect width="126" height="104" rx="12" fill="#0b1f1a" stroke="#17403a"/>
+<g transform="translate(35 14)"><rect x="8" y="8" width="40" height="24" rx="4" fill="none" stroke="#10b7ce" stroke-dasharray="4 3"/><text x="28" y="25" font-size="14" font-weight="600" text-anchor="middle" fill="#10b7ce">&lt;/&gt;</text></g>
+<text x="63" y="92" font-size="12" text-anchor="middle" fill="#8fb5ab">custom</text>
+</g>
+    <text x="40" y="1378" font-size="13" fill="#3f6f65">VectiVolt &#183; VectiSuite &#183; Apache-2.0 &#183; every widget shown is free</text>
+  </g>
+</svg>

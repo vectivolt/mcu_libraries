@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-JouleSuite UI · generate-screens.py
-Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+VectiSuite UI · generate-screens.py
+Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 
-Bulk-generate every JouleSuite UI screen from text prompts via Google
+Bulk-generate every VectiSuite UI screen from text prompts via Google
 Stitch's MCP. Each entry specifies a slug, target device, and a detailed
 prompt referencing our DESIGN.md vocabulary.
 
@@ -57,7 +57,7 @@ def call(name, args, timeout=300):
 
 
 BASE_RULES = """
-Use the JouleSuite DESIGN.md vocabulary uploaded to this project:
+Use the VectiSuite DESIGN.md vocabulary uploaded to this project:
 - dark theme by default, near-black bg #08090f with subtle indigo+violet
   gradient blur blobs behind the page
 - single accent family: brand #6366f1 (indigo) + brand-2 #8b5cf6 (violet),
@@ -78,13 +78,13 @@ Use the JouleSuite DESIGN.md vocabulary uploaded to this project:
 
 SCREENS = [
     # ============================================================
-    # JouleDash — Real-time IoT dashboard
+    # VectiDash — Real-time IoT dashboard
     # ============================================================
     {"lib":"dash","slug":"dash-overview-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleDash dashboard — Overview tab — desktop 1280x900.
+VectiDash dashboard — Overview tab — desktop 1280x900.
 
 Sticky header (88% opaque bg, blurred): brand-gradient logo tile with bolt
-icon, title "JouleSuite EV Charger", subtitle "live dashboard", online status
+icon, title "VectiSuite EV Charger", subtitle "live dashboard", online status
 pill with pulsing green dot, theme toggle.
 
 Sticky pill tab bar below: Overview (active, font-weight 600, subtle filled
@@ -92,7 +92,7 @@ background), Energy, Controls, Diagnostics.
 
 Main 12-col grid:
 - Hero card col-span 12: brand-gradient 64px tile with bolt, small caps
-  "BAY 3 · JOULESUITE DEMO" label, 24px gradient-fill title
+  "BAY 3 · VECTISUITE DEMO" label, 24px gradient-fill title
   "Charging · 7.20 kW · 47%", muted subtitle "OCPP 1.6 · CCS2 connector ·
   32 A type-2 cable", two right pills: green "live" and indigo "RFID linked".
 - Four KPI cards col-span 3 each with left semantic strip:
@@ -109,7 +109,7 @@ Main 12-col grid:
 Dark palette, generous spacing, glass cards with sheen and crisp shadows.
 """},
     {"lib":"dash","slug":"dash-overview-mobile","device":"MOBILE","prompt":BASE_RULES+"""
-JouleDash dashboard — Overview tab — mobile 390x844.
+VectiDash dashboard — Overview tab — mobile 390x844.
 
 Same header + tabs (compressed). Tab bar horizontally scrollable,
 Overview active. Grid collapses to 2 columns:
@@ -121,7 +121,7 @@ Overview active. Grid collapses to 2 columns:
 Sticky bottom CTA brand-gradient "Pause session" button. 44px touch targets.
 """},
     {"lib":"dash","slug":"dash-energy-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleDash — Energy tab — desktop 1280x900. Same header. Energy tab active.
+VectiDash — Energy tab — desktop 1280x900. Same header. Energy tab active.
 
 Grid:
 - Four phase-detail KPI cards col-span 3: Voltage L1 230.4 V (info),
@@ -136,7 +136,7 @@ Grid:
 Chart card is the visual centrepiece.
 """},
     {"lib":"dash","slug":"dash-controls-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleDash — Controls tab — desktop 1280x900. Header + tabs unchanged.
+VectiDash — Controls tab — desktop 1280x900. Header + tabs unchanged.
 
 Grid of interactive widgets:
 - Start session toggle card col-span 3: big toggle on, brand gradient + glow
@@ -151,7 +151,7 @@ Grid of interactive widgets:
 - Driver RFID tag input col-span 6: text input "scan or type tag UID"
 """},
     {"lib":"dash","slug":"dash-diag-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleDash — Diagnostics tab — desktop 1280x900. Diagnostics active.
+VectiDash — Diagnostics tab — desktop 1280x900. Diagnostics active.
 
 Sensor & health cards:
 - PCB TEMPERATURE 38.4 C (warning) col-span 3 + sparkline
@@ -167,7 +167,7 @@ Bottom-right corner: success toast "Energy delivered: 3.132 kWh" with
 green left bar.
 """},
     {"lib":"dash","slug":"dash-widget-gallery","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleDash WIDGET GALLERY screen — every widget type in one dashboard,
+VectiDash WIDGET GALLERY screen — every widget type in one dashboard,
 desktop 1280x900. Three pill tabs: Display / Interactive / Indicators;
 Display active.
 
@@ -186,13 +186,13 @@ Each widget in standard card with sheen, shadow, hairline border.
 """},
 
     # ============================================================
-    # JouleOTA — Firmware updater
+    # VectiOTA — Firmware updater
     # ============================================================
     {"lib":"ota","slug":"ota-idle-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleOTA firmware updater — idle state — desktop 1280x900.
+VectiOTA firmware updater — idle state — desktop 1280x900.
 
 Centred max-width 780px column. Header: brand-gradient 36px logo with
-Lucide Upload icon, title "JouleSuite OTA", subtitle "drag a firmware to
+Lucide Upload icon, title "VectiSuite OTA", subtitle "drag a firmware to
 flash". Pulsing green "live" pill and theme toggle on right.
 
 Stacked cards:
@@ -215,7 +215,7 @@ Stacked cards:
 Background has subtle indigo+violet gradient blur blobs.
 """},
     {"lib":"ota","slug":"ota-uploading-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleOTA — uploading state — desktop 1280x900.
+VectiOTA — uploading state — desktop 1280x900.
 
 Same layout. UPLOAD card now shows progress under the dimmed drop-zone:
 - 96px SVG progress ring left: bg ring muted line colour, fg ring stroked
@@ -232,7 +232,7 @@ Below ring, small terminal-style log box (mono 11.5px) with 4 lines:
 Header, device card, maintenance card unchanged.
 """},
     {"lib":"ota","slug":"ota-pull-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleOTA — Pull URL mode — desktop 1280x900.
+VectiOTA — Pull URL mode — desktop 1280x900.
 
 Same layout. UPLOAD card: tab "Pull URL" active. Drop-zone replaced with
 mono URL input "https://builds.example.com/v1.2.3/firmware.bin". Below:
@@ -240,7 +240,7 @@ two buttons — primary brand-gradient "Pull & flash" with Lucide Cloud
 icon, ghost "Cancel".
 """},
     {"lib":"ota","slug":"ota-success-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleOTA — success state — desktop 1280x900.
+VectiOTA — success state — desktop 1280x900.
 
 Same layout as uploading. Progress ring at 100% solid brand gradient. Mono
 headline "100.0%". Subtitle "complete — rebooting in 3s". Log box ends with
@@ -248,7 +248,7 @@ green "done — rebooting" line. Bottom-right success toast "Update applied"
 with green ok left bar. Drop zone dimmed. Header status pill amber "updating".
 """},
     {"lib":"ota","slug":"ota-mobile","device":"MOBILE","prompt":BASE_RULES+"""
-JouleOTA — mobile 390x844, idle state.
+VectiOTA — mobile 390x844, idle state.
 
 Single column. Cards stack. Header has logo + title only. Device card uses
 single-column KV chips. Upload tabs wrap if needed. Drop-zone full width
@@ -256,15 +256,15 @@ min 260px tall. Maintenance buttons stack vertically.
 """},
 
     # ============================================================
-    # JouleSerial — Wireless console
+    # VectiSerial — Wireless console
     # ============================================================
     {"lib":"serial","slug":"serial-active-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleSerial wireless console — active stream — desktop 1280x900.
+VectiSerial wireless console — active stream — desktop 1280x900.
 
 Full-bleed layout (no central column). Three bands:
 
 Top header ~52px: brand-gradient 32px logo tile with Lucide Terminal icon,
-title "JouleSerial Console", mono sublabel "online · 3 clients" with
+title "VectiSerial Console", mono sublabel "online · 3 clients" with
 pulsing green dot. Theme toggle right.
 
 Toolbar ~48px under header, left to right:
@@ -285,7 +285,7 @@ then ink-colour message.
 
 Sample 18 lines mixing levels:
   12.847s INF HTTP server up
-  12.852s INF mDNS: http://joule-demo.local
+  12.852s INF mDNS: http://vecti-demo.local
   13.001s INF netState=connecting
   13.420s INF netState=connected
   14.012s DBG heap=246412 rssi=-86
@@ -300,7 +300,7 @@ brand-gradient "Send" pill with Lucide Send icon.
 Reads like a polished modern terminal app, not a generic web log.
 """},
     {"lib":"serial","slug":"serial-filter-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleSerial — filter applied — desktop 1280x900.
+VectiSerial — filter applied — desktop 1280x900.
 
 Same active screen but:
 - Search field contains "wifi|rssi" with yellow soft highlight
@@ -309,14 +309,14 @@ Same active screen but:
 - Total chip drops to 7
 """},
     {"lib":"serial","slug":"serial-hex-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleSerial — hex view — desktop 1280x900.
+VectiSerial — hex view — desktop 1280x900.
 
 Same layout. Toolbar "hex" pill active brand outline. Log rows show each
 message as hex byte pairs space-separated, eg
 "6e 65 74 53 74 61 74 65 3d 63 6f 6e 6e 65 63 74 65 64".
 """},
     {"lib":"serial","slug":"serial-mobile","device":"MOBILE","prompt":BASE_RULES+"""
-JouleSerial — mobile 390x844.
+VectiSerial — mobile 390x844.
 
 Single column. Header compressed; clients count under title. Toolbar wraps:
 row 1 filter+level+Auto, row 2 time/hex/font/export/clear. Stat chips hidden
@@ -325,13 +325,13 @@ bar bottom 80% input + small brand send button.
 """},
 
     # ============================================================
-    # JouleNet — Wi-Fi provisioning portal
+    # VectiNet — Wi-Fi provisioning portal
     # ============================================================
     {"lib":"net","slug":"net-scan-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleNet Wi-Fi portal — scanning state — desktop, centred 600px column on
+VectiNet Wi-Fi portal — scanning state — desktop, centred 600px column on
 dark bg with standard indigo+violet blur blobs.
 
-Header: brand-gradient 36px logo with Lucide Wifi icon, title "JouleSuite
+Header: brand-gradient 36px logo with Lucide Wifi icon, title "VectiSuite
 Setup", subtitle "pick a network · apply settings", theme toggle.
 
 Segmented control three tabs: "Wi-Fi" (active brand gradient pill, white,
@@ -347,10 +347,10 @@ input. Indigo link "Advanced (static IP · hostname · country)" — collapsed.
 Bottom of card: full-width primary brand-gradient "Connect" button with
 Lucide Power icon (disabled / dimmed because no SSID picked).
 
-Footer: "JouleNet · MIT · ESP32 / ESP8266 · Chinmoy Bhuyan".
+Footer: "VectiNet · Apache-2.0 · ESP32 / ESP8266 · Chinmoy Bhuyan".
 """},
     {"lib":"net","slug":"net-list-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleNet Wi-Fi portal — networks list — desktop.
+VectiNet Wi-Fi portal — networks list — desktop.
 
 Same header + tabs (Wi-Fi active). Same card. AVAILABLE NETWORKS section
 now shows 5 rows. Each row: 4-bar SVG signal indicator left (bars filled
@@ -365,18 +365,18 @@ Password input below contains "•••••••••". Connect button enab
 gradient ready.
 """},
     {"lib":"net","slug":"net-advanced-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleNet — advanced expanded — desktop.
+VectiNet — advanced expanded — desktop.
 
 Same card and selected network. "Advanced" link now "Advanced (static IP ·
 hostname · country)" expanded. Reveal block slides down:
-- HOSTNAME (mDNS) input with placeholder "joule-demo"
+- HOSTNAME (mDNS) input with placeholder "vecti-demo"
 - 2-col: COUNTRY input "IN" maxlength 2, STATIC IP input "(DHCP)"
 - 2-col: GATEWAY input, NETMASK input "255.255.255.0"
 
 Dark glass inputs with hairline borders that brighten to brand on focus.
 """},
     {"lib":"net","slug":"net-connecting-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleNet — connecting state — desktop.
+VectiNet — connecting state — desktop.
 
 Same card. Connect button busy: brand gradient slightly dimmed, contents
 replaced with Lucide RotateCcw spinning + "Connecting…", disabled.
@@ -385,13 +385,13 @@ Centered above network list: thin info-blue strip card with Lucide Info
 icon, "Trying Rajesh k…", small mono "attempt 1 of 3" right.
 """},
     {"lib":"net","slug":"net-setup-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleNet — Setup (parameters) tab — desktop.
+VectiNet — Setup (parameters) tab — desktop.
 
 Segmented tabs: Wi-Fi, "Setup" active brand-gradient pill, Status.
 
 PARAMETERS form:
 - Section header "APPLICATION" brand indigo small caps
-- Charger name TEXT input "Bay 3 · JouleSuite Demo"
+- Charger name TEXT input "Bay 3 · VectiSuite Demo"
 - MQTT host TEXT input "broker.local"
 - 2-col: MQTT port NUMBER "1883" / MQTT password PASSWORD dots
 - Region DROPDOWN "IN"
@@ -404,7 +404,7 @@ PARAMETERS form:
 Big primary brand-gradient "Save settings" button bottom.
 """},
     {"lib":"net","slug":"net-status-desktop","device":"DESKTOP","prompt":BASE_RULES+"""
-JouleNet — Status tab — desktop.
+VectiNet — Status tab — desktop.
 
 Segmented tabs: Status active brand-gradient pill.
 
@@ -418,8 +418,8 @@ Live diagnostics KV rows separated by dashed hairlines:
   BSSID     28:EE:52:EA:23:FC
   CHANNEL   10
   RSSI      -86 dBm
-  HOSTNAME  joule-demo
-  mDNS      joule-demo.local
+  HOSTNAME  vecti-demo
+  mDNS      vecti-demo.local
   MAC       D0:CF:13:73:0A:B8
   HEAP      245 KB
   UPTIME    246 s
@@ -428,7 +428,7 @@ Bottom row: ghost "Restart" left, red gradient destructive "Erase & reboot"
 right with Lucide Trash2 icon.
 """},
     {"lib":"net","slug":"net-mobile","device":"MOBILE","prompt":BASE_RULES+"""
-JouleNet — mobile 390x844 — Wi-Fi tab, networks listed.
+VectiNet — mobile 390x844 — Wi-Fi tab, networks listed.
 
 Single full-width card. Compressed logo + title. Segmented tab row scrolls
 horizontally if needed. 5 network rows full card width with signal bars,

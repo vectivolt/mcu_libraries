@@ -1,5 +1,5 @@
 // ---------------------------------------------------------------------------
-// JouleSuite UI · chart regression check
+// VectiSuite UI · chart regression check
 //
 //   node scripts/check-charts.mjs          # needs `npm run build` first
 //
@@ -13,7 +13,7 @@
 // path builder.
 //
 // Starts tools/mock_device.js itself if nothing is listening on 3137.
-// (c) 2026 VectiVolt — MIT License
+// (c) 2026 VectiVolt — Apache-2.0 License
 // ---------------------------------------------------------------------------
 import { chromium } from "playwright";
 import { spawn } from "node:child_process";

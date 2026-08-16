@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------------------
-// JouleSuite UI · JouleDash
-// Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+// VectiSuite UI · VectiDash
+// Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 // ---------------------------------------------------------------------------
 //
-// Builds the JouleDash Svelte 5 SPA into a SINGLE self-contained HTML file
+// Builds the VectiDash Svelte 5 SPA into a SINGLE self-contained HTML file
 // at `dist/dash.html`. `scripts/embed-progmem.js` then gzips that file and
-// writes the bytes to `libraries/JouleDash/src/JouleDash_ui_gz.h` so the
+// writes the bytes to `libraries/VectiDash/src/VectiDash_ui_gz.h` so the
 // ESP serves it directly from flash with `Content-Encoding: gzip`.
 
 import { defineConfig } from "vite";

@@ -1,6 +1,6 @@
 // ---------------------------------------------------------------------------
-// JouleSuite UI · screenshot
-// Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+// VectiSuite UI · screenshot
+// Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 // ---------------------------------------------------------------------------
 //
 // In-process screenshot pipeline using Playwright. Replaces the fragile
@@ -25,19 +25,19 @@ mkdirSync(OUT, { recursive: true });
 
 const SHOTS = [
   // ---- Desktop 1280×900 ----
-  { name: "dash-desktop-overview",  path: "/dash",                w: 1280, h: 900,  wait: ".joule-card", hold: 2500 },
-  { name: "dash-desktop-energy",    path: "/dash#energy",         w: 1280, h: 900,  wait: ".joule-card", hold: 2500 },
-  { name: "dash-desktop-controls",  path: "/dash#controls",       w: 1280, h: 900,  wait: ".joule-card", hold: 1500 },
-  { name: "dash-desktop-diag",      path: "/dash#diagnostics",    w: 1280, h: 900,  wait: ".joule-card", hold: 2500 },
-  { name: "ota-desktop",            path: "/ota",                 w: 1280, h: 900,  wait: ".joule-card", hold: 1500 },
-  { name: "wifi-desktop",           path: "/wifi",                w: 1280, h: 1100, wait: ".joule-card", hold: 3000 },
+  { name: "dash-desktop-overview",  path: "/dash",                w: 1280, h: 900,  wait: ".vecti-card", hold: 2500 },
+  { name: "dash-desktop-energy",    path: "/dash#energy",         w: 1280, h: 900,  wait: ".vecti-card", hold: 2500 },
+  { name: "dash-desktop-controls",  path: "/dash#controls",       w: 1280, h: 900,  wait: ".vecti-card", hold: 1500 },
+  { name: "dash-desktop-diag",      path: "/dash#diagnostics",    w: 1280, h: 900,  wait: ".vecti-card", hold: 2500 },
+  { name: "ota-desktop",            path: "/ota",                 w: 1280, h: 900,  wait: ".vecti-card", hold: 1500 },
+  { name: "wifi-desktop",           path: "/wifi",                w: 1280, h: 1100, wait: ".vecti-card", hold: 3000 },
   { name: "serial-desktop",         path: "/serial",              w: 1280, h: 900,  wait: "header",      hold: 2500 },
 
   // ---- Mobile 390×844 (iPhone 14) ----
-  { name: "dash-mobile-overview",   path: "/dash",                w: 390,  h: 844,  wait: ".joule-card", hold: 2500 },
-  { name: "dash-mobile",            path: "/dash",                w: 390,  h: 844,  wait: ".joule-card", hold: 2500 },
-  { name: "ota-mobile",             path: "/ota",                 w: 390,  h: 844,  wait: ".joule-card", hold: 1500 },
-  { name: "wifi-mobile",            path: "/wifi",                w: 390,  h: 900,  wait: ".joule-card", hold: 3000 },
+  { name: "dash-mobile-overview",   path: "/dash",                w: 390,  h: 844,  wait: ".vecti-card", hold: 2500 },
+  { name: "dash-mobile",            path: "/dash",                w: 390,  h: 844,  wait: ".vecti-card", hold: 2500 },
+  { name: "ota-mobile",             path: "/ota",                 w: 390,  h: 844,  wait: ".vecti-card", hold: 1500 },
+  { name: "wifi-mobile",            path: "/wifi",                w: 390,  h: 900,  wait: ".vecti-card", hold: 3000 },
   { name: "serial-mobile",          path: "/serial",              w: 390,  h: 844,  wait: "header",      hold: 2000 },
 ];
 

@@ -11,7 +11,7 @@ Run from the repo root:
 import pathlib, re, json
 
 AUTHOR = "Chinmoy Bhuyan"
-EMAIL  = "dikibhuyan@gmail.com"
+EMAIL  = "chinmoy@joulepoint.com"
 YEAR   = "2026"
 ROOT   = pathlib.Path(__file__).resolve().parent.parent
 
@@ -31,10 +31,10 @@ HEADER_MARK = "Author: Chinmoy Bhuyan"  # presence test for idempotency
 # Words in library.json that came from the reference projects. We swap them
 # for our own brand-aligned keywords.
 KEYWORD_MAP = {
-    "netwizard":  "joulenet",
-    "elegantota": "jouleota",
-    "espdash":    "jouledash",
-    "webserial":  "jouleserial",
+    "netwizard":  "vectinet",
+    "elegantota": "vectiota",
+    "espdash":    "vectidash",
+    "webserial":  "vectiserial",
 }
 
 def stamp_text(src: str, ext: str) -> str:
@@ -45,10 +45,10 @@ def stamp_text(src: str, ext: str) -> str:
         return src
     block = (
         f"{c} ---------------------------------------------------------------------------\n"
-        f"{c} JouleSuite for ESP32 / ESP8266 — JouleOTA · JouleSerial · JouleNet · JouleDash\n"
+        f"{c} VectiSuite for ESP32 / ESP8266 — VectiOTA · VectiSerial · VectiNet · VectiDash\n"
         f"{c} Author: {AUTHOR}\n"
         f"{c} Email:  {EMAIL}\n"
-        f"{c} (c) {YEAR} — MIT License\n"
+        f"{c} (c) {YEAR} — Apache-2.0 License\n"
         f"{c} ---------------------------------------------------------------------------\n\n"
     )
     return block + src

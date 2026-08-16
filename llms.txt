@@ -1,0 +1,140 @@
+# VectiSuite
+
+> Four Apache-2.0 Arduino/PlatformIO libraries for ESP32 that give an embedded
+> product a web stack served from the MCU's own flash: OTA firmware updates
+> (VectiOTA), a wireless serial console (VectiSerial), Wi-Fi provisioning with a
+> captive portal (VectiNet), and a realtime dashboard with 50 DashType types —
+> 49 widgets plus Custom, the raw-HTML escape hatch (VectiDash). All four mount onto one AsyncWebServer. Vendor: VectiVolt.
+> Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>.
+
+Three rules that prevent most broken generated code:
+1. Every library has a mandatory per-loop hook. Skip it and the library silently does nothing.
+2. Never block on the AsyncTCP task. Set a flag in the callback; act in loop().
+3. Every VectiDash value crosses the wire as a string, in both directions.
+
+## Docs
+
+- [AGENTS.md](AGENTS.md): the short brief for coding agents — sketch shape, one gotcha per library, version floor.
+- [docs/AI-AGENT-GUIDE.md](docs/AI-AGENT-GUIDE.md): the deep reference — every method signature, all 49 widgets, both wire protocols, wrong→right code pairs. Read this one if you are writing firmware.
+- [README.md](README.md): human-facing overview.
+- Headers are ground truth: `libraries/VectiOTA/src/VectiOTA.h`, `libraries/VectiSerial/src/VectiSerial.h`, `libraries/VectiNet/src/VectiNet.h`, `libraries/VectiDash/src/VectiDash.h`.
+- Working sketches: `libraries/*/examples/*/*.ino`. All four at once: `demo/src/main.cpp`, `demo/platformio.ini`.
+- Widget contract for the browser side: `ui/shared/widgets/CONTRACT.md`, registry in `ui/shared/widgets/index.js`.
+
+## The four libraries
+
+- VectiOTA — firmware + filesystem OTA. Browser drag-drop and pull-from-URL, HMAC-SHA256 signing, A/B rollback, SSE progress, per-IP rate limiting. Routes: /ota /ota/info /ota/upload /ota/pull /ota/events /ota/commit /ota/rollback. Loop hook: VectiOTA.loop(). Targets ESP32 and ESP8266.
+- VectiSerial — wireless console over WebSocket. Four log levels, printf helpers, ring-buffer history replay, command input. Routes: /serial /serial/ws. Loop hook: VectiSerial.loop(). ESP32.
+- VectiNet — Wi-Fi provisioning. Up to 8 saved SSIDs with failover, captive portal, 10 custom-parameter types persisted in NVS, static IP, mDNS, country code. Routes: /wifi /wifi/scan /wifi/connect /wifi/status /wifi/params /wifi/reset /wifi/restart plus the OS probe URLs /generate_204 /gen_204 /hotspot-detect.html /ncsi.txt. Loop hook: VectiNet.loop(). ESP32 only — the header #errors elsewhere.
+- VectiDash — realtime dashboard over one WebSocket. 49 widgets plus Custom, tabs, dark/light/auto theme, notifications, optional anonymous read-only mode. Routes: / (302 to /dash) /dash /dash/login /dash/ws. Loop hook: VectiDash.tick(). ESP32.
+
+C++ namespace is `vecti::`. The globals `VectiOTA`, `VectiSerial`, `VectiNet`, `VectiDash` are declared by the headers — do not instantiate your own.
+
+## Dependency floor
+
+- ESPAsyncWebServer ^3.11.0 — a hard floor. All four libraries call `AsyncURIMatcher::exact()`, which does not exist below 3.11.0.
+- AsyncURIMatcher ships in ESPAsyncWebServer, NOT in the Arduino ESP32 core. Older docs get this wrong.
+- AsyncTCP ^3.4.0 (VectiDash pins ^3.4.10; resolve to >=3.4.10 to satisfy all four).
+- ArduinoJson ^7.4.0 — needed by VectiOTA, VectiNet, VectiDash. VectiSerial has no JSON dependency.
+- The demo builds on arduino-esp32 2.0.17, platform espressif32 6.13.0, with -std=gnu++17.
+- Add `lib_ignore = AsyncTCP_RP2040W, ESPAsyncTCP` if a global PlatformIO store may hold other async TCP ports.
+
+## Canonical sketch shape
+
+    #include <WiFi.h>
+    #include <ESPAsyncWebServer.h>
+    #include <VectiDash.h>
+
+    AsyncWebServer server(80);
+    vecti::DashCard temp(vecti::DashType::Number, "temp", "Temperature", "C");
+
+    float readTemp() { return 20.0f + (millis() % 20) * 0.1f; }
+
+    void setup() {
+      WiFi.mode(WIFI_STA);
+      WiFi.begin("SSID", "PASS");
+      while (WiFi.status() != WL_CONNECTED) delay(200);
+      VectiDash.add(&temp);                      // card must be global/static
+      VectiDash.begin(&server, "admin", "vecti");
+      server.begin();                            // after every library begin()
+    }
+
+    void loop() {
+      temp.setValue(readTemp());
+      VectiDash.tick();                          // mandatory
+    }
+
+## Threading model
+
+Two tasks exist: the AsyncTCP task (all HTTP handlers and WebSocket callbacks) and the Arduino loop() task.
+
+- DashCardBase::onChange runs on the loop() task, from inside VectiDash.tick(). A slow callback delays your own loop, not the server.
+- VectiSerial::onMessage runs on the AsyncTCP task. No delay(), no ESP.restart(), no flash/NVS writes. Logging from it is safe.
+- VectiOTA::onStart/onProgress/onEnd/onError/onBeforeReboot run on the AsyncTCP task. Same rules.
+- VectiNet::onState and onConfig always run on the loop() task, even when an HTTP POST caused the change.
+
+Blocking on the AsyncTCP task stalls every connection on the device, and ESP.restart() there tears the TCP stack down from inside its own callback. The libraries defer every reboot for this reason, which is why their loop() hooks are mandatory. The fix is always: `volatile bool flag` set in the callback, acted on in loop().
+
+## VectiDash DashType types (50 = 49 widgets + Custom)
+
+Enum DashType -> renderer key. All values are strings; structured widgets carry JSON inside the string.
+
+Readouts (14): Number/number (a number) · Text/text (any string) · Status/status (word matched by regex: ok|online|connect|valid|success|live|good|ready starts green, warn|degrad|pending amber, err|off|fail|invalid|fault|alarm red) · Badge/badge (short string) · Led/led ("1"/"0"/"true"/"false"/"on"/"blink") · Temperature/temperature (number) · Humidity/humidity (number) · Battery/battery (percent, trailing "+" means charging) · Signal/signal (dBm) · Uptime/uptime (seconds) · Table/table ([["k","v"],...] JSON or "k=v;k=v") · LogView/logview (["line"] JSON or newline-separated) · Image/image (http(s)/data URL, else bare base64 PNG) · Sparkline/sparkline ([1,2,3] JSON or "1,2,3").
+
+Meters (8), all read setRange(lo,hi): Gauge/gauge · Dial/dial · Donut/donut · Progress/progress · Bar/bar (setStep() also draws a threshold marker) · Level/level · Compass/compass (degrees, wrapped 0-360) · Thermo/thermo.
+
+Charts (5): Chart/chart ({"x":[],"y":[]} — use chartPushXY(), NOT setValue()) · MultiChart/multichart ({"x":[],"s":[{"n":"L1","y":[]}]}, max 5 series) · Histogram/histogram ({"l":[],"v":[]}, max 24 bars) · Scatter/scatter ({"x":[],"y":[]}, max 400 points) · Heatmap/heatmap ({"w":8,"v":[]} row-major, w<=64, cells truncated at 2048).
+
+Controls (20): Button/button (sends "1") · ConfirmButton/confirm (sends "1" on a second click within 3 s) · Momentary/momentary (sends "1" pressed, "0" released) · Switch/switch ("1"/"0") · Slider/slider (number in min..max) · RangeSlider/range ("lo,hi") · Stepper/stepper (number, stepped) · Dropdown/dropdown (one option from setOptions) · Radio/radio (one option) · Checklist/checklist (pipe-joined subset, "A|B") · Input/input (free text; unit is the placeholder) · Textarea/textarea · Password/password · Keypad/keypad (digits, sends on Enter) · Joystick/joystick ("x,y" each -100..100, releases to "0,0") · XYPad/xypad ("x,y" each 0..100, centre "50,50") · Knob/knob (number, snapped to step) · Color/color (#rrggbb) · DateTime/datetime (Unix epoch SECONDS) · QrCode/qrcode (payload string; setOptions carries EC level L|M|Q|H).
+
+Layout (3): Header/header (label only, no chrome) · Divider/divider · Custom/custom (setCustomHtml() supplies markup; setValue() is injected into `<span id="dash-<id>-out">`; a <script> in the snippet never executes).
+
+Choice widgets read their options from setOptions("A|B|C").
+
+## Wire protocol summary
+
+VectiDash WebSocket /dash/ws. Client sends {"type":"hello"} or {"type":"cmd","id":"<cardId>","value":"<string>"}. Server sends {"type":"layout",...}, {"type":"upd","cards":[{"id","value"}]}, {"type":"notify","level","message","ttl"}. Layout cards always carry id,type,label,unit,color,tab,min,max,step,width,hidden,chartType,value plus custom/opts when non-empty. Inbound message limit 4096 bytes; at most 32 queued cmd frames per tick(). Auth uses a per-boot ticket cookie (jdash=<hex>) planted by GET /dash or /dash/login, because browsers cannot attach Basic credentials to a WebSocket upgrade.
+
+VectiSerial WebSocket /serial/ws?since=<seq>. Client sends {"type":"cmd","text":"..."} — single frame only, no reassembly. Server sends hist frames ({"type":"hist","boot","title","brand","lines":[{seq,ms,lvl,text}]}, max 64 lines per frame), line frames ({"type":"line","seq","ms","lvl","text"}), and clients frames ({"type":"clients","n"}). lvl is 0=DEBUG 1=INFO 2=WARN 3=ERROR. seq is 64-bit: (bootId << 32) + line number, rising across reboots — parse with strtoull or Number(), never toInt().
+
+VectiOTA HTTP. GET /ota/info returns hwId,fwVersion,title,brand,freeHeap,currentSlot,nextSlot,freeOta,slotState,updating,allowFw,allowFs,allowPull. POST /ota/upload takes a multipart body, ?mode=firmware|filesystem, and header X-Vecti-Signature when a signing key is set. POST /ota/pull takes {"url":"...","mode":"firmware"} and answers 202 queued. GET /ota/events is an SSE stream with `progress` ({"written","total","mode"}, emitted every ~32 KB) and `status` events. POST /ota/commit and POST /ota/rollback. In OtaAuth::Token mode /ota/events is denied by design — a browser cannot attach a custom header to an EventSource, so there is no live progress in token mode.
+
+VectiNet HTTP JSON. GET /wifi/scan returns cached results ({"networks":[{ssid,rssi,ch,bssid,sec}]}) and refreshes on a 10 s cooldown. POST /wifi/connect takes {ssid,password,hidden,hostname,countryCode,staticIp,gateway,netmask,dns,dhcp}; absent static-IP fields mean unchanged, not cleared — clearing takes {"dhcp":true}. GET/POST /wifi/params. GET /wifi/status returns state as the NetState integer (0 Idle, 1 Connecting, 2 Connected, 3 Portal, 4 Failed). POST /wifi/reset wipes NVS and reboots; POST /wifi/restart just reboots.
+
+## Common mistakes
+
+- Blocking or rebooting inside VectiSerial.onMessage or a VectiOTA callback. Set a flag; act in loop().
+- Omitting VectiDash.tick() / VectiSerial.loop() / VectiOTA.loop() / VectiNet.loop(). Each fails silently and differently.
+- `parseFloat(v) || min` in a widget — a legitimate 0 is falsy. Use a finite check (that is what num() in ui/shared/lib/net.js does).
+- Calling setValue() on a chart card instead of chartPushXY() / chartSetSeries().
+- Assuming onChange hands you a number. The signature is std::function<void(const String &)>.
+- Declaring a DashCard as a setup() local. VectiDash.add() stores the pointer — the card must outlive it.
+- Calling VectiNet.addParameter() after VectiNet.begin(). Parameters must be registered first.
+- Ignoring VectiNet.saveCredentials()'s bool return — there are 8 NVS slots and it returns false when full.
+- Arming setRollbackTimeoutMs() and never calling VectiOTA.commit(); the bootloader reverts and the update "doesn't stick".
+- Mounting your own handler on a reserved path. Reserved: / /dash* /ota* /serial* /wifi* /generate_204 /gen_204 /hotspot-detect.html /ncsi.txt. Use AsyncURIMatcher::exact() on your own routes so they cannot swallow sub-paths under the 3.x BackwardCompatible default.
+- Pinning ESPAsyncWebServer below ^3.11.0.
+
+## Measured sizes
+
+Gzipped PROGMEM UI blob (what costs flash): VectiDash 46,811 B (155,079 B raw) · VectiNet 28,498 B (82,969 B raw) · VectiOTA 25,822 B (71,475 B raw) · VectiSerial 24,862 B (67,383 B raw). Total embedded UI 125,993 bytes (about 126 kB).
+
+A demo exercising all four on an ESP32-S3 (8 MB flash, default_8MB.csv): flash 1,226,013 bytes (36.7% of 3,342,336), RAM 62,440 bytes (19.1% of 327,680).
+
+## Platform support
+
+ESP32 verified (built and run on ESP32-S3). VectiOTA also declares espressif8266 and has real ESP8266 code paths (Updater.h, BearSSL HMAC); ESP8266 is not claimed or tested for VectiSerial, VectiNet or VectiDash. What is ESP-specific in this code: esp_ota_ops, NVS Preferences, ESPmDNS, mbedtls. RP2040/RP2350+W is a plausible future target. STM32 and NXP are not — no async web server, no onboard Wi-Fi.
+
+## Verified vs not verified
+
+Verified on real hardware (ESP32-S3 rev v0.2, QFN56, 8 MB flash, 2 MB PSRAM): flashes with esptool hash verified; boots cleanly with PSRAM up and no reset loop; HTTP server starts and / /dash /ota /serial /wifi register; mDNS starts; with no stored credentials it correctly enters the captive-portal state; no memory leak (heap went flat at 244,188 B from about 72 s in a soak and stayed flat).
+
+NOT verified — the device was exercised over USB serial only and never joined to a LAN: HTTP endpoints serving real responses over the network, the WebSocket dashboard against real hardware, OTA upload/pull/rollback on real hardware, captive-portal provisioning end to end.
+
+VectiSuite is new. No users yet, no CI, no test suite, not in the Arduino Library Manager.
+
+## Licensing
+
+VectiSuite's own code is Apache-2.0. It links ESPAsyncWebServer and AsyncTCP, both LGPL-3.0. There is no dynamic linking on an MCU, so LGPL section 4 relink obligations attach to the shipped binary. Do not claim this stack has zero copyleft obligations — it does not. Every comparable library in this space inherits the same dependency.
+
+VectiOTA's HMAC firmware signing is symmetric: the key ships inside the firmware image, so anyone who can read the image can forge a signature. Asymmetric signing (Ed25519) is a known future improvement, not a shipped feature. The VectiDash ticket cookie and HTTP Basic credentials are plaintext on the wire — put the device behind TLS or a trusted LAN.

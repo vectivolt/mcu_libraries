@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 # ---------------------------------------------------------------------------
-# JouleSuite for ESP32 / ESP8266 — JouleOTA · JouleSerial · JouleNet · JouleDash
+# VectiSuite for ESP32 / ESP8266 — VectiOTA · VectiSerial · VectiNet · VectiDash
 # Author: Chinmoy Bhuyan
-# Email:  dikibhuyan@gmail.com
-# (c) 2026 — MIT License
+# Email:  chinmoy@joulepoint.com
+# (c) 2026 VectiVolt — Apache-2.0 License
 # ---------------------------------------------------------------------------
 #
 # Captures screenshots of the live ESP-served UIs through the local proxy
@@ -32,7 +32,7 @@ ensure_proxy() {
   /usr/bin/lsof -t -i ":${PROXY_PORT}" 2>/dev/null | /usr/bin/xargs -r kill -9 2>/dev/null
   sleep 1
   /usr/bin/nohup /usr/bin/env "PORT=${PROXY_PORT}" "ESP_HOST=${ESP_HOST}" \
-    node /tmp/evse-bench-shell/proxy.js >/tmp/joule_proxy.log 2>&1 </dev/null &
+    node /tmp/evse-bench-shell/proxy.js >/tmp/vecti_proxy.log 2>&1 </dev/null &
   disown
   sleep 3
   /usr/bin/curl -s --max-time 5 -o /dev/null \

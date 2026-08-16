@@ -1,21 +1,21 @@
 // ---------------------------------------------------------------------------
-// JouleSuite for ESP32 / ESP8266 — JouleOTA · JouleSerial · JouleNet · JouleDash
+// VectiSuite for ESP32 / ESP8266 — VectiOTA · VectiSerial · VectiNet · VectiDash
 // Author: Chinmoy Bhuyan
-// Email:  dikibhuyan@gmail.com
-// (c) 2026 — MIT License
+// Email:  chinmoy@joulepoint.com
+// (c) 2026 VectiVolt — Apache-2.0 License
 // ---------------------------------------------------------------------------
 //
-// JouleSuite combined demo for ESP32-S3 N8R2.
+// VectiSuite combined demo for ESP32-S3 N8R2.
 //
 // Spins up a polished, EV-charger-themed dashboard that exercises every
-// widget type in JouleDash plus the OTA / Serial / Wi-Fi UIs at the same
+// widget type in VectiDash plus the OTA / Serial / Wi-Fi UIs at the same
 // time. All four libraries share one AsyncWebServer instance.
 //
-//   /         → JouleDash (302 → /dash)
-//   /dash     → JouleDash · 4 tabs of live energy / status / control widgets
-//   /ota      → JouleOTA  · drag-drop firmware updater
-//   /serial   → JouleSerial · wireless console
-//   /wifi     → JouleNet  · provisioning portal + custom params
+//   /         → VectiDash (302 → /dash)
+//   /dash     → VectiDash · 4 tabs of live energy / status / control widgets
+//   /ota      → VectiOTA  · drag-drop firmware updater
+//   /serial   → VectiSerial · wireless console
+//   /wifi     → VectiNet  · provisioning portal + custom params
 //
 // Simulated telemetry is sized to look like a real 7.2 kW Level-2 AC
 // charging session so the dashboard screenshot is meaningful, not toy.
@@ -24,10 +24,10 @@
 #include <WiFi.h>
 #include <ESPAsyncWebServer.h>
 
-#include <JouleOTA.h>
-#include <JouleSerial.h>
-#include <JouleNet.h>
-#include <JouleDash.h>
+#include <VectiOTA.h>
+#include <VectiSerial.h>
+#include <VectiNet.h>
+#include <VectiDash.h>
 
 #include <math.h>
 
@@ -62,13 +62,13 @@ static constexpr const char *BRAND_HEX       = "#0fd08c";
 
 AsyncWebServer server(80);
 
-using joule::DashCard;
-using joule::DashType;
-using joule::DashColor;
+using vecti::DashCard;
+using vecti::DashType;
+using vecti::DashColor;
 
 // ---- Overview tab — hero + live energy / session telemetry ----------------
 
-DashCard hero    (DashType::Custom,      "hero",   "JouleSuite EV charger");
+DashCard hero    (DashType::Custom,      "hero",   "VectiSuite EV charger");
 DashCard cPower  (DashType::Number,      "pwr",    "Power output",   "kW");
 DashCard cEnergy (DashType::Number,      "kwh",    "Energy delivered","kWh");
 DashCard cCost   (DashType::Number,      "cost",   "Session cost",   "₹");
@@ -112,7 +112,7 @@ DashCard cRssiCh (DashType::Chart,       "rch",    "RSSI history");
 
 // ---- Widgets tab — one card per remaining DashType, so a hardware smoke test
 // ---- exercises the whole catalogue rather than the handful the demo uses. ----
-using joule::DashType;
+using vecti::DashType;
 DashCard wHdr1 (DashType::Header,       "wh1",  "Readouts");
 DashCard wText (DashType::Text,         "wtx",  "Build");
 DashCard wBadge(DashType::Badge,        "wbg",  "Mode");
@@ -181,66 +181,66 @@ static void seedDefaultWiFiIfEmpty() {
   // match a hard-coded SSID, so flashing the demo de-provisioned the device.
   if (DEFAULT_SSID[0] == '\0') return;
 
-  for (auto &n : JouleNet.savedNetworks()) if (n.ssid == DEFAULT_SSID) return;
-  JouleSerial.inf("Seeding build-time Wi-Fi '%s'", DEFAULT_SSID);
-  JouleNet.saveCredentials(DEFAULT_SSID, DEFAULT_PASS);
+  for (auto &n : VectiNet.savedNetworks()) if (n.ssid == DEFAULT_SSID) return;
+  VectiSerial.inf("Seeding build-time Wi-Fi '%s'", DEFAULT_SSID);
+  VectiNet.saveCredentials(DEFAULT_SSID, DEFAULT_PASS);
 }
 
 static void setupNet() {
-  JouleNet.setApCredentials(AP_FALLBACK_SSID, "");
-  JouleNet.setHostname(HOSTNAME);
-  JouleNet.setMdnsName(HOSTNAME);
-  JouleNet.setPortalTimeoutMs(0);
-  JouleNet.setConnectTimeoutMs(20000);
-  JouleNet.setReprovisionMs(120000);
-  JouleNet.setBrandColor(BRAND_HEX);
-  JouleNet.setTitle("JouleSuite Setup");
+  VectiNet.setApCredentials(AP_FALLBACK_SSID, "");
+  VectiNet.setHostname(HOSTNAME);
+  VectiNet.setMdnsName(HOSTNAME);
+  VectiNet.setPortalTimeoutMs(0);
+  VectiNet.setConnectTimeoutMs(20000);
+  VectiNet.setReprovisionMs(120000);
+  VectiNet.setBrandColor(BRAND_HEX);
+  VectiNet.setTitle("VectiSuite Setup");
 
   // Custom parameters covering every supported type.
-  JouleNet.addParameter({"sec1",    "Application",  joule::NetParamType::Header,  "","","",0,0});
-  JouleNet.addParameter({"name",    "Charger name", joule::NetParamType::Text,    "Bay 3 · JouleSuite Demo","display name","",0,0});
-  JouleNet.addParameter({"mqtt_h",  "MQTT host",    joule::NetParamType::Text,    "broker.local","fqdn or ip","",0,0});
-  JouleNet.addParameter({"mqtt_p",  "MQTT port",    joule::NetParamType::Number,  "1883","","",1,65535});
-  JouleNet.addParameter({"mqtt_pw", "MQTT password",joule::NetParamType::Password,"","","",0,0});
-  JouleNet.addParameter({"region",  "Region",       joule::NetParamType::Dropdown,"IN","","EU|US|APAC|IN|other",0,0});
-  JouleNet.addParameter({"accent",  "Accent colour",joule::NetParamType::Color,   BRAND_HEX,"","",0,0});
-  JouleNet.addParameter({"verbose", "Verbose logs", joule::NetParamType::Toggle,  "1","","",0,0});
-  JouleNet.addParameter({"sec2",    "Notes",        joule::NetParamType::Divider, "","","",0,0});
-  JouleNet.addParameter({"notes",   "Site notes",   joule::NetParamType::Textarea,
+  VectiNet.addParameter({"sec1",    "Application",  vecti::NetParamType::Header,  "","","",0,0});
+  VectiNet.addParameter({"name",    "Charger name", vecti::NetParamType::Text,    "Bay 3 · VectiSuite Demo","display name","",0,0});
+  VectiNet.addParameter({"mqtt_h",  "MQTT host",    vecti::NetParamType::Text,    "broker.local","fqdn or ip","",0,0});
+  VectiNet.addParameter({"mqtt_p",  "MQTT port",    vecti::NetParamType::Number,  "1883","","",1,65535});
+  VectiNet.addParameter({"mqtt_pw", "MQTT password",vecti::NetParamType::Password,"","","",0,0});
+  VectiNet.addParameter({"region",  "Region",       vecti::NetParamType::Dropdown,"IN","","EU|US|APAC|IN|other",0,0});
+  VectiNet.addParameter({"accent",  "Accent colour",vecti::NetParamType::Color,   BRAND_HEX,"","",0,0});
+  VectiNet.addParameter({"verbose", "Verbose logs", vecti::NetParamType::Toggle,  "1","","",0,0});
+  VectiNet.addParameter({"sec2",    "Notes",        vecti::NetParamType::Divider, "","","",0,0});
+  VectiNet.addParameter({"notes",   "Site notes",   vecti::NetParamType::Textarea,
                          "Bay 3, ground floor.\nMounted on west pillar.\nKey under reception.","free-form","",0,0});
 
-  JouleNet.begin(&server);
+  VectiNet.begin(&server);
   seedDefaultWiFiIfEmpty();
 
-  JouleNet.onState([](joule::NetState s){
+  VectiNet.onState([](vecti::NetState s){
     const char *names[] = {"idle","connecting","connected","portal","failed"};
-    JouleSerial.inf("netState=%s", names[(int)s]);
-    if (s == joule::NetState::Connected) {
-      JouleDash.notify(joule::NotifyLevel::Success,
+    VectiSerial.inf("netState=%s", names[(int)s]);
+    if (s == vecti::NetState::Connected) {
+      VectiDash.notify(vecti::NotifyLevel::Success,
         String("Connected: ") + WiFi.SSID() + " · " + WiFi.localIP().toString());
     }
   });
 }
 
 static void setupOta() {
-  JouleOTA.setID(WiFi.macAddress());
-  JouleOTA.setFWVersion(FW_VERSION);
-  JouleOTA.setTitle("JouleSuite OTA");
-  JouleOTA.setBrandColor(BRAND_HEX);
-  JouleOTA.setRateLimitMs(2000);
+  VectiOTA.setID(WiFi.macAddress());
+  VectiOTA.setFWVersion(FW_VERSION);
+  VectiOTA.setTitle("VectiSuite OTA");
+  VectiOTA.setBrandColor(BRAND_HEX);
+  VectiOTA.setRateLimitMs(2000);
 
-  JouleOTA.onProgress([](size_t cur, size_t tot){
+  VectiOTA.onProgress([](size_t cur, size_t tot){
     static int last = -5;
     int pct = tot ? (int)((cur * 100) / tot) : 0;
-    if (pct >= last + 5) { last = pct; JouleSerial.dbg("OTA %d%%", pct); }
+    if (pct >= last + 5) { last = pct; VectiSerial.dbg("OTA %d%%", pct); }
   });
-  JouleOTA.onEnd([](bool ok, const String &m){
-    JouleSerial.inf("OTA end ok=%d msg=%s", ok, m.c_str());
-    JouleDash.notify(ok ? joule::NotifyLevel::Success : joule::NotifyLevel::Error,
+  VectiOTA.onEnd([](bool ok, const String &m){
+    VectiSerial.inf("OTA end ok=%d msg=%s", ok, m.c_str());
+    VectiDash.notify(ok ? vecti::NotifyLevel::Success : vecti::NotifyLevel::Error,
                      ok ? "Update complete — rebooting" : (String("Update failed: ") + m));
   });
 
-  JouleOTA.begin(&server, "", "");        // demo: no auth (see README)
+  VectiOTA.begin(&server, "", "");        // demo: no auth (see README)
 
   // Mark the running image good only after the device has actually proven it
   // works. Calling commit() unconditionally here would cancel the rollback
@@ -251,30 +251,30 @@ static void setupOta() {
 }
 
 static void setupSerial() {
-  JouleSerial.setTitle("JouleSuite Console");
-  JouleSerial.setBrandColor("#10b981");
-  JouleSerial.setHistorySize(512);
-  JouleSerial.onMessage([](const String &cmd){
-    JouleSerial.inf("recv> %s", cmd.c_str());
-    if      (cmd == "reboot")     { JouleSerial.wrn("rebooting in 1s"); requestReboot(1000); }
-    else if (cmd == "scan")       { WiFi.scanNetworks(true); JouleSerial.inf("scan started"); }
-    else if (cmd == "heap")       { JouleSerial.inf("heap = %u bytes", ESP.getFreeHeap()); }
-    else if (cmd == "wipe-wifi")  { JouleNet.clearAllCredentials(); JouleSerial.wrn("WiFi creds wiped"); }
-    else if (cmd.startsWith("notify ")) JouleDash.notify(joule::NotifyLevel::Info, cmd.substring(7));
-    else JouleSerial.dbg("unknown '%s' — try: reboot scan heap wipe-wifi 'notify <msg>'", cmd.c_str());
+  VectiSerial.setTitle("VectiSuite Console");
+  VectiSerial.setBrandColor("#10b981");
+  VectiSerial.setHistorySize(512);
+  VectiSerial.onMessage([](const String &cmd){
+    VectiSerial.inf("recv> %s", cmd.c_str());
+    if      (cmd == "reboot")     { VectiSerial.wrn("rebooting in 1s"); requestReboot(1000); }
+    else if (cmd == "scan")       { WiFi.scanNetworks(true); VectiSerial.inf("scan started"); }
+    else if (cmd == "heap")       { VectiSerial.inf("heap = %u bytes", ESP.getFreeHeap()); }
+    else if (cmd == "wipe-wifi")  { VectiNet.clearAllCredentials(); VectiSerial.wrn("WiFi creds wiped"); }
+    else if (cmd.startsWith("notify ")) VectiDash.notify(vecti::NotifyLevel::Info, cmd.substring(7));
+    else VectiSerial.dbg("unknown '%s' — try: reboot scan heap wipe-wifi 'notify <msg>'", cmd.c_str());
   });
-  JouleSerial.begin(&server, "", "");
+  VectiSerial.begin(&server, "", "");
 }
 
 static void setupDash() {
-  JouleDash.setTitle("JouleSuite EV Charger");
-  JouleDash.setBrandColor(BRAND_HEX);
-  JouleDash.setTheme("auto");
-  JouleDash.addTab("Overview");
-  JouleDash.addTab("Energy");
-  JouleDash.addTab("Controls");
-  JouleDash.addTab("Diagnostics");
-  JouleDash.addTab("Widgets");
+  VectiDash.setTitle("VectiSuite EV Charger");
+  VectiDash.setBrandColor(BRAND_HEX);
+  VectiDash.setTheme("auto");
+  VectiDash.addTab("Overview");
+  VectiDash.addTab("Energy");
+  VectiDash.addTab("Controls");
+  VectiDash.addTab("Diagnostics");
+  VectiDash.addTab("Widgets");
 
   // ---- Overview --------------------------------------------------------
   hero.setTab("Overview"); hero.setWidth(12);
@@ -285,7 +285,7 @@ static void setupDash() {
           "font-size:30px;color:#fff'>⚡</div>"
       "<div style='flex:1;min-width:220px'>"
         "<div style='font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);font-weight:700'>"
-          "Bay 3 · JouleSuite Demo</div>"
+          "Bay 3 · VectiSuite Demo</div>"
         "<div style='font-size:24px;font-weight:800;background:var(--grad);"
           "-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;line-height:1.1'>"
           "<span id='dash-hero-out'>Charging · 7.2 kW</span></div>"
@@ -342,57 +342,57 @@ static void setupDash() {
   cStart.onChange([](const String &v){
     bool on = v == "1";
     digitalWrite(LED_BUILTIN, on ? HIGH : LOW);
-    JouleDash.notify(on ? joule::NotifyLevel::Success : joule::NotifyLevel::Info,
+    VectiDash.notify(on ? vecti::NotifyLevel::Success : vecti::NotifyLevel::Info,
                      on ? "Session started" : "Session stopped");
   });
-  cLimit .onChange([](const String &v){ JouleSerial.inf("current limit → %sA", v.c_str()); });
+  cLimit .onChange([](const String &v){ VectiSerial.inf("current limit → %sA", v.c_str()); });
   cMode  .onChange([](const String &v){
     const char *names[]={"Standard","Eco","Boost","Solar"};
     int n = constrain(v.toInt(), 0, 3);
-    JouleSerial.inf("mode → %s", names[n]);
-    JouleDash.notify(joule::NotifyLevel::Info, String("Mode: ") + names[n]);
+    VectiSerial.inf("mode → %s", names[n]);
+    VectiDash.notify(vecti::NotifyLevel::Info, String("Mode: ") + names[n]);
   });
   cLed   .onChange([](const String &v){
-    JouleSerial.inf("LED ring → %s", v.c_str());
-    JouleDash.setBrandColor(v);
-    JouleDash.refreshLayout();
+    VectiSerial.inf("LED ring → %s", v.c_str());
+    VectiDash.setBrandColor(v);
+    VectiDash.refreshLayout();
   });
   cStop  .onChange([](const String &){
-    JouleDash.notify(joule::NotifyLevel::Error, "Emergency STOP triggered");
-    JouleSerial.err("E-STOP");
+    VectiDash.notify(vecti::NotifyLevel::Error, "Emergency STOP triggered");
+    VectiSerial.err("E-STOP");
   });
   cReboot.onChange([](const String &){
-    JouleDash.notify(joule::NotifyLevel::Warn, "Rebooting in 1s…", 1000);
+    VectiDash.notify(vecti::NotifyLevel::Warn, "Rebooting in 1s…", 1000);
     requestReboot(1100);
   });
   cTag   .onChange([](const String &v){
-    JouleSerial.inf("Driver tag: %s", v.c_str());
-    JouleDash.notify(joule::NotifyLevel::Success, String("RFID: ") + v + " · authorized");
+    VectiSerial.inf("Driver tag: %s", v.c_str());
+    VectiDash.notify(vecti::NotifyLevel::Success, String("RFID: ") + v + " · authorized");
   });
 
   // ---- Register every card ---------------------------------------------
-  JouleDash.add(&hero);
-  JouleDash.add(&cPower); JouleDash.add(&cEnergy); JouleDash.add(&cCost); JouleDash.add(&cSess);
-  JouleDash.add(&cState); JouleDash.add(&cSoc);    JouleDash.add(&cChargeG);
-  JouleDash.add(&cV1);    JouleDash.add(&cI1);     JouleDash.add(&cPF);   JouleDash.add(&cFreq);
-  JouleDash.add(&cQuota); JouleDash.add(&cGreen);  JouleDash.add(&cTrend);
-  JouleDash.add(&cStart); JouleDash.add(&cLimit);  JouleDash.add(&cMode); JouleDash.add(&cLed);
-  JouleDash.add(&cStop);  JouleDash.add(&cReboot); JouleDash.add(&cJoy);  JouleDash.add(&cTag);
-  JouleDash.add(&cTemp);  JouleDash.add(&cHumid);  JouleDash.add(&cRssi); JouleDash.add(&cHeap);
-  JouleDash.add(&cUp);    JouleDash.add(&cNet);    JouleDash.add(&cOcpp); JouleDash.add(&cRssiCh);
+  VectiDash.add(&hero);
+  VectiDash.add(&cPower); VectiDash.add(&cEnergy); VectiDash.add(&cCost); VectiDash.add(&cSess);
+  VectiDash.add(&cState); VectiDash.add(&cSoc);    VectiDash.add(&cChargeG);
+  VectiDash.add(&cV1);    VectiDash.add(&cI1);     VectiDash.add(&cPF);   VectiDash.add(&cFreq);
+  VectiDash.add(&cQuota); VectiDash.add(&cGreen);  VectiDash.add(&cTrend);
+  VectiDash.add(&cStart); VectiDash.add(&cLimit);  VectiDash.add(&cMode); VectiDash.add(&cLed);
+  VectiDash.add(&cStop);  VectiDash.add(&cReboot); VectiDash.add(&cJoy);  VectiDash.add(&cTag);
+  VectiDash.add(&cTemp);  VectiDash.add(&cHumid);  VectiDash.add(&cRssi); VectiDash.add(&cHeap);
+  VectiDash.add(&cUp);    VectiDash.add(&cNet);    VectiDash.add(&cOcpp); VectiDash.add(&cRssiCh);
 
 
   // ---- Widgets tour -----------------------------------------------------
-  for (auto *c : kWidgetTour) { c->setTab("Widgets"); JouleDash.add(c); }
+  for (auto *c : kWidgetTour) { c->setTab("Widgets"); VectiDash.add(c); }
   wHdr1.setWidth(12); wHdr2.setWidth(12); wHdr3.setWidth(12); wHdr4.setWidth(12); wDiv.setWidth(12);
   wTable.setWidth(6); wLog.setWidth(6); wMulti.setWidth(12);
   wHist.setWidth(6);  wScat.setWidth(6); wHeat.setWidth(6); wArea.setWidth(6); wQr.setWidth(4);
-  wConf.setColor(joule::DashColor::Danger);
+  wConf.setColor(vecti::DashColor::Danger);
   wDrop .setOptions("Eco|Standard|Boost");
   wRadio.setOptions("L1|L2|L3");
   wChk  .setOptions("OCPP|MQTT|Modbus");
   wText .setValue(FW_VERSION);
-  wBadge.setValue("Boost");        wBadge.setColor(joule::DashColor::Info);
+  wBadge.setValue("Boost");        wBadge.setColor(vecti::DashColor::Info);
   wStep .setValue(16);  wKnob.setValue(16);  wRange.setValue("18,42");
   wDrop .setValue("Standard");     wRadio.setValue("L1");  wChk.setValue("OCPP|MQTT");
   wXY   .setValue("50,50");
@@ -403,12 +403,12 @@ static void setupDash() {
   // competitor in this space ships.
   wQr   .setValue(String("WIFI:S:") + AP_FALLBACK_SSID + ";T:nopass;;");
 
-  JouleDash.begin(&server, "", "", /*allowAnonymousRead=*/true);
+  VectiDash.begin(&server, "", "", /*allowAnonymousRead=*/true);
 }
 
 void setup() {
   Serial.begin(115200);
-  delay(300); Serial.println("\n== JouleSuite demo ==");
+  delay(300); Serial.println("\n== VectiSuite demo ==");
 
   setupNet();
   setupSerial();
@@ -416,9 +416,9 @@ void setup() {
   setupDash();
 
   server.begin();
-  JouleSerial.inf("HTTP server up — routes: / /dash /ota /serial /wifi");
-  JouleSerial.inf("mDNS: http://%s.local", HOSTNAME);
-  JouleNet.autoConnect();
+  VectiSerial.inf("HTTP server up — routes: / /dash /ota /serial /wifi");
+  VectiSerial.inf("mDNS: http://%s.local", HOSTNAME);
+  VectiNet.autoConnect();
 
   // Seed Energy + RSSI charts with a plausible warm-up curve so the first
   // viewer of the dashboard sees something interesting immediately.
@@ -430,10 +430,10 @@ void setup() {
 }
 
 void loop() {
-  JouleNet.loop();
-  JouleOTA.loop();
-  JouleSerial.loop();
-  JouleDash.tick();
+  VectiNet.loop();
+  VectiOTA.loop();
+  VectiSerial.loop();
+  VectiDash.tick();
   serviceReboot();
 
   static uint32_t last = 0, startMs = millis(), chartT = 0, notifyT = millis();
@@ -446,8 +446,8 @@ void loop() {
   static bool committed = false;
   if (!committed && (now - startMs) > 20000 && WiFi.status() == WL_CONNECTED) {
     committed = true;
-    JouleOTA.commit();
-    JouleSerial.inf("self-test passed — firmware slot marked valid");
+    VectiOTA.commit();
+    VectiSerial.inf("self-test passed — firmware slot marked valid");
   }
 
   if (now - last < 1000) return;
@@ -463,11 +463,11 @@ void loop() {
   if (now - hbT >= 60000) {
     hbT = now;
     uint32_t h = ESP.getFreeHeap();
-    JouleSerial.inf("heartbeat up=%lus heap=%u min=%u drift=%ld rssi=%d state=%d",
+    VectiSerial.inf("heartbeat up=%lus heap=%u min=%u drift=%ld rssi=%d state=%d",
                     (unsigned long)(now / 1000), (unsigned)h,
                     (unsigned)ESP.getMinFreeHeap(),
                     (long)h - (long)heapAtStart,
-                    WiFi.RSSI(), (int)JouleNet.getState());
+                    WiFi.RSSI(), (int)VectiNet.getState());
   }
 
   // ----- Plausible 7.2 kW Level-2 charging session ---------------------
@@ -521,7 +521,7 @@ void loop() {
   // Occasional notifications so the toast UI is visible in screenshots
   if (now - notifyT > 25000) {
     notifyT = now;
-    JouleDash.notify(joule::NotifyLevel::Info,
+    VectiDash.notify(vecti::NotifyLevel::Info,
                      String("Energy delivered: ") + String(energy, 2) + " kWh", 4000);
   }
 }

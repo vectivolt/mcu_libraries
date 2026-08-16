@@ -1,11 +1,11 @@
 // ---------------------------------------------------------------------------
-// JouleSuite UI · build-all
-// Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+// VectiSuite UI · build-all
+// Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 // ---------------------------------------------------------------------------
 //
 // Sequentially builds every Svelte app under apps/, then runs the embed
 // script that gzips dist/<app>/index.html and writes it as PROGMEM bytes
-// into the matching libraries/Joule*/src/Joule*_ui_gz.h.
+// into the matching libraries/Vecti*/src/Vecti*_ui_gz.h.
 
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";

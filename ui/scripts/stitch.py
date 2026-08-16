@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-JouleSuite UI · stitch.py
-Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+VectiSuite UI · stitch.py
+Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 
 Thin Python helper around the Google Stitch MCP server's HTTP transport.
 Lets the rest of the toolchain drive Stitch from shell scripts:

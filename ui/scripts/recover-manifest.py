@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-JouleSuite UI · recover-manifest.py
-Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+VectiSuite UI · recover-manifest.py
+Author: Chinmoy Bhuyan <chinmoy@joulepoint.com>  (c) 2026 VectiVolt — Apache-2.0
 
 Walk the project's actual screen list from Stitch, map each screen title
 back to one of our slugs, and pull HTML + PNG into ui/stitch-out/<slug>/.
@@ -20,34 +20,34 @@ OUT.mkdir(exist_ok=True)
 
 # Title → slug. Tolerate minor variations in Stitch's auto-generated titles.
 TITLE_MAP = {
-    "JouleDash Overview":                              ("DESKTOP", "dash-overview-desktop"),
-    "JouleDash Overview (Mobile)":                     ("MOBILE",  "dash-overview-mobile"),
-    "JouleDash Energy Overview":                       ("DESKTOP", "dash-energy-desktop"),
-    "JouleDash Controls":                              ("DESKTOP", "dash-controls-desktop"),
-    "JouleDash Diagnostics":                           ("DESKTOP", "dash-diag-desktop"),
-    "JouleDash Widget Gallery":                        ("DESKTOP", "dash-widget-gallery"),
+    "VectiDash Overview":                              ("DESKTOP", "dash-overview-desktop"),
+    "VectiDash Overview (Mobile)":                     ("MOBILE",  "dash-overview-mobile"),
+    "VectiDash Energy Overview":                       ("DESKTOP", "dash-energy-desktop"),
+    "VectiDash Controls":                              ("DESKTOP", "dash-controls-desktop"),
+    "VectiDash Diagnostics":                           ("DESKTOP", "dash-diag-desktop"),
+    "VectiDash Widget Gallery":                        ("DESKTOP", "dash-widget-gallery"),
 
-    "JouleOTA Idle":                                   ("DESKTOP", "ota-idle-desktop"),
-    "JouleOTA":                                        ("DESKTOP", "ota-idle-desktop"),
-    "JouleOTA Uploading Firmware":                     ("DESKTOP", "ota-uploading-desktop"),
-    "JouleOTA Pull URL Mode":                          ("DESKTOP", "ota-pull-desktop"),
-    "JouleOTA Update Success":                         ("DESKTOP", "ota-success-desktop"),
-    "JouleOTA Mobile (Idle)":                          ("MOBILE",  "ota-mobile"),
+    "VectiOTA Idle":                                   ("DESKTOP", "ota-idle-desktop"),
+    "VectiOTA":                                        ("DESKTOP", "ota-idle-desktop"),
+    "VectiOTA Uploading Firmware":                     ("DESKTOP", "ota-uploading-desktop"),
+    "VectiOTA Pull URL Mode":                          ("DESKTOP", "ota-pull-desktop"),
+    "VectiOTA Update Success":                         ("DESKTOP", "ota-success-desktop"),
+    "VectiOTA Mobile (Idle)":                          ("MOBILE",  "ota-mobile"),
 
-    "JouleSerial Wireless Console":                    ("DESKTOP", "serial-active-desktop"),
-    "JouleSerial Console - Filtered (wifi|rssi)":      ("DESKTOP", "serial-filter-desktop"),
-    "JouleSerial Console (Filtered)":                  ("DESKTOP", "serial-filter-desktop"),
-    "JouleSerial Hex View Console":                    ("DESKTOP", "serial-hex-desktop"),
-    "JouleSerial Mobile Console":                      ("MOBILE",  "serial-mobile"),
+    "VectiSerial Wireless Console":                    ("DESKTOP", "serial-active-desktop"),
+    "VectiSerial Console - Filtered (wifi|rssi)":      ("DESKTOP", "serial-filter-desktop"),
+    "VectiSerial Console (Filtered)":                  ("DESKTOP", "serial-filter-desktop"),
+    "VectiSerial Hex View Console":                    ("DESKTOP", "serial-hex-desktop"),
+    "VectiSerial Mobile Console":                      ("MOBILE",  "serial-mobile"),
 
-    "JouleNet Wi-Fi Portal (Scanning)":                ("DESKTOP", "net-scan-desktop"),
-    "JouleNet Wi-Fi Scan":                             ("DESKTOP", "net-scan-desktop"),
-    "JouleNet Wi-Fi Portal (Networks List)":           ("DESKTOP", "net-list-desktop"),
-    "JouleNet Advanced Configuration Expanded":        ("DESKTOP", "net-advanced-desktop"),
-    "JouleNet Connecting State":                       ("DESKTOP", "net-connecting-desktop"),
-    "JouleNet Setup (Parameters)":                     ("DESKTOP", "net-setup-desktop"),
-    "JouleNet Status Tab":                             ("DESKTOP", "net-status-desktop"),
-    "JouleNet Wi-Fi Portal (Mobile)":                  ("MOBILE",  "net-mobile"),
+    "VectiNet Wi-Fi Portal (Scanning)":                ("DESKTOP", "net-scan-desktop"),
+    "VectiNet Wi-Fi Scan":                             ("DESKTOP", "net-scan-desktop"),
+    "VectiNet Wi-Fi Portal (Networks List)":           ("DESKTOP", "net-list-desktop"),
+    "VectiNet Advanced Configuration Expanded":        ("DESKTOP", "net-advanced-desktop"),
+    "VectiNet Connecting State":                       ("DESKTOP", "net-connecting-desktop"),
+    "VectiNet Setup (Parameters)":                     ("DESKTOP", "net-setup-desktop"),
+    "VectiNet Status Tab":                             ("DESKTOP", "net-status-desktop"),
+    "VectiNet Wi-Fi Portal (Mobile)":                  ("MOBILE",  "net-mobile"),
 }
 
 

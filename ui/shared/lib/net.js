@@ -5,7 +5,7 @@
  * that a normal web app never sees: plain HTTP on a link-local address, a
  * radio that drops mid-frame, and a browser whose storage may be blocked.
  *
- * (c) 2026 VectiVolt — MIT License
+ * (c) 2026 VectiVolt — Apache-2.0 License
  * ------------------------------------------------------------------------- */
 
 /**

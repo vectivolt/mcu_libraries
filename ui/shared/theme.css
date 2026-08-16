@@ -14,7 +14,7 @@
  *   3. No backdrop-filter on large surfaces. It tanks scroll on the cheap
  *      Androids that techs actually carry.
  *
- * (c) 2026 VectiVolt — MIT License
+ * (c) 2026 VectiVolt — Apache-2.0 License
  * ------------------------------------------------------------------------- */
 /* ---- Tokens: light is the base definition -------------------------------
  * Defined on bare :root so a page always has a complete palette even when

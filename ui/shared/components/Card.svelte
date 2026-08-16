@@ -7,7 +7,7 @@
   hover states are dead weight on the phone where most of this gets read.
   Status is carried by the accent rail and the value, never by decoration.
 
-  (c) 2026 VectiVolt — MIT License
+  (c) 2026 VectiVolt — Apache-2.0 License
 --------------------------------------------------------------------------- -->
 <script>
   import Icon from './Icon.svelte';
