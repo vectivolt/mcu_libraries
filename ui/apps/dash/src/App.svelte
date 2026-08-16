@@ -1,49 +1,35 @@
 <!-- ---------------------------------------------------------------------------
-  JouleDash — real-time dashboard SPA. Svelte 5 + Tailwind v4 + bits-ui.
-  Design ported from Google Stitch generated screens (Dec 2026):
-  https://stitch.googleapis.com/projects/16086657541908603661
-  Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+  VectiDash — real-time device dashboard SPA. Svelte 5 + Tailwind v4.
+  (c) 2026 VectiVolt — Apache-2.0 License
 --------------------------------------------------------------------------- -->
 <script>
-  import { onMount, onDestroy } from "svelte";
+  import { onMount } from "svelte";
   import Card from "$shared/components/Card.svelte";
-  import Value from "$shared/components/Value.svelte";
   import StatusDot from "$shared/components/StatusDot.svelte";
   import Sparkline from "$shared/components/Sparkline.svelte";
-  import { Zap, BatteryCharging, IndianRupee, Clock, ActivitySquare,
-           Cpu, Wifi, Bolt, Gauge as GaugeIcon, Thermometer, Droplets,
-           Sun, Moon, Monitor, Menu, X, ChevronRight } from "lucide-svelte";
+  import { uid, store, num, clamp01, reconnectingSocket } from "$shared/lib/net.js";
+  import Icon from "$shared/components/Icon.svelte";
+  import { WIDGETS, BARE } from "$shared/widgets/index.js";
 
-  let ws        = $state(null);
-  let layout    = $state(null);
-  let values    = $state({});
-  let history   = $state({});            // id → number[] (sparkline buffers)
-  let currentTab= $state(null);
-  let connected = $state(false);
-  let toasts    = $state([]);
-  let theme     = $state(localStorage.getItem("joule-theme") || "dark");
-  // Viewport bucket — recomputed on resize so the grid can collapse from
-  // 12 columns (desktop) → cards in pairs (tablet/mobile) without each
-  // card having to know about media queries.
-  let viewport  = $state("desktop");
-  // Mobile hamburger drawer state. Auto-closes on tab pick + ESC.
-  let menuOpen  = $state(false);
+  let sock       = null;
+  let layout     = $state(null);
+  let values     = $state({});
+  let trend      = $state({});        // id → recent numbers, for the sparklines
+  let currentTab = $state(null);
+  let connected  = $state(false);
+  let toasts     = $state([]);
+  let theme      = $state(store.get("vecti-theme", "auto"));
+  let viewport   = $state("desktop");
+  let menuOpen   = $state(false);
 
-  $effect(() => { document.documentElement.setAttribute("data-theme", theme); });
+  // Toast timers, so unmount doesn't leave callbacks pointed at a dead component.
+  const timers = new Set();
+
+  $effect(() => document.documentElement.setAttribute("data-theme", theme));
   function cycleTheme() {
-    theme = theme === "dark" ? "light" : theme === "light" ? "auto" : "dark";
-    localStorage.setItem("joule-theme", theme);
+    theme = theme === "auto" ? "light" : theme === "light" ? "dark" : "auto";
+    store.set("vecti-theme", theme);
   }
-
-  function open() {
-    const proto = location.protocol === "https:" ? "wss:" : "ws:";
-    ws = new WebSocket(proto + "//" + location.host + "/dash/ws");
-    ws.onopen  = () => connected = true;
-    ws.onclose = () => { connected = false; setTimeout(open, 1500); };
-    ws.onerror = () => connected = false;
-    ws.onmessage = (e) => { try { handle(JSON.parse(e.data)); } catch {} };
-  }
-  function send(o) { if (ws && ws.readyState === 1) ws.send(JSON.stringify(o)); }
 
   function handle(m) {
     if (m.type === "layout") {
@@ -53,438 +39,598 @@
         document.documentElement.style.setProperty("--color-brand", m.brand);
         document.querySelector('meta[name="theme-color"]')?.setAttribute("content", m.brand);
       }
-      if (!currentTab || !(m.tabs || []).includes(currentTab)) {
-        const hash = (location.hash || "").replace(/^#/, "").toLowerCase();
-        const match = (m.tabs || []).find(t => t.toLowerCase().includes(hash));
-        currentTab = match || (m.tabs && m.tabs[0]) || "Main";
+      const tabs = m.tabs || [];
+      if (!currentTab || !tabs.includes(currentTab)) {
+        const want = decodeURIComponent((location.hash || "").replace(/^#/, "")).toLowerCase();
+        currentTab = tabs.find(t => t.toLowerCase() === want) || tabs[0] || "Main";
       }
     } else if (m.type === "upd") {
-      for (const c of m.cards) {
+      for (const c of m.cards || []) {
         values[c.id] = c.value;
         const n = parseFloat(c.value);
-        if (!isNaN(n)) history[c.id] = [...(history[c.id] || []), n].slice(-32);
+        if (Number.isFinite(n)) trend[c.id] = [...(trend[c.id] || []), n].slice(-32);
       }
     } else if (m.type === "notify") {
-      const t = { id: crypto.randomUUID(), level: m.level || "info", msg: m.message, ttl: m.ttl || 4500 };
+      // uid(), not crypto.randomUUID(): this page is served over plain http://
+      // from the device's IP, which is not a secure context, so randomUUID is
+      // undefined there and every notification threw.
+      const t = { id: uid(), level: m.level || "info", msg: m.message, };
       toasts = [...toasts, t];
-      setTimeout(() => toasts = toasts.filter(x => x.id !== t.id), t.ttl);
+      const h = setTimeout(() => {
+        toasts = toasts.filter(x => x.id !== t.id);
+        timers.delete(h);
+      }, m.ttl || 4500);
+      timers.add(h);
     }
   }
 
+  // `window.history`, spelled out. A local `let history = $state({})` used to
+  // shadow it here, so every tab click threw "history.replaceState is not a
+  // function" and the dashboard was stuck on tab one.
+  function pickTab(t) {
+    currentTab = t;
+    menuOpen = false;
+    try { window.history.replaceState(null, "", `#${encodeURIComponent(t)}`); } catch { /* file:// */ }
+  }
+
+  const send = (o) => sock?.send(o);
+  const onCmd = (id, v) => send({ type: "cmd", id, value: String(v) });
+
   onMount(() => {
-    open();
-    const updateVp = () => {
+    sock = reconnectingSocket("/dash/ws", {
+      onMessage: handle,
+      onOpen:  () => { connected = true; send({ type: "hello" }); },
+      onClose: () => (connected = false),
+    });
+
+    const onResize = () => {
       const w = window.innerWidth;
-      viewport = w <= 420 ? "small" : w <= 760 ? "tablet" : "desktop";
-      if (viewport === "desktop" && menuOpen) menuOpen = false;
+      // 448 covers the widest phones in portrait (iPhone Pro Max is 430).
+      viewport = w <= 448 ? "small" : w <= 800 ? "tablet" : "desktop";
+      if (viewport !== "small") menuOpen = false;
     };
-    updateVp();
-    window.addEventListener("resize", updateVp);
+    onResize();
+    window.addEventListener("resize", onResize);
+
     const onKey = (e) => { if (e.key === "Escape") menuOpen = false; };
     window.addEventListener("keydown", onKey);
+
     return () => {
-      window.removeEventListener("resize", updateVp);
+      window.removeEventListener("resize", onResize);
       window.removeEventListener("keydown", onKey);
+      timers.forEach(clearTimeout); timers.clear();
+      sock?.close();
     };
   });
-  onDestroy(() => ws?.close());
 
+  let tabs = $derived(layout?.tabs || []);
+
+  // A card whose tab is unset, or names a tab the firmware never registered,
+  // lands on the first tab rather than on a phantom "Main" that appears in no
+  // tab strip — cards used to vanish with no way to reach them.
+  const tabOf = (c) => (tabs.includes(c.tab) ? c.tab : (tabs[0] || "Main"));
   let visibleCards = $derived(
-    layout?.cards?.filter(c => !c.hidden && (c.tab || "Main") === currentTab) || []
+    (layout?.cards || []).filter(c => !c.hidden && tabOf(c) === currentTab)
   );
 
-  // Map declared card width → an effective grid span for the active
-  // viewport. On a phone, even a "narrow" 3-col card becomes half-row so
-  // the value + unit + sparkline have room; full-width charts stay full.
+  // Card width in 12-column units for the current viewport.
+  //
+  // Tablet snaps to halves or full rather than simply doubling the declared
+  // width: doubling turned a 4-wide card into an 8, which left a 4-column
+  // gap on every row because nothing else was narrow enough to fill it.
   function spanFor(c) {
-    const base = c.width || (c.type === "chart" || c.type === "custom" ? 12 : 3);
-    if (viewport === "small") {
-      if (c.type === "chart" || c.type === "custom" || base >= 12) return 12;
-      return 6;     // pairs of cards on phones
-    }
-    if (viewport === "tablet") return Math.min(12, base * 2);
+    const wide = c.type === "chart" || c.type === "custom";
+    const base = c.width || (wide ? 12 : 3);
+    if (viewport === "small")  return wide || base >= 12 ? 12 : 6;
+    if (viewport === "tablet") return wide || base > 3 ? 12 : 6;
     return base;
   }
 
-  function onCmd(id, v) { send({ type: "cmd", id, value: String(v) }); }
-
-  // ---- chart canvas ----
-  function drawChart(canvas, raw) {
-    const dpr = window.devicePixelRatio || 1;
-    const w = canvas.clientWidth, h = canvas.clientHeight || 180;
-    canvas.width = w * dpr; canvas.height = h * dpr;
-    const ctx = canvas.getContext("2d"); ctx.scale(dpr, dpr); ctx.clearRect(0, 0, w, h);
-    let xs = [], ys = [];
-    try { const j = typeof raw === "string" ? JSON.parse(raw) : raw; xs = j.x || []; ys = j.y || []; } catch { return; }
-    if (!ys.length) return;
-    const mn = Math.min(...ys), mx = Math.max(...ys), rg = (mx - mn) || 1;
-    const css = getComputedStyle(document.documentElement);
-    const b  = css.getPropertyValue("--color-brand").trim()   || "#6366f1";
-    const b2 = css.getPropertyValue("--color-brand-2").trim() || "#8b5cf6";
-    ctx.strokeStyle = css.getPropertyValue("--color-line").trim() || "rgba(255,255,255,.06)";
-    ctx.lineWidth = 1;
-    for (let i = 0; i < 4; i++) { const y = (i + 1) * (h - 16) / 5 + 8; ctx.beginPath(); ctx.moveTo(4, y); ctx.lineTo(w - 4, y); ctx.stroke(); }
-    const g = ctx.createLinearGradient(0, 0, w, 0); g.addColorStop(0, b); g.addColorStop(1, b2);
-    const pts = ys.map((y, i) => [4 + (i / (ys.length - 1 || 1)) * (w - 8), h - 8 - ((y - mn) / rg) * (h - 24)]);
-    ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, p[0], p[1]));
-    ctx.lineTo(w - 4, h - 4); ctx.lineTo(4, h - 4); ctx.closePath();
-    const ag = ctx.createLinearGradient(0, 0, 0, h); ag.addColorStop(0, b + "55"); ag.addColorStop(1, b + "00");
-    ctx.fillStyle = ag; ctx.fill();
-    ctx.beginPath(); pts.forEach((p, i) => (i ? ctx.lineTo : ctx.moveTo).call(ctx, p[0], p[1]));
-    ctx.strokeStyle = g; ctx.lineWidth = 2.4; ctx.lineJoin = "round"; ctx.stroke();
-    const lp = pts[pts.length - 1];
-    ctx.fillStyle = b; ctx.beginPath(); ctx.arc(lp[0], lp[1], 4, 0, 7); ctx.fill();
-    ctx.fillStyle = "#fff"; ctx.beginPath(); ctx.arc(lp[0], lp[1], 1.6, 0, 7); ctx.fill();
-  }
-  function chartCanvas(node, val) { drawChart(node, val); return { update(v) { drawChart(node, v); } }; }
-
-  function joystickHandler(el, id) {
-    let dragging = false;
-    const nub = el.querySelector(".nub");
-    const move = (cx, cy) => {
-      const b = el.getBoundingClientRect();
-      const dx = (cx - b.left - b.width / 2) / (b.width / 2);
-      const dy = (cy - b.top  - b.height / 2) / (b.height / 2);
-      const md = Math.min(1, Math.hypot(dx, dy));
-      const ag = Math.atan2(dy, dx);
-      const x = Math.cos(ag) * md, y = Math.sin(ag) * md;
-      nub.style.transform = `translate(${x * 48}px, ${y * 48}px)`;
-      onCmd(id, `${Math.round(x * 100)},${-Math.round(y * 100)}`);
-    };
-    el.onpointerdown = (e) => { dragging = true; el.setPointerCapture(e.pointerId); move(e.clientX, e.clientY); };
-    el.onpointermove = (e) => { if (dragging) move(e.clientX, e.clientY); };
-    el.onpointerup   = ()  => { dragging = false; nub.style.transform = "translate(0,0)"; onCmd(id, "0,0"); };
-  }
-
   function statusKind(v) {
-    const lv = String(v || "").toLowerCase();
-    if (/^(ok|online|connect|valid|success|live)/.test(lv)) return "ok";
-    if (/warn/.test(lv))                                     return "warn";
-    if (/err|off|fail|invalid/.test(lv))                     return "err";
+    const s = String(v ?? "").toLowerCase();
+    if (/^(ok|online|connect|valid|success|live|good|ready)/.test(s)) return "ok";
+    if (/warn|degrad|pending/.test(s)) return "warn";
+    if (/err|off|fail|invalid|fault|alarm/.test(s)) return "err";
     return "muted";
   }
 
-  // Map common card IDs to a semantic colour + Lucide icon so KPIs feel
-  // intentional rather than generic. Falls back to defaults when no match.
+  // Icon + tone by card id. Anchored patterns so "up" doesn't match "supply"
+  // and "i1" doesn't match every id containing an i.
+  const DECOR = [
+    [/^(pwr|power)|kw$/,        "info",    "Zap"],
+    [/^(kwh|energy)/,           "success", "BatteryCharging"],
+    [/^cost|price/,             "primary", "IndianRupee"],
+    [/^(sess|time|up|uptime)$/, null,      "Clock"],
+    [/^(tmp|temp)/,             "warning", "Thermometer"],
+    [/^hum/,                    "info",    "Droplets"],
+    [/^(rssi|net|wifi)/,        null,      "Wifi"],
+    [/^heap|^mem/,              null,      "Cpu"],
+    [/^v\d|^volt/,              "info",    "Zap"],
+    [/^i\d|^cur|^amp/,          "warning", "Bolt"],
+    [/^f$|^freq/,               null,      "Activity"],
+    [/^cpu|^load/,              null,      "Gauge"],
+  ];
   function decor(c) {
-    const idl = (c.id || "").toLowerCase();
-    if (/pwr|power|kw/.test(idl)) return { color: "info",     Icon: Zap };
-    if (/kwh|energy/.test(idl))   return { color: "success",  Icon: BatteryCharging };
-    if (/cost/.test(idl))         return { color: "primary",  Icon: IndianRupee };
-    if (/sess|time|up/.test(idl)) return { color: c.color||"default", Icon: Clock };
-    if (/temp|tmp/.test(idl))     return { color: "warning",  Icon: Thermometer };
-    if (/hum/.test(idl))          return { color: "info",     Icon: Droplets };
-    if (/rssi|net/.test(idl))     return { color: c.color||"default", Icon: Wifi };
-    if (/heap/.test(idl))         return { color: c.color||"default", Icon: Cpu };
-    if (/volt|v\d/.test(idl))     return { color: "info",     Icon: Zap };
-    if (/cur|amp|i\d/.test(idl))  return { color: "warning",  Icon: Bolt };
-    if (/freq/.test(idl))         return { color: c.color||"default", Icon: ActivitySquare };
-    if (/cpu|load/.test(idl))     return { color: c.color||"default", Icon: GaugeIcon };
-    return { color: c.color || "default", Icon: null };
+    const id = String(c.id || "").toLowerCase();
+    for (const [re, tone, icon] of DECOR) {
+      if (re.test(id)) return { color: tone || c.color || "default", icon };
+    }
+    return { color: c.color || "default", icon: null };
+  }
+
+  // ---- chart -------------------------------------------------------------
+  // SVG, not canvas. Canvas has to be told what colour to use, which meant
+  // reading getComputedStyle at draw time and repainting only when a
+  // ResizeObserver fired — so a theme toggle left the old palette on screen
+  // until something resized the card. stroke="var(--color-brand)" re-resolves
+  // itself the moment data-theme flips, and the viewBox handles resize for
+  // free, so the observer goes too.
+  const CW = 300, CH = 170, CP = 5;
+  const CGRID = [1, 2, 3]
+    .map((i) => `M${CP} ${CP + (i * (CH - CP * 2)) / 4}H${CW - CP}`).join("");
+
+  function chartOf(raw) {
+    let xs = [], ys = [];
+    try {
+      const j = typeof raw === "string" ? JSON.parse(raw) : raw;
+      xs = j?.x || []; ys = j?.y || [];
+    } catch { return null; }
+    if (ys.length < 2) return null;
+
+    const yMin = Math.min(...ys), yMax = Math.max(...ys);
+    const yRng = (yMax - yMin) || 1;
+    // Honour the x series when the device sent one. The previous build spaced
+    // points evenly by index, so a chart with irregular timestamps drew a
+    // shape that did not match the data.
+    const useX = xs.length === ys.length;
+    const xMin = useX ? Math.min(...xs) : 0;
+    const xRng = useX ? (Math.max(...xs) - xMin) || 1 : (ys.length - 1) || 1;
+
+    const px = (i) => (CP + ((useX ? xs[i] - xMin : i) / xRng) * (CW - CP * 2)).toFixed(1);
+    const py = (v) => (CH - CP - ((v - yMin) / yRng) * (CH - CP * 2)).toFixed(1);
+
+    const line = ys.map((v, i) => `${i ? "L" : "M"}${px(i)} ${py(v)}`).join("");
+    const last = ys.length - 1;
+    return {
+      line,
+      area: `${line}L${px(last)} ${CH - CP}L${px(0)} ${CH - CP}Z`,
+      // Zero-length subpath; .cd gives it a round cap, which paints a real
+      // circle. A <circle> would come out an ellipse under
+      // preserveAspectRatio="none".
+      dot: `M${px(last)} ${py(ys[last])}h0`,
+    };
+  }
+
+  function joystick(el, id) {
+    const nub = el.querySelector(".nub");
+    let active = false;
+    const R = 46;
+    const move = (cx, cy) => {
+      const b = el.getBoundingClientRect();
+      const dx = (cx - b.left - b.width / 2) / (b.width / 2);
+      const dy = (cy - b.top - b.height / 2) / (b.height / 2);
+      const mag = Math.min(1, Math.hypot(dx, dy)), ang = Math.atan2(dy, dx);
+      const x = Math.cos(ang) * mag, y = Math.sin(ang) * mag;
+      nub.style.transform = `translate(${x * R}px, ${y * R}px)`;
+      onCmd(id, `${Math.round(x * 100)},${-Math.round(y * 100)}`);
+    };
+    const reset = () => { active = false; nub.style.transform = "translate(0,0)"; onCmd(id, "0,0"); };
+    const down = (e) => { active = true; el.setPointerCapture(e.pointerId); move(e.clientX, e.clientY); };
+    const drag = (e) => { if (active) move(e.clientX, e.clientY); };
+    el.addEventListener("pointerdown", down);
+    el.addEventListener("pointermove", drag);
+    el.addEventListener("pointerup", reset);
+    el.addEventListener("pointercancel", reset);
+    return { destroy() {
+      el.removeEventListener("pointerdown", down);
+      el.removeEventListener("pointermove", drag);
+      el.removeEventListener("pointerup", reset);
+      el.removeEventListener("pointercancel", reset);
+    } };
+  }
+
+  const frac = (v, c) => clamp01((num(v) - num(c.min, 0)) / ((num(c.max, 100) - num(c.min, 0)) || 1));
+
+  /**
+   * Push the card's value into the `<span id="dash-<id>-out">` that a custom
+   * snippet may declare. textContent, never innerHTML — the snippet is
+   * firmware-authored but the VALUE routinely carries live readings, and
+   * those must never be parsed as markup.
+   */
+  function customOut(node, { id, value }) {
+    const paint = (v) => {
+      const el = node.querySelector(`#dash-${CSS.escape(id)}-out`);
+      if (el && el.textContent !== String(v)) el.textContent = String(v);
+    };
+    paint(value);
+    return { update({ value: v }) { paint(v); } };
   }
 </script>
 
-<!-- ============================== HEADER ============================== -->
-<header class="sticky top-0 z-50 backdrop-blur-xl border-b border-[color:var(--color-line)]"
-        style="background:color-mix(in srgb,var(--color-bg) 80%,transparent)">
-  <div class="max-w-[1280px] mx-auto px-6 h-16 flex items-center gap-3">
-    <div class="w-8 h-8 grid place-items-center rounded-[10px] text-white font-extrabold text-[14px]"
-         style="background:var(--grad);box-shadow:0 6px 20px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">⚡</div>
-    <div class="flex flex-col min-w-0">
-      <div class="flex items-center gap-2">
-        <h1 class="font-semibold text-[15px] tracking-tight text-[color:var(--color-ink)] truncate">{layout?.title || "JouleDash"}</h1>
-        <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full font-mono text-[10px]
-                     bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] border border-[color:var(--color-line)]"
-              style:color={connected ? "var(--color-ok)" : "var(--color-muted)"}>
-          <span class="w-[6px] h-[6px] rounded-full"
-                style:background={connected ? "var(--color-ok)" : "var(--color-muted)"}
-                style:box-shadow={connected ? "0 0 0 4px color-mix(in srgb,var(--color-ok) 18%,transparent)" : "none"}
-                class:animate-[pulse_2.4s_ease-in-out_infinite]={connected}></span>
-          {connected ? "Online" : "Offline"}
-        </span>
-      </div>
-      <span class="text-[11.5px] text-[color:var(--color-muted)] font-medium">live dashboard</span>
+<a href="#main" class="skip">Skip to content</a>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <span class="mark" aria-hidden="true"><Icon name="Zap" size={15} strokeWidth={2.4}/></span>
+    <div class="ident">
+      <h1>{layout?.title || "VectiDash"}</h1>
+      <p>{currentTab || "live dashboard"}</p>
     </div>
-    <div class="flex-1"></div>
-    <button onclick={cycleTheme} aria-label="theme"
-      class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition-colors cursor-pointer">
-      {#if theme === "light"}<Sun size={16} strokeWidth={2.2}/>{:else if theme === "dark"}<Moon size={16} strokeWidth={2.2}/>{:else}<Monitor size={16} strokeWidth={2.2}/>{/if}
+    <span class="pill" data-tone={connected ? "ok" : "muted"} aria-live="polite">
+      <i aria-hidden="true"></i>{connected ? "Online" : "Reconnecting"}
+    </span>
+    <button class="icon-btn" onclick={cycleTheme} aria-label="Theme: {theme}. Click to change.">
+      {#if theme === "light"}<Icon name="Sun" size={16}/>{:else if theme === "dark"}<Icon name="Moon" size={16}/>{:else}<Icon name="Monitor" size={16}/>{/if}
     </button>
-    <!-- Hamburger — small viewport only. Sits on the right so the user's
-         thumb (on the phone) is closer to it than to the logo. -->
-    {#if viewport === "small" && layout?.tabs?.length}
-      <button onclick={() => menuOpen = true} aria-label="open menu"
-        class="w-9 h-9 grid place-items-center rounded-full text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_6%,transparent)] transition cursor-pointer">
-        <Menu size={18} strokeWidth={2.2}/>
-      </button>
+    {#if viewport === "small" && tabs.length > 1}
+      <button class="icon-btn" onclick={() => (menuOpen = true)}
+              aria-label="Open tab menu" aria-expanded={menuOpen}><Icon name="Menu" size={18}/></button>
     {/if}
   </div>
-  <!-- Phone breadcrumb — when tabs are hidden, this strip shows the
-       current tab so the user always knows where they are. -->
-  {#if viewport === "small" && currentTab}
-    <div class="max-w-[1280px] mx-auto px-5 pb-2.5 -mt-1 flex items-center gap-1.5 text-[11.5px] font-semibold uppercase tracking-[1px] text-[color:var(--color-muted)]">
-      <span style="color:var(--color-brand)">{currentTab}</span>
-      <ChevronRight size={12} strokeWidth={2.4}/>
-      <span class="lowercase tracking-normal font-normal opacity-70">tap menu for other tabs</span>
+
+  {#if tabs.length > 1 && viewport !== "small"}
+    <!-- div, not nav: a tablist is its own landmark role and nesting it in a
+         nav gives assistive tech two competing roles for one control. -->
+    <div class="wrap tabs" role="tablist" aria-label="Dashboard tabs">
+      {#each tabs as t (t)}
+        <button role="tab" class="tab" class:on={t === currentTab}
+                aria-selected={t === currentTab} tabindex={t === currentTab ? 0 : -1}
+                onclick={() => pickTab(t)}
+                onkeydown={(e) => {
+                  const i = tabs.indexOf(currentTab);
+                  if (e.key === "ArrowRight") pickTab(tabs[(i + 1) % tabs.length]);
+                  else if (e.key === "ArrowLeft") pickTab(tabs[(i - 1 + tabs.length) % tabs.length]);
+                }}>{t}</button>
+      {/each}
     </div>
   {/if}
 </header>
 
-<!-- ============================== TAB BAR ============================== -->
-{#if layout?.tabs?.length && viewport !== "small"}
-  <nav class="sticky top-16 z-40 backdrop-blur-xl border-b border-[color:var(--color-line)]"
-       style="background:color-mix(in srgb,var(--color-bg) 80%,transparent)">
-    <div class="max-w-[1280px] mx-auto px-6 py-3 flex gap-1.5 overflow-x-auto [&::-webkit-scrollbar]:hidden" style="scrollbar-width:none">
-      {#each layout.tabs as t (t)}
-        <button onclick={() => { currentTab = t; history.replaceState(null, "", "#" + t.toLowerCase()); }}
-          class="px-4 py-1.5 rounded-full text-[13px] font-semibold whitespace-nowrap transition-all border cursor-pointer"
-          class:bg-[color-mix(in_srgb,var(--color-ink)_6%,transparent)]={t === currentTab}
-          class:border-[color:var(--color-line)]={t === currentTab}
-          class:text-[color:var(--color-ink)]={t === currentTab}
-          class:border-transparent={t !== currentTab}
-          class:text-[color:var(--color-muted)]={t !== currentTab}>
-          {t}
-        </button>
-      {/each}
+{#if viewport === "small" && tabs.length > 1}
+  <div class="scrim" class:on={menuOpen} onclick={() => (menuOpen = false)} aria-hidden="true"></div>
+  <aside class="drawer" class:on={menuOpen} aria-label="Tabs" aria-hidden={!menuOpen}>
+    <div class="drawer-hd">
+      <span>Tabs</span>
+      <button class="icon-btn" onclick={() => (menuOpen = false)} aria-label="Close menu"><Icon name="X" size={16}/></button>
     </div>
-  </nav>
-{/if}
-
-<!-- ============================== MOBILE DRAWER ============================== -->
-{#if viewport === "small" && layout?.tabs?.length}
-  <!-- Backdrop — clicking it closes the drawer. Aria-hidden so it doesn't
-       confuse screen readers when the drawer is closed (opacity 0). -->
-  <div onclick={() => menuOpen = false} aria-hidden="true"
-       class="fixed inset-0 z-[60] transition-opacity duration-200 backdrop-blur-sm"
-       class:opacity-100={menuOpen} class:opacity-0={!menuOpen} class:pointer-events-none={!menuOpen}
-       style="background:rgb(0 0 0 / 0.55)"></div>
-  <aside class="fixed top-0 right-0 bottom-0 z-[70] w-[80vw] max-w-[320px] flex flex-col
-                border-l border-[color:var(--color-line)]"
-         style="background:var(--color-bg);box-shadow:-24px 0 64px -16px rgb(0 0 0 / 0.6);
-                transform:{menuOpen ? 'translateX(0)' : 'translateX(100%)'};
-                transition:transform 280ms cubic-bezier(.3,.8,.2,1)"
-         aria-hidden={!menuOpen}>
-    <div class="flex items-center justify-between px-5 h-16 border-b border-[color:var(--color-line)]">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 grid place-items-center rounded-[10px] text-white"
-             style="background:var(--grad);box-shadow:0 6px 20px -4px color-mix(in srgb,var(--color-brand) 60%,transparent),inset 0 1px 0 rgb(255 255 255/.25)">⚡</div>
-        <span class="font-semibold text-[14px] text-[color:var(--color-ink)]">Menu</span>
-      </div>
-      <button onclick={() => menuOpen = false} aria-label="close menu"
-        class="w-8 h-8 grid place-items-center rounded-full text-[color:var(--color-muted)] hover:text-[color:var(--color-ink)] hover:bg-[color-mix(in_srgb,var(--color-ink)_5%,transparent)] transition cursor-pointer">
-        <X size={16} strokeWidth={2.2}/>
-      </button>
-    </div>
-    <nav class="flex-1 overflow-y-auto py-3">
-      {#each layout.tabs as t (t)}
-        {@const active = t === currentTab}
-        <button onclick={() => { currentTab = t; history.replaceState(null, "", "#" + t.toLowerCase()); menuOpen = false; }}
-          class="w-full flex items-center justify-between px-5 py-3.5 text-[14.5px] font-semibold transition-colors cursor-pointer"
-          class:text-[color:var(--color-ink)]={active}
-          class:text-[color:var(--color-ink-2)]={!active}
-          style:background={active ? "color-mix(in srgb, var(--color-brand) 10%, transparent)" : "transparent"}
-          style:border-left={active ? "3px solid var(--color-brand)" : "3px solid transparent"}>
-          <span>{t}</span>
-          {#if active}<span class="w-1.5 h-1.5 rounded-full" style="background:var(--color-brand);box-shadow:0 0 0 4px color-mix(in srgb,var(--color-brand) 25%,transparent)"></span>{/if}
-        </button>
+    <nav>
+      {#each tabs as t (t)}
+        <button class="drawer-item" class:on={t === currentTab}
+                tabindex={menuOpen ? 0 : -1} onclick={() => pickTab(t)}>{t}</button>
       {/each}
     </nav>
-    <div class="px-5 py-4 border-t border-[color:var(--color-line)] text-[11px] text-[color:var(--color-muted)] font-mono">
-      <div class="flex items-center justify-between">
-        <span>{connected ? "● online" : "○ offline"}</span>
-        <span>JouleSuite</span>
-      </div>
-    </div>
   </aside>
 {/if}
 
-<!-- ============================== GRID =============================== -->
-<main class="relative z-10 max-w-[1280px] mx-auto p-5">
-  <!-- SVG defs for brand-gradient strokes used by gauges/donuts. -->
-  <svg aria-hidden="true" focusable="false" style="position:absolute;width:0;height:0">
-    <defs><linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%"   stop-color="var(--color-brand)"/>
-      <stop offset="100%" stop-color="var(--color-brand-2)"/>
-    </linearGradient></defs>
-  </svg>
+<main id="main" class="wrap grid">
+  {#each visibleCards as c (c.id)}
+    {@const v = values[c.id] ?? c.value ?? ""}
+    {@const d = decor(c)}
+    {#if BARE.has(c.type)}
+      {@const Bare = WIDGETS[c.type]}
+      <div class="bare" style:grid-column={`span ${spanFor(c)}`}>
+        <Bare card={c} value={v} cmd={(x) => onCmd(c.id, x)} />
+      </div>
+    {:else}
+    <Card color={c.color && c.color !== "default" ? c.color : d.color}
+          icon={d.icon} span={spanFor(c)} label={c.label || c.id}>
 
-  <div class="grid gap-3.5" style="grid-template-columns:repeat(12,minmax(0,1fr))">
-    {#each visibleCards as c (c.id)}
-      {@const v = values[c.id] ?? c.value ?? ""}
-      {@const dec = decor(c)}
-      <Card color={c.color || dec.color} Icon={dec.Icon}
-            span={spanFor(c)}
-            label={c.label || c.id}>
+      {#if c.type === "number" || c.type === "temperature" || c.type === "humidity"}
+        <div class="kpi">
+          <span class="kpi-v tnum">{v === "" ? "—" : v}{#if c.unit}<em>{c.unit}</em>{/if}</span>
+          {#if trend[c.id]?.length > 1}
+            <span class="kpi-spark"><Sparkline data={trend[c.id]} height={30}/></span>
+          {/if}
+        </div>
 
-        <!-- ===== Numeric ===== -->
-        {#if c.type === "number" || c.type === "temperature" || c.type === "humidity"}
-          <div class="flex items-end justify-between gap-2 mt-auto min-w-0">
-            <div class="font-mono font-light tabular-nums truncate min-w-0"
-                 style="font-size:clamp(20px, 4.4vw, 28px);letter-spacing:-.5px;line-height:1.05">
-              {v || "—"}{#if c.unit}<span class="text-[13px] text-[color:var(--color-muted)] ml-1">{c.unit}</span>{/if}
-            </div>
-            {#if history[c.id]?.length > 1}
-              <div class="w-14 h-8 flex-shrink-0 opacity-90 hidden sm:block">
-                <Sparkline data={history[c.id]} height={32}/>
-              </div>
-            {/if}
-          </div>
+      {:else if c.type === "button"}
+        <!-- A button inherits its card's semantic colour. Rendering a card
+             declared DashColor::Danger (an E-STOP) in the same brand green as
+             every benign action is a safety problem, not a styling nit. -->
+        <button class="w-btn" data-tone={c.color || "default"}
+                onclick={() => onCmd(c.id, "1")}>{c.label || "Press"}</button>
 
-        <!-- ===== Button ===== -->
-        {:else if c.type === "button"}
-          <button onclick={() => onCmd(c.id, "1")}
-            class="px-4 py-2.5 rounded-xl text-white font-semibold text-[13.5px] cursor-pointer transition-all hover:-translate-y-0.5 active:translate-y-0 mt-auto"
-            style="background:var(--grad);box-shadow:0 8px 24px -8px color-mix(in srgb,var(--color-brand) 70%,transparent),inset 0 1px 0 rgb(255 255 255/.2)">
-            {c.label || "Press"}
-          </button>
+      {:else if c.type === "switch"}
+        {@const on = v === "1" || v === "true"}
+        <button class="sw" class:on role="switch" aria-checked={on}
+                aria-label={c.label || c.id} onclick={() => onCmd(c.id, on ? "0" : "1")}>
+          <span class="knob"></span>
+        </button>
 
-        <!-- ===== Switch ===== -->
-        {:else if c.type === "switch"}
-          {@const on = v === "1" || v === 1 || v === true}
-          <button aria-label="{c.label || c.id} toggle" onclick={() => onCmd(c.id, on ? "0" : "1")}
-            class="relative w-12 h-7 rounded-full transition-all cursor-pointer mt-auto"
-            style:background={on ? "var(--grad)" : "color-mix(in srgb, var(--color-ink) 12%, transparent)"}
-            style:box-shadow={on ? "0 4px 14px -4px color-mix(in srgb, var(--color-brand) 70%, transparent)" : "none"}>
-            <span class="absolute top-[3px] w-5 h-5 rounded-full bg-white shadow-md transition-all"
-                  style:left={on ? "23px" : "3px"}></span>
-          </button>
+      {:else if c.type === "slider"}
+        {@const n = num(v, num(c.min, 0))}
+        <div class="sl-top tnum">
+          <span>{num(c.min, 0)}</span>
+          <strong>{n}{c.unit ? ` ${c.unit}` : ""}</strong>
+          <span>{num(c.max, 100)}</span>
+        </div>
+        <input class="sl" type="range" aria-label={c.label || c.id}
+               min={num(c.min, 0)} max={num(c.max, 100)} step={num(c.step, 1) || 1} value={n}
+               oninput={(e) => onCmd(c.id, e.currentTarget.value)}/>
 
-        <!-- ===== Slider ===== -->
-        {:else if c.type === "slider"}
-          {@const num = parseFloat(v) || c.min || 0}
-          <div class="flex items-center justify-between text-[11px] text-[color:var(--color-muted)] font-mono">
-            <span>{c.min ?? 0}</span>
-            <span class="font-semibold text-[color:var(--color-brand)] text-[13px] tabular-nums">{num}{c.unit ? " "+c.unit : ""}</span>
-            <span>{c.max ?? 100}</span>
-          </div>
-          <input type="range" min={c.min ?? 0} max={c.max ?? 100} step={c.step || 1} value={num}
-                 oninput={(e) => onCmd(c.id, e.currentTarget.value)} class="joule-range w-full"/>
+      {:else if c.type === "gauge"}
+        {@const n = num(v)}
+        <div class="gauge" role="img" aria-label="{c.label}: {n}{c.unit || ''}">
+          <svg viewBox="-6 -6 112 62" preserveAspectRatio="xMidYMax meet">
+            <path d="M8,48 A40,40 0 0 1 88,48" fill="none" stroke="var(--color-line)" stroke-width="8" stroke-linecap="round"/>
+            <path d="M8,48 A40,40 0 0 1 88,48" fill="none" stroke="var(--color-brand)" stroke-width="8" stroke-linecap="round"
+                  stroke-dasharray="{frac(v, c) * 125.6} 999" style="transition:stroke-dasharray .4s ease"/>
+          </svg>
+          <span class="gauge-v tnum">{n.toFixed(1)}{c.unit || ""}</span>
+        </div>
 
-        <!-- ===== Gauge ===== -->
-        {:else if c.type === "gauge"}
-          {@const n = parseFloat(v) || 0}
-          {@const lo = c.min ?? 0}
-          {@const hi = c.max ?? 100}
-          {@const p  = Math.max(0, Math.min(1, (n - lo) / (hi - lo)))}
-          {@const len = p * 125.6}
-          <div class="relative" style="height:96px">
-            <!-- viewBox includes 5-unit margin so the 8-unit stroke can't
-                 clip the right/top edge when the card is very narrow. -->
-            <svg viewBox="-5 -5 110 70" preserveAspectRatio="xMidYMax meet" class="w-full h-full">
-              <path d="M10,50 A40,40 0 0 1 90,50" fill="none" stroke="var(--color-line)" stroke-width="8" stroke-linecap="round"/>
-              <path d="M10,50 A40,40 0 0 1 90,50" fill="none" stroke="url(#brand-gradient)" stroke-width="8" stroke-linecap="round"
-                    stroke-dasharray="{len} 999" style="transition:stroke-dasharray .5s ease"/>
-            </svg>
-            <div class="absolute inset-x-0 bottom-0 text-center font-mono font-bold text-[18px] text-[color:var(--color-ink)]">{n.toFixed(1)}{c.unit || ""}</div>
-          </div>
+      {:else if c.type === "donut"}
+        {@const p = frac(v, c) * 100}
+        <div class="donut" role="img" aria-label="{c.label}: {Math.round(p)} percent">
+          <svg viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-line)" stroke-width="3.2"/>
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-brand)" stroke-width="3.2"
+                    stroke-linecap="round" stroke-dasharray="{p} 100" transform="rotate(-90 18 18)"
+                    style="transition:stroke-dasharray .4s ease"/>
+          </svg>
+          <span class="donut-v tnum">{Math.round(p)}%</span>
+        </div>
 
-        <!-- ===== Donut ===== -->
-        {:else if c.type === "donut"}
-          {@const n = parseFloat(v) || 0}
-          {@const lo = c.min ?? 0}
-          {@const hi = c.max ?? 100}
-          {@const p  = Math.max(0, Math.min(100, ((n - lo) / (hi - lo)) * 100))}
-          <div class="relative grid place-items-center" style="height:140px">
-            <svg viewBox="0 0 36 36" class="w-[120px] h-[120px]">
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--color-line)" stroke-width="3"/>
-              <circle cx="18" cy="18" r="15.9" fill="none" stroke="url(#brand-gradient)" stroke-width="3"
-                      stroke-linecap="round" stroke-dasharray="{p} 100" transform="rotate(-90 18 18)"
-                      style="transition:stroke-dasharray .5s ease"/>
-            </svg>
-            <div class="absolute font-mono font-extrabold text-[22px]" style="background:var(--grad);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">{Math.round(p)}%</div>
-          </div>
+      {:else if c.type === "progress"}
+        {@const p = frac(v, c) * 100}
+        <div class="bar" role="progressbar" aria-valuenow={Math.round(p)} aria-valuemin="0" aria-valuemax="100">
+          <span style:width="{p}%"></span>
+        </div>
+        <div class="bar-t tnum"><span>{num(v)}{c.unit ? ` ${c.unit}` : ""}</span><span>{p.toFixed(0)}%</span></div>
 
-        <!-- ===== Progress ===== -->
-        {:else if c.type === "progress"}
-          {@const n = parseFloat(v) || 0}
-          {@const lo = c.min ?? 0}
-          {@const hi = c.max ?? 100}
-          {@const p = Math.max(0, Math.min(100, ((n - lo) / (hi - lo)) * 100))}
-          <div class="h-3 rounded-full overflow-hidden mt-auto" style="background:color-mix(in srgb,var(--color-ink) 10%,transparent)">
-            <div class="h-full rounded-full transition-[width] duration-500"
-                 style:width="{p}%" style:background="var(--grad)"
-                 style:box-shadow="0 0 16px color-mix(in srgb, var(--color-brand) 50%, transparent)"></div>
-          </div>
-          <div class="flex items-center justify-between text-[11px] text-[color:var(--color-muted)] font-mono">
-            <span>{n}{c.unit ? " "+c.unit : ""}</span><span>{p.toFixed(1)}%</span>
-          </div>
+      {:else if c.type === "status"}
+        <StatusDot state={statusKind(v)} text={v || "—"}/>
 
-        <!-- ===== Status ===== -->
-        {:else if c.type === "status"}
-          <StatusDot state={statusKind(v)} text={v || "—"}/>
+      {:else if c.type === "color"}
+        <div class="colr">
+          <input type="color" aria-label={c.label || c.id} value={/^#[0-9a-f]{6}$/i.test(v) ? v : "#0fd08c"}
+                 oninput={(e) => onCmd(c.id, e.currentTarget.value)}/>
+          <code>{v || "—"}</code>
+        </div>
 
-        <!-- ===== Color ===== -->
-        {:else if c.type === "color"}
-          <div class="flex items-center gap-3 mt-auto">
-            <input type="color" value={v || "#6366f1"}
-                   oninput={(e) => onCmd(c.id, e.currentTarget.value)}
-                   class="w-14 h-10 rounded-xl border-0 cursor-pointer overflow-hidden"/>
-            <span class="font-mono text-[14px] text-[color:var(--color-ink-2)]">{v || "#6366f1"}</span>
-          </div>
+      {:else if c.type === "input"}
+        <input class="txt" type="text" aria-label={c.label || c.id}
+               placeholder={c.unit || "type and press enter"} value={v}
+               onchange={(e) => onCmd(c.id, e.currentTarget.value)}/>
 
-        <!-- ===== Input ===== -->
-        {:else if c.type === "input"}
-          <input type="text" placeholder={c.unit || "type and press enter"}
-                 value={v} onchange={(e) => onCmd(c.id, e.currentTarget.value)}
-                 class="w-full px-3 py-2.5 rounded-xl border border-[color:var(--color-line)] bg-[color-mix(in_srgb,var(--color-ink)_4%,transparent)] text-[color:var(--color-ink)] outline-none transition-all focus:border-[color:var(--color-brand)] focus:shadow-[0_0_0_3px_color-mix(in_srgb,var(--color-brand)_22%,transparent)] mt-auto"/>
+      {:else if c.type === "joystick"}
+        <div class="joy" use:joystick={c.id} role="application" aria-label="{c.label}: drag to steer">
+          <span class="ring"></span><span class="nub"></span>
+        </div>
 
-        <!-- ===== Joystick ===== -->
-        {:else if c.type === "joystick"}
-          <div class="relative w-[140px] h-[140px] mx-auto rounded-full cursor-pointer border border-[color:var(--color-line)] [touch-action:none]"
-               style="background:radial-gradient(circle at 30% 30%,color-mix(in srgb,var(--color-brand) 14%,var(--color-panel)),var(--color-panel))"
-               use:joystickHandler={c.id}>
-            <div class="absolute inset-[14px] rounded-full border border-dashed border-[color:var(--color-line)] opacity-60"></div>
-            <div class="nub absolute w-11 h-11 rounded-full"
-                 style="left:48px;top:48px;background:var(--grad);box-shadow:0 6px 16px color-mix(in srgb,var(--color-brand) 35%,transparent),inset 0 2px 4px rgb(255 255 255/.3);transition:transform .08s linear"></div>
-          </div>
+      {:else if c.type === "image"}
+        <img class="img" alt={c.label || ""}
+             src={/^(https?:|data:)/.test(String(v)) ? v : `data:image/png;base64,${v}`}/>
 
-        <!-- ===== Image ===== -->
-        {:else if c.type === "image"}
-          <img src={v?.startsWith("http") || v?.startsWith("data:") ? v : ("data:image/png;base64," + v)} alt="" class="max-w-full rounded-xl"/>
+      {:else if c.type === "chart"}
+        {@const ch = chartOf(v)}
+        <svg class="chart" viewBox="0 0 {CW} {CH}" preserveAspectRatio="none" role="img"
+             aria-label="{c.label || c.id}{c.unit ? ` (${c.unit})` : ''}: line chart">
+          <path class="cg" d={CGRID}/>
+          {#if ch}
+            <path class="ca" d={ch.area}/>
+            <path class="cl" d={ch.line}/>
+            <path class="cd" d={ch.dot}/>
+          {/if}
+        </svg>
 
-        <!-- ===== Chart ===== -->
-        {:else if c.type === "chart"}
-          <div class="w-full" style="height:180px">
-            <canvas use:chartCanvas={v} class="block w-full h-full"></canvas>
-          </div>
+      {:else if c.type === "custom"}
+        <!-- The firmware owns this markup (setCustomHtml). It is device-supplied,
+             not user-supplied, and rendering it verbatim is the documented point
+             of the Custom widget — but it does mean a sketch that interpolates
+             untrusted input into the snippet is injecting into this page.
+             The value goes in via an action, not a {@const} side effect: a
+             {@const} is evaluated once when the block is created, so the
+             injected value never updated after the first frame. -->
+        <div use:customOut={{ id: c.id, value: v }}>{@html c.custom || ""}</div>
 
-        <!-- ===== Custom HTML ===== -->
-        {:else if c.type === "custom"}
-          {@html c.custom || ""}
-          {@const _injected = (() => {
-            queueMicrotask(() => {
-              const el = document.getElementById("dash-" + c.id + "-out");
-              if (el && el.textContent !== String(v)) el.textContent = String(v);
-            });
-            return null;
-          })()}
-        {/if}
-      </Card>
-    {/each}
-  </div>
+      {:else if WIDGETS[c.type]}
+        <!-- Everything added after the original sixteen lives in
+             shared/widgets/ and is dispatched by type key. Keeping the classic
+             types inline above avoids churning the shell for no gain. -->
+        {@const Widget = WIDGETS[c.type]}
+        <Widget card={c} value={v} cmd={(x) => onCmd(c.id, x)} />
+
+      {:else}
+        <!-- A card whose type this UI does not know. Firmware newer than the
+             embedded page is a normal state during a staged rollout, so say so
+             instead of rendering an empty box the operator can't interpret. -->
+        <p class="unknown">Unsupported widget <code>{c.type}</code> — update the device UI.</p>
+      {/if}
+    </Card>
+    {/if}
+  {:else}
+    <p class="empty">No widgets on this tab.</p>
+  {/each}
 </main>
 
-<!-- ============================== TOASTS ============================== -->
-<div class="fixed right-3.5 bottom-3.5 flex flex-col gap-2 z-50 pointer-events-none max-w-[min(360px,90vw)]">
+<div class="toasts" role="status" aria-live="polite">
   {#each toasts as t (t.id)}
-    <div class="flex items-center gap-2.5 px-3.5 py-3 rounded-xl text-[13px] pointer-events-auto border bg-[color:var(--color-panel-solid)]"
-         style:box-shadow="var(--shadow-card)"
-         style:border-color={t.level === "success" ? "var(--color-ok)" : t.level === "warn" ? "var(--color-warn)" : t.level === "error" ? "var(--color-err)" : "var(--color-info)"}>
-      <span class="w-1.5 h-8 rounded-[3px]"
-            style:background={t.level === "success" ? "var(--color-ok)" : t.level === "warn" ? "var(--color-warn)" : t.level === "error" ? "var(--color-err)" : "var(--color-info)"}></span>
-      <span>{t.msg}</span>
-    </div>
+    <div class="toast" data-l={t.level}><i aria-hidden="true"></i><span>{t.msg}</span></div>
   {/each}
 </div>
 
+<!-- One gradient shared by every chart card. Sparkline.svelte has to mint a
+     per-instance id because its colour is a prop; here every chart fills with
+     the brand colour, so a second copy would be identical. stop-color takes
+     the var() straight, which is what keeps the fill honest across a theme
+     toggle. -->
+<svg width="0" height="0" aria-hidden="true" style="position:absolute">
+  <linearGradient id="chart-fade" x1="0" x2="0" y1="0" y2="1">
+    <stop offset="0" stop-color="var(--color-brand)" stop-opacity=".3"/>
+    <stop offset="1" stop-color="var(--color-brand)" stop-opacity="0"/>
+  </linearGradient>
+</svg>
+
 <style>
-  :global(.joule-range) { -webkit-appearance: none; appearance: none; background: transparent; height: 24px; outline: none; }
-  :global(.joule-range::-webkit-slider-runnable-track) { height: 6px; border-radius: 6px; background: color-mix(in srgb, var(--color-ink) 12%, transparent); }
-  :global(.joule-range::-webkit-slider-thumb) { -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%; background: var(--grad); margin-top: -7px; cursor: pointer; border: 2px solid #fff; box-shadow: 0 2px 8px color-mix(in srgb, var(--color-brand) 35%, transparent); }
-  :global(.joule-range::-moz-range-track) { height: 6px; border-radius: 6px; background: color-mix(in srgb, var(--color-ink) 12%, transparent); }
-  :global(.joule-range::-moz-range-thumb) { width: 20px; height: 20px; border-radius: 50%; background: var(--color-brand); border: 2px solid #fff; cursor: pointer; }
-  @keyframes pulse {
-    0%,100% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-ok) 18%, transparent); }
-    50%     { box-shadow: 0 0 0 7px color-mix(in srgb, var(--color-ok)  6%, transparent); }
-  }
+.skip { position:absolute; left:-9999px; top:0; z-index:100; padding:10px 14px;
+        background:var(--color-panel); color:var(--color-ink); border-radius:var(--radius-ctl); }
+.skip:focus { left:12px; top:12px; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+
+.hdr { position: sticky; top: 0; z-index: 20; background: var(--color-bg);
+       border-bottom: 1px solid var(--color-line); }
+.hdr-in { display: flex; align-items: center; gap: 12px; height: 60px; }
+.mark { display: grid; place-items: center; width: 30px; height: 30px; flex: none;
+        border-radius: 9px; color: #fff; background: var(--grad); }
+.ident { min-width: 0; flex: 1; }
+.ident h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -.01em;
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ident p  { margin: 0; font-size: 12px; color: var(--color-muted);
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.pill { display: inline-flex; align-items: center; gap: 6px; flex: none;
+        padding: 3px 9px; border-radius: 99px; font-size: 11.5px; font-weight: 600;
+        border: 1px solid var(--color-line); color: var(--color-muted); }
+.pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.pill[data-tone="ok"] { color: var(--color-ok); }
+
+.icon-btn { display: grid; place-items: center; width: 32px; height: 32px; flex: none;
+            border: 0; background: none; color: var(--color-muted); cursor: pointer; border-radius: 8px; }
+.icon-btn:hover { color: var(--color-ink); background: var(--color-bg-soft); }
+
+.tabs { display: flex; gap: 4px; padding-bottom: 8px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tab { padding: 5px 13px; border-radius: 99px; white-space: nowrap; cursor: pointer;
+       font: inherit; font-size: 13px; font-weight: 600; color: var(--color-muted);
+       background: none; border: 1px solid transparent; }
+.tab:hover { color: var(--color-ink); }
+.tab.on { color: var(--color-brand); border-color: var(--color-brand);
+          background: color-mix(in srgb, var(--color-brand) 9%, transparent); }
+
+.scrim { position: fixed; inset: 0; z-index: 60; background: rgb(0 0 0 / .5);
+         opacity: 0; pointer-events: none; transition: opacity .2s; }
+.scrim.on { opacity: 1; pointer-events: auto; }
+.drawer { position: fixed; inset: 0 0 0 auto; z-index: 70; width: min(78vw, 300px);
+          display: flex; flex-direction: column; background: var(--color-bg);
+          border-left: 1px solid var(--color-line); transform: translateX(100%);
+          transition: transform .24s cubic-bezier(.3,.8,.2,1); }
+.drawer.on { transform: none; }
+.drawer-hd { display: flex; align-items: center; justify-content: space-between;
+             height: 60px; padding: 0 12px 0 18px; border-bottom: 1px solid var(--color-line);
+             font-weight: 650; font-size: 14px; }
+.drawer nav { overflow-y: auto; padding: 6px 0; }
+.drawer-item { display: block; width: 100%; text-align: left; padding: 12px 18px;
+               font: inherit; font-size: 14.5px; font-weight: 600; cursor: pointer;
+               color: var(--color-ink-2); background: none; border: 0;
+               border-left: 3px solid transparent; }
+.drawer-item.on { color: var(--color-brand); border-left-color: var(--color-brand);
+                  background: color-mix(in srgb, var(--color-brand) 8%, transparent); }
+
+.grid { display: grid; grid-template-columns: repeat(12, minmax(0,1fr));
+        gap: 12px; padding-top: 16px; padding-bottom: 48px; }
+.bare { min-width: 0; }
+.unknown { margin: auto 0 0; font-size: 12.5px; color: var(--color-muted); }
+.unknown code { font-family: var(--font-mono); color: var(--color-warn); }
+.empty { grid-column: span 12; color: var(--color-muted); font-size: 14px; padding: 24px 4px; }
+
+.kpi { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px;
+       margin-top: auto; min-width: 0; }
+/* The number wins any space fight with its sparkline — a truncated reading
+   ("0.60…") is useless, a missing trend line is merely a shame. */
+.kpi-v { flex: 1 1 auto; min-width: 0;
+         font-size: clamp(20px, 4.2vw, 28px); font-weight: 400; letter-spacing: -.02em;
+         line-height: 1.05; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kpi-v em { font-style: normal; font-size: .46em; color: var(--color-muted);
+            margin-left: .3em; font-weight: 500; }
+.kpi-spark { flex: 0 1 52px; min-width: 0; opacity: .85; }
+@container (max-width: 150px) { .kpi-spark { display: none; } }
+
+.w-btn { margin-top: auto; padding: 9px 14px; cursor: pointer; font: inherit;
+         font-size: 13.5px; font-weight: 600; color: #fff;
+         background: var(--tone, var(--color-brand));
+         border: 1px solid var(--tone, var(--color-brand));
+         border-radius: var(--radius-ctl); }
+.w-btn:hover { filter: brightness(1.07); }
+.w-btn:active { filter: brightness(.94); }
+.w-btn[data-tone="danger"]  { --tone: var(--color-err); }
+.w-btn[data-tone="warning"] { --tone: var(--color-warn); }
+.w-btn[data-tone="success"] { --tone: var(--color-ok); }
+.w-btn[data-tone="info"]    { --tone: var(--color-info); }
+
+.sw { position: relative; width: 46px; height: 26px; margin-top: auto; flex: none;
+      border-radius: 99px; cursor: pointer; border: 1px solid var(--color-line);
+      background: var(--color-bg-soft); transition: background .18s, border-color .18s; }
+.sw.on { background: var(--color-brand); border-color: var(--color-brand); }
+.knob { position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%;
+        background: var(--color-panel); box-shadow: 0 1px 3px rgb(0 0 0 / .3);
+        transition: transform .18s cubic-bezier(.3,.8,.2,1); }
+.sw.on .knob { transform: translateX(20px); background: #fff; }
+
+.sl-top { display: flex; align-items: baseline; justify-content: space-between;
+          font-size: 11.5px; color: var(--color-muted); }
+.sl-top strong { font-size: 14px; font-weight: 650; color: var(--color-brand); }
+.sl { width: 100%; height: 22px; appearance: none; -webkit-appearance: none;
+      background: none; cursor: pointer; }
+.sl::-webkit-slider-runnable-track { height: 5px; border-radius: 5px; background: var(--color-line); }
+.sl::-webkit-slider-thumb { -webkit-appearance: none; width: 17px; height: 17px; margin-top: -6px;
+      border-radius: 50%; background: var(--color-brand); border: 2px solid var(--color-panel);
+      box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+.sl::-moz-range-track { height: 5px; border-radius: 5px; background: var(--color-line); }
+.sl::-moz-range-thumb { width: 17px; height: 17px; border-radius: 50%;
+      background: var(--color-brand); border: 2px solid var(--color-panel); }
+
+/* The readout sits BELOW the arc, not inside it. Centred in the arc it
+   collided with the 8px stroke on any card narrower than ~200px. */
+.gauge { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: auto; }
+.gauge svg { width: 100%; max-width: 190px; height: 74px; display: block; }
+.gauge-v { font-family: var(--font-mono); font-size: 16px; font-weight: 650;
+           line-height: 1; color: var(--color-ink); }
+.donut { position: relative; display: grid; place-items: center; }
+.donut svg { width: 112px; height: 112px; }
+.donut-v { position: absolute; font-family: var(--font-mono); font-size: 20px;
+           font-weight: 650; color: var(--color-brand); }
+
+.bar { height: 9px; margin-top: auto; border-radius: 99px; overflow: hidden;
+       background: var(--color-bg-soft); border: 1px solid var(--color-line-soft); }
+.bar span { display: block; height: 100%; background: var(--color-brand);
+            transition: width .4s ease; }
+.bar-t { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--color-muted); }
+
+.colr { display: flex; align-items: center; gap: 10px; margin-top: auto; }
+.colr input { width: 46px; height: 34px; padding: 0; border: 1px solid var(--color-line);
+              border-radius: var(--radius-ctl); background: none; cursor: pointer; }
+.colr code { font-family: var(--font-mono); font-size: 13px; color: var(--color-ink-2); }
+
+.txt { margin-top: auto; width: 100%; padding: 8px 11px; font: inherit; font-size: 13.5px;
+       color: var(--color-ink); background: var(--color-panel-2);
+       border: 1px solid var(--color-line); border-radius: var(--radius-ctl); }
+
+.joy { position: relative; width: 132px; height: 132px; margin: 0 auto; border-radius: 50%;
+       touch-action: none; cursor: grab; background: var(--color-bg-soft);
+       border: 1px solid var(--color-line); }
+.joy .ring { position: absolute; inset: 13px; border-radius: 50%;
+             border: 1px dashed var(--color-line); }
+.nub { position: absolute; left: 44px; top: 44px; width: 44px; height: 44px; border-radius: 50%;
+       background: var(--color-brand); box-shadow: 0 2px 8px rgb(0 0 0 / .25);
+       transition: transform .07s linear; }
+
+.img { max-width: 100%; height: auto; border-radius: var(--radius-ctl); }
+.chart { display: block; width: 100%; height: 170px; }
+/* non-scaling-stroke so preserveAspectRatio="none" stretches the geometry but
+   not the line weight — same trick as shared/components/Sparkline.svelte. */
+.chart path { vector-effect: non-scaling-stroke; }
+.cg { fill: none; stroke: var(--color-line); }
+.ca { fill: url(#chart-fade); }
+.cl { fill: none; stroke: var(--color-brand); stroke-width: 2;
+      stroke-linejoin: round; stroke-linecap: round; }
+.cd { stroke: var(--color-brand); stroke-width: 6.4; stroke-linecap: round; }
+
+.toasts { position: fixed; right: 12px; bottom: 12px; z-index: 80;
+          display: flex; flex-direction: column; gap: 8px; max-width: min(360px, calc(100vw - 24px)); }
+.toast { display: flex; align-items: center; gap: 10px; padding: 10px 13px; font-size: 13px;
+         /* Opaque: this used to reference an undefined --color-panel-solid and
+            rendered as transparent text floating over the dashboard. */
+         background: var(--color-panel); color: var(--color-ink);
+         border: 1px solid var(--color-line); border-left-width: 3px;
+         border-radius: var(--radius-ctl); box-shadow: var(--shadow-pop); }
+.toast i { width: 7px; height: 7px; border-radius: 50%; flex: none; background: var(--color-info); }
+.toast[data-l="success"] { border-left-color: var(--color-ok); }
+.toast[data-l="success"] i { background: var(--color-ok); }
+.toast[data-l="warn"] { border-left-color: var(--color-warn); }
+.toast[data-l="warn"] i { background: var(--color-warn); }
+.toast[data-l="error"] { border-left-color: var(--color-err); }
+.toast[data-l="error"] i { background: var(--color-err); }
+.toast[data-l="info"] { border-left-color: var(--color-info); }
 </style>

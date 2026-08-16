@@ -1,98 +1,106 @@
 <!-- ---------------------------------------------------------------------------
-  JouleSuite — generic glass-styled card. Shared across all four apps.
-  Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>  (c) 2026 — MIT
+  VectiSuite — panel card, shared across all four apps.
+
+  Deliberately flat: no lift-on-hover, no backdrop blur, no coloured glow.
+  These pages are instrument panels, not marketing sites — a card that moves
+  when the pointer crosses it makes a 30-widget dashboard feel unstable, and
+  hover states are dead weight on the phone where most of this gets read.
+  Status is carried by the accent rail and the value, never by decoration.
+
+  (c) 2026 VectiVolt — MIT License
 --------------------------------------------------------------------------- -->
 <script>
+  import Icon from './Icon.svelte';
+
   /** @type {'default'|'success'|'warning'|'danger'|'info'|'primary'} */
   let { color = 'default',
         span = 3,
         label = '',
-        Icon = null,       // optional Lucide component to show in the top-right corner
+        icon = null,        // icon NAME from shared/icons.js, rendered in the corner
         class: klass = '',
         children } = $props();
+
   let colSpan = $derived(`span ${Math.min(12, Math.max(1, span))}`);
 
-  // Semantic color → CSS var lookup for the icon tint.
-  let iconVar = $derived(
-    color === "success" ? "--color-ok"
-    : color === "warning" ? "--color-warn"
-    : color === "danger"  ? "--color-err"
-    : color === "info"    ? "--color-info"
-    : color === "primary" ? "--color-brand"
-    : "--color-muted"
+  let accent = $derived(
+    color === "success" ? "var(--color-ok)"
+    : color === "warning" ? "var(--color-warn)"
+    : color === "danger"  ? "var(--color-err)"
+    : color === "info"    ? "var(--color-info)"
+    : color === "primary" ? "var(--color-brand)"
+    : "var(--color-muted)"
   );
 </script>
 
-<div class="joule-card group {klass}" data-c={color} style:grid-column={colSpan}>
-  {#if label || Icon}
-    <div class="joule-card-head">
-      {#if label}<div class="joule-card-label">{label}</div>{/if}
-      {#if Icon}
-        <div class="joule-card-icon" style:color={`color-mix(in srgb, var(${iconVar}) 55%, transparent)`}>
-          <Icon size={16} strokeWidth={2.2}/>
-        </div>
+<section class="vecti-card {klass}"
+         data-accent={color !== 'default'}
+         style:grid-column={colSpan}
+         style:--accent={accent}>
+  {#if label || icon}
+    <header class="vecti-card-head">
+      {#if label}<h2 class="vecti-card-label">{label}</h2>{/if}
+      {#if icon}
+        <span class="vecti-card-icon"><Icon name={icon} size={15} strokeWidth={2}/></span>
       {/if}
-    </div>
+    </header>
   {/if}
-  <div class="joule-card-body">{@render children?.()}</div>
-</div>
+  <div class="vecti-card-body">{@render children?.()}</div>
+</section>
 
 <style>
-.joule-card {
+.vecti-card {
   position: relative;
   background: var(--color-panel);
   border: 1px solid var(--color-line);
   border-radius: var(--radius-card);
-  padding: 20px;
-  min-height: 124px;
+  padding: 13px 15px;
+  /* Enough to align a row of KPI cards, not so much that a one-line status
+     widget floats in a pool of empty panel. */
+  min-height: 92px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  overflow: hidden;
-  transition: transform .25s cubic-bezier(.3,.8,.2,1),
-              box-shadow .25s ease, border-color .2s ease;
+  gap: 8px;
   box-shadow: var(--shadow-card);
+  /* Cards sit in a 12-col grid; without this a long unbroken value string
+     (a MAC, a base64 blob) forces the whole row wider than the viewport. */
+  min-width: 0;
+  /* Lets widgets adapt to the card's own width rather than the viewport's —
+     a 3-col card on desktop is narrower than a 12-col card on a phone. */
+  container-type: inline-size;
 }
-.joule-card:hover {
-  transform: translateY(-2px);
-  border-color: color-mix(in srgb, var(--color-brand) 30%, var(--color-line));
-  box-shadow: var(--shadow-card-hover);
-}
-/* Top sheen — gives the dark glass-morphism a subtle inner highlight. */
-.joule-card::before {
-  content: "";
-  position: absolute; inset: 0 0 auto 0; height: 50%;
-  border-radius: inherit;
-  background: linear-gradient(180deg, rgb(255 255 255 / 0.025), transparent 80%);
-  pointer-events: none;
-}
-/* Left semantic accent strip, 70% opacity to match Stitch's polish. */
-.joule-card[data-c]:not([data-c="default"])::after {
-  content: ""; position: absolute; left: 0; top: 16px; bottom: 16px;
-  width: 3px; border-radius: 3px;
-  opacity: .7;
-}
-.joule-card[data-c="success"]::after { background: var(--color-ok); }
-.joule-card[data-c="warning"]::after { background: var(--color-warn); }
-.joule-card[data-c="danger"]::after  { background: var(--color-err); }
-.joule-card[data-c="info"]::after    { background: var(--color-info); }
-.joule-card[data-c="primary"]::after { background: var(--color-brand); }
 
-.joule-card-head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 2px;
+/* Accent rail. Inset rather than full-bleed so it reads as a status marker
+   and not as a border, and so adjacent cards don't form a stripe pattern. */
+.vecti-card[data-accent="true"]::before {
+  content: "";
+  position: absolute; left: 0; top: 14px; bottom: 14px;
+  width: 3px;
+  border-top-right-radius: 3px; border-bottom-right-radius: 3px;
+  background: var(--accent);
 }
-.joule-card-label {
-  font-size: 10.5px;
-  text-transform: uppercase;
-  letter-spacing: 1.6px;
+
+.vecti-card-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+}
+.vecti-card-label {
+  margin: 0;
+  font-size: 11px;
   font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   color: var(--color-muted);
+  /* A long label truncates rather than wrapping to three lines and shoving
+     the value out of the card. */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.joule-card-icon {
-  display: inline-grid;
-  place-items: center;
-  width: 16px; height: 16px;
+.vecti-card-icon {
+  display: inline-grid; place-items: center;
+  flex: none;
+  color: var(--accent);
+  opacity: .75;
 }
-.joule-card-body { display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.vecti-card-body {
+  display: flex; flex-direction: column; gap: 8px;
+  flex: 1; min-width: 0;
+}
 </style>

@@ -32,15 +32,33 @@
 #include <math.h>
 
 // ---- defaults ----------------------------------------------------------
-static constexpr const char *DEFAULT_SSID    = "TP-Link_930C";
-static constexpr const char *DEFAULT_PASS    = "66021117";
-static constexpr const char *AP_FALLBACK_SSID= "Joule-Demo";
-static constexpr const char *HOSTNAME        = "joule-demo";
+//
+// Wi-Fi credentials are build flags, never literals in the source. A previous
+// revision of this file carried a real SSID and its plaintext PSK, and that is
+// exactly how a home network ends up in a git history that outlives it.
+//
+// Provide them at build time if you want the demo to auto-join:
+//     pio run -e esp32s3-n8r2 \
+//       --build-flag='-DDEMO_WIFI_SSID="my-ssid"' \
+//       --build-flag='-DDEMO_WIFI_PASS="my-psk"'
+//
+// With no flags the demo boots straight into the VectiNet setup portal, which
+// is the flow a first-time user should see anyway.
+#ifndef DEMO_WIFI_SSID
+  #define DEMO_WIFI_SSID ""
+#endif
+#ifndef DEMO_WIFI_PASS
+  #define DEMO_WIFI_PASS ""
+#endif
+
+static constexpr const char *DEFAULT_SSID    = DEMO_WIFI_SSID;
+static constexpr const char *DEFAULT_PASS    = DEMO_WIFI_PASS;
+static constexpr const char *AP_FALLBACK_SSID= "Vecti-Demo";
+static constexpr const char *HOSTNAME        = "vecti-demo";
 static constexpr const char *FW_VERSION      = "1.0.0+demo";
-// Unified JouleSuite brand: Indigo 500. Same family as the gradient companion
-// (Violet) baked into the UI CSS so the hero card, buttons, gauges, charts,
-// and tab pills all sit in one harmonious palette.
-static constexpr const char *BRAND_HEX       = "#6366f1";    // Indigo 500
+// VectiVolt energy green. The UI's gradient companion (teal) is baked into the
+// shared CSS, so cards, gauges, charts and tab pills all sit in one palette.
+static constexpr const char *BRAND_HEX       = "#0fd08c";
 
 AsyncWebServer server(80);
 
@@ -91,19 +109,81 @@ DashCard cNet    (DashType::Status,      "net",    "Network link");
 DashCard cOcpp   (DashType::Status,      "ocpp",   "OCPP backend");
 DashCard cRssiCh (DashType::Chart,       "rch",    "RSSI history");
 
+
+// ---- Widgets tab — one card per remaining DashType, so a hardware smoke test
+// ---- exercises the whole catalogue rather than the handful the demo uses. ----
+using joule::DashType;
+DashCard wHdr1 (DashType::Header,       "wh1",  "Readouts");
+DashCard wText (DashType::Text,         "wtx",  "Build");
+DashCard wBadge(DashType::Badge,        "wbg",  "Mode");
+DashCard wLed  (DashType::Led,          "wld",  "Contactor");
+DashCard wBatt (DashType::Battery,      "wbt",  "Pack",      "%");
+DashCard wSig  (DashType::Signal,       "wsg",  "Wi-Fi",     "dBm");
+DashCard wUp2  (DashType::Uptime,       "wup",  "Uptime");
+DashCard wSpark(DashType::Sparkline,    "wsp",  "Trend");
+DashCard wTable(DashType::Table,        "wtb",  "Device");
+DashCard wLog  (DashType::LogView,      "wlg",  "Events");
+
+DashCard wHdr2 (DashType::Header,       "wh2",  "Meters");
+DashCard wDial (DashType::Dial,         "wdl",  "Dial",      "kW", 0, 22);
+DashCard wBar  (DashType::Bar,          "wbr",  "Bar",       "%",  0, 100);
+DashCard wLevel(DashType::Level,        "wlv",  "Tank",      "L",  0, 60);
+DashCard wComp (DashType::Compass,      "wcp",  "Heading");
+DashCard wTherm(DashType::Thermo,       "wth",  "Coolant",   "C", -10, 90);
+
+DashCard wHdr3 (DashType::Header,       "wh3",  "Charts");
+DashCard wMulti(DashType::MultiChart,   "wmc",  "3-phase current");
+DashCard wHist (DashType::Histogram,    "whs",  "Hourly kWh");
+DashCard wScat (DashType::Scatter,      "wsc",  "V vs I");
+DashCard wHeat (DashType::Heatmap,      "whm",  "Cell temps");
+
+DashCard wHdr4 (DashType::Header,       "wh4",  "Controls");
+DashCard wConf (DashType::ConfirmButton,"wcf",  "Factory reset");
+DashCard wMom  (DashType::Momentary,    "wmo",  "Jog motor");
+DashCard wStep (DashType::Stepper,      "wst",  "Setpoint",  "A", 6, 32);
+DashCard wRange(DashType::RangeSlider,  "wrg",  "Window",    "C", 0, 60);
+DashCard wDrop (DashType::Dropdown,     "wdp",  "Profile");
+DashCard wRadio(DashType::Radio,        "wrd",  "Phase");
+DashCard wChk  (DashType::Checklist,    "wck",  "Protocols");
+DashCard wKnob (DashType::Knob,         "wkn",  "Limit",     "A", 6, 32);
+DashCard wXY   (DashType::XYPad,        "wxy",  "Pan / tilt");
+DashCard wKeys (DashType::Keypad,       "wkp",  "PIN");
+DashCard wArea (DashType::Textarea,     "wta",  "Site notes");
+DashCard wPass (DashType::Password,     "wpw",  "MQTT password");
+DashCard wDate (DashType::DateTime,     "wdt",  "Next service");
+DashCard wQr   (DashType::QrCode,       "wqr",  "Join this AP");
+DashCard wDiv  (DashType::Divider,      "wdv",  "end of catalogue");
+
+static DashCard *const kWidgetTour[] = {
+  &wHdr1,&wText,&wBadge,&wLed,&wBatt,&wSig,&wUp2,&wSpark,&wTable,&wLog,
+  &wHdr2,&wDial,&wBar,&wLevel,&wComp,&wTherm,
+  &wHdr3,&wMulti,&wHist,&wScat,&wHeat,
+  &wHdr4,&wConf,&wMom,&wStep,&wRange,&wDrop,&wRadio,&wChk,&wKnob,&wXY,&wKeys,
+  &wArea,&wPass,&wDate,&wQr,&wDiv,
+};
+
 // ---- helpers -----------------------------------------------------------
 
+// Deferred reboot. Both the WebSocket command handler and the dashboard button
+// callback run on the AsyncTCP task; calling delay() + ESP.restart() from there
+// stalls every other socket on the device and tears the stack down underneath
+// the frame that is still being processed. Set a deadline instead and let
+// loop() do it from a context that owns the CPU.
+static uint32_t gRebootAtMs = 0;
+static void requestReboot(uint32_t inMs) { gRebootAtMs = millis() + inMs; if (!gRebootAtMs) gRebootAtMs = 1; }
+static void serviceReboot() {
+  if (gRebootAtMs && (int32_t)(millis() - gRebootAtMs) >= 0) ESP.restart();
+}
+
 static void seedDefaultWiFiIfEmpty() {
-  bool hasCorrect = false;
-  for (auto &n : JouleNet.savedNetworks()) if (n.ssid == DEFAULT_SSID) { hasCorrect = true; break; }
-  if (!hasCorrect) {
-    if (!JouleNet.savedNetworks().empty()) {
-      JouleSerial.wrn("Wiping stale Wi-Fi creds (none matched '%s')", DEFAULT_SSID);
-      JouleNet.clearAllCredentials();
-    }
-    JouleSerial.inf("Seeding default Wi-Fi '%s'", DEFAULT_SSID);
-    JouleNet.saveCredentials(DEFAULT_SSID, DEFAULT_PASS);
-  }
+  // No build-time credentials: leave whatever the operator provisioned through
+  // the portal alone. The old version wiped every saved network that didn't
+  // match a hard-coded SSID, so flashing the demo de-provisioned the device.
+  if (DEFAULT_SSID[0] == '\0') return;
+
+  for (auto &n : JouleNet.savedNetworks()) if (n.ssid == DEFAULT_SSID) return;
+  JouleSerial.inf("Seeding build-time Wi-Fi '%s'", DEFAULT_SSID);
+  JouleNet.saveCredentials(DEFAULT_SSID, DEFAULT_PASS);
 }
 
 static void setupNet() {
@@ -161,7 +241,13 @@ static void setupOta() {
   });
 
   JouleOTA.begin(&server, "", "");        // demo: no auth (see README)
-  JouleOTA.commit();
+
+  // Mark the running image good only after the device has actually proven it
+  // works. Calling commit() unconditionally here would cancel the rollback
+  // watchdog on every boot, including a boot of freshly-flashed firmware that
+  // is about to crash — which is precisely the case rollback exists to catch.
+  // The real self-test is deferred to loop(): once Wi-Fi is up and the HTTP
+  // server has served a request, the image has demonstrably survived.
 }
 
 static void setupSerial() {
@@ -170,7 +256,7 @@ static void setupSerial() {
   JouleSerial.setHistorySize(512);
   JouleSerial.onMessage([](const String &cmd){
     JouleSerial.inf("recv> %s", cmd.c_str());
-    if      (cmd == "reboot")     { JouleSerial.wrn("rebooting in 1s"); delay(1000); ESP.restart(); }
+    if      (cmd == "reboot")     { JouleSerial.wrn("rebooting in 1s"); requestReboot(1000); }
     else if (cmd == "scan")       { WiFi.scanNetworks(true); JouleSerial.inf("scan started"); }
     else if (cmd == "heap")       { JouleSerial.inf("heap = %u bytes", ESP.getFreeHeap()); }
     else if (cmd == "wipe-wifi")  { JouleNet.clearAllCredentials(); JouleSerial.wrn("WiFi creds wiped"); }
@@ -188,6 +274,7 @@ static void setupDash() {
   JouleDash.addTab("Energy");
   JouleDash.addTab("Controls");
   JouleDash.addTab("Diagnostics");
+  JouleDash.addTab("Widgets");
 
   // ---- Overview --------------------------------------------------------
   hero.setTab("Overview"); hero.setWidth(12);
@@ -276,7 +363,7 @@ static void setupDash() {
   });
   cReboot.onChange([](const String &){
     JouleDash.notify(joule::NotifyLevel::Warn, "Rebooting in 1s…", 1000);
-    delay(1100); ESP.restart();
+    requestReboot(1100);
   });
   cTag   .onChange([](const String &v){
     JouleSerial.inf("Driver tag: %s", v.c_str());
@@ -293,6 +380,28 @@ static void setupDash() {
   JouleDash.add(&cStop);  JouleDash.add(&cReboot); JouleDash.add(&cJoy);  JouleDash.add(&cTag);
   JouleDash.add(&cTemp);  JouleDash.add(&cHumid);  JouleDash.add(&cRssi); JouleDash.add(&cHeap);
   JouleDash.add(&cUp);    JouleDash.add(&cNet);    JouleDash.add(&cOcpp); JouleDash.add(&cRssiCh);
+
+
+  // ---- Widgets tour -----------------------------------------------------
+  for (auto *c : kWidgetTour) { c->setTab("Widgets"); JouleDash.add(c); }
+  wHdr1.setWidth(12); wHdr2.setWidth(12); wHdr3.setWidth(12); wHdr4.setWidth(12); wDiv.setWidth(12);
+  wTable.setWidth(6); wLog.setWidth(6); wMulti.setWidth(12);
+  wHist.setWidth(6);  wScat.setWidth(6); wHeat.setWidth(6); wArea.setWidth(6); wQr.setWidth(4);
+  wConf.setColor(joule::DashColor::Danger);
+  wDrop .setOptions("Eco|Standard|Boost");
+  wRadio.setOptions("L1|L2|L3");
+  wChk  .setOptions("OCPP|MQTT|Modbus");
+  wText .setValue(FW_VERSION);
+  wBadge.setValue("Boost");        wBadge.setColor(joule::DashColor::Info);
+  wStep .setValue(16);  wKnob.setValue(16);  wRange.setValue("18,42");
+  wDrop .setValue("Standard");     wRadio.setValue("L1");  wChk.setValue("OCPP|MQTT");
+  wXY   .setValue("50,50");
+  wArea .setValue("Bay 3, ground floor.\nWest pillar.");
+  wTable.setValue("[[\"Chip\",\"ESP32-S3\"],[\"Flash\",\"8 MB\"],[\"PSRAM\",\"2 MB\"]]");
+  wLog  .setValue("[\"boot ok\",\"wifi up\",\"dash ready\"]");
+  // Scanning this joins the device's own AP — the onboarding path no
+  // competitor in this space ships.
+  wQr   .setValue(String("WIFI:S:") + AP_FALLBACK_SSID + ";T:nopass;;");
 
   JouleDash.begin(&server, "", "", /*allowAnonymousRead=*/true);
 }
@@ -325,11 +434,41 @@ void loop() {
   JouleOTA.loop();
   JouleSerial.loop();
   JouleDash.tick();
+  serviceReboot();
 
   static uint32_t last = 0, startMs = millis(), chartT = 0, notifyT = millis();
   uint32_t now = millis();
+
+  // Self-test for the rollback watchdog: 20 s of uptime with an associated
+  // radio means this image boots, joins, and serves. Only then is it worth
+  // marking valid — before that, a crash should hand the device back to the
+  // previous slot.
+  static bool committed = false;
+  if (!committed && (now - startMs) > 20000 && WiFi.status() == WL_CONNECTED) {
+    committed = true;
+    JouleOTA.commit();
+    JouleSerial.inf("self-test passed — firmware slot marked valid");
+  }
+
   if (now - last < 1000) return;
   last = now;
+
+  // Heartbeat to the hardware UART once a minute. A soak test needs a heap
+  // series it can regress against, and the dashboard card only exists while a
+  // browser is attached — which is exactly the condition you are NOT testing
+  // when you leave a device running overnight on a bench.
+  static uint32_t hbT = 0;
+  static uint32_t heapAtStart = 0;
+  if (!heapAtStart) heapAtStart = ESP.getFreeHeap();
+  if (now - hbT >= 60000) {
+    hbT = now;
+    uint32_t h = ESP.getFreeHeap();
+    JouleSerial.inf("heartbeat up=%lus heap=%u min=%u drift=%ld rssi=%d state=%d",
+                    (unsigned long)(now / 1000), (unsigned)h,
+                    (unsigned)ESP.getMinFreeHeap(),
+                    (long)h - (long)heapAtStart,
+                    WiFi.RSSI(), (int)JouleNet.getState());
+  }
 
   // ----- Plausible 7.2 kW Level-2 charging session ---------------------
   float sessionS  = (now - startMs) / 1000.0f;

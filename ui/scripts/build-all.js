@@ -19,7 +19,13 @@ const apps = readdirSync(resolve(here, "../apps"))
 function run(cmd, args, cwd) {
   return new Promise((res, rej) => {
     const p = spawn(cmd, args, { cwd, stdio: "inherit" });
-    p.on("exit", code => code === 0 ? res() : rej(new Error(`${cmd} exited ${code}`)));
+    // Without an 'error' handler a failed spawn (npx not on PATH, EACCES)
+    // never emits 'exit', so this promise never settles and the build hangs
+    // silently instead of failing.
+    p.on("error", rej);
+    p.on("exit", (code, signal) =>
+      code === 0 ? res()
+                 : rej(new Error(`${cmd} ${signal ? `killed by ${signal}` : `exited ${code}`}`)));
   });
 }
 

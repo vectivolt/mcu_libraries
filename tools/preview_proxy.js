@@ -35,7 +35,17 @@ const server = http.createServer((req, res) => {
 });
 
 server.on("clientError", () => {});
-process.on("uncaughtException", () => {});
+
+// A blanket no-op uncaughtException handler used to sit here, which swallowed
+// EADDRINUSE and let the process exit 0 with no output — the caller saw a
+// "successful" proxy start and then every request went nowhere. Per-connection
+// socket errors are already handled above; anything reaching here is fatal.
+server.on("error", (e) => {
+  console.error(e.code === "EADDRINUSE"
+    ? `port ${PORT} is already in use — stop the other proxy or set PORT=`
+    : `proxy failed: ${e.message}`);
+  process.exit(1);
+});
 
 // WebSocket upgrade pass-through (raw TCP after the handshake).
 server.on("upgrade", (req, clientSock, head) => {

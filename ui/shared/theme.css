@@ -1,96 +1,178 @@
 /* ---------------------------------------------------------------------------
- * JouleSuite — shared design tokens (Linear/Vercel-inspired, indigo accent)
- * Author: Chinmoy Bhuyan <dikibhuyan@gmail.com>
- * (c) 2026 — MIT
+ * VectiSuite — shared design tokens.
+ *
+ * Palette is the VectiVolt brand system (energy green → teal), matching
+ * vectivolt/Website app/globals.css so a device page and the marketing site
+ * read as one product.
+ *
+ * Design notes for anyone editing this file: these pages are served from an
+ * MCU's flash over a weak Wi-Fi link and are read by a technician holding a
+ * phone in a car park. That drives three rules:
+ *   1. Every byte is flash. No decorative CSS that doesn't earn its size.
+ *   2. Contrast beats atmosphere. Light theme is first-class, not an
+ *      afterthought — daylight is the common case.
+ *   3. No backdrop-filter on large surfaces. It tanks scroll on the cheap
+ *      Androids that techs actually carry.
+ *
+ * (c) 2026 VectiVolt — MIT License
  * ------------------------------------------------------------------------- */
-@import "tailwindcss";
+/* ---- Tokens: light is the base definition -------------------------------
+ * Defined on bare :root so a page always has a complete palette even when
+ * neither the media query nor a data-theme attribute matches.
+ *
+ * These pages used to pull in Tailwind. After the redesign moved every
+ * component to scoped CSS, the entire framework was earning three utility
+ * classes across four apps — all of which were shadowed by the apps' own
+ * `.grid` rules anyway. Dropping it removed ~18-23 KB of CSS per page from
+ * flash and one build dependency.
+ * ---------------------------------------------------------------------- */
+:root {
+  /* Brand — VectiVolt energy green through teal. */
+  --color-brand:      #0b9c68;   /* AA on white; the interactive/accent colour */
+  --color-brand-2:    #0e9fb4;   /* gradient companion (teal) */
+  --color-brand-lift: #0fd08c;   /* bright energy — dark-theme accent, glows */
 
-/* ---- Design tokens ------------------------------------------------------ */
-@theme {
-  --color-bg:         #08090f;
-  --color-bg-soft:    #0d0f17;
-  --color-panel:      #11131c;
-  --color-panel-2:    #161824;
-  --color-line:       rgb(255 255 255 / 0.06);
-  --color-line-soft:  rgb(255 255 255 / 0.04);
-  --color-ink:        #f1f3fa;
-  --color-ink-2:      #b5bbd0;
-  --color-muted:      #7a809a;
+  /* Surfaces */
+  --color-bg:         #f3f5ee;   /* warm paper, matches the marketing site */
+  --color-bg-soft:    #e9ede1;
+  --color-panel:      #ffffff;
+  --color-panel-2:    #f7f9f3;
+  --color-line:       #dbe1d2;
+  --color-line-soft:  #e8ecdf;
 
-  --color-brand:      #6366f1;
-  --color-brand-2:    #8b5cf6;
-  --color-ok:         #10b981;
-  --color-warn:       #f59e0b;
-  --color-err:        #ef4444;
-  --color-info:       #06b6d4;
+  /* Text */
+  --color-ink:        #0b1512;   /* 16.8:1 on --color-bg */
+  --color-ink-2:      #34423b;   /*  9.1:1 */
+  --color-muted:      #5d6b62;   /*  5.4:1 — passes AA for body text */
 
-  --radius-card:      20px;
-  --shadow-card:      0 1px 0 rgb(255 255 255 / 0.04) inset,
-                      0 24px 48px -16px rgb(0 0 0 / 0.55),
-                      0 4px 12px -4px rgb(0 0 0 / 0.30);
-  --shadow-card-hover:0 1px 0 rgb(255 255 255 / 0.06) inset,
-                      0 30px 60px -18px rgb(99 102 241 / 0.35),
-                      0 6px 16px -4px rgb(0 0 0 / 0.35);
-  --shadow-btn:       0 8px 24px -8px rgb(99 102 241 / 0.7),
-                      inset 0 1px 0 rgb(255 255 255 / 0.2);
-  --grad:             linear-gradient(135deg, var(--color-brand) 0%, var(--color-brand-2) 100%);
+  /* Semantic status. Chosen for AA contrast on both surfaces, and
+   * distinguishable under the common red-green deficiencies: the danger and
+   * success hues differ in lightness, not only hue. */
+  --color-ok:         #0b8f5c;
+  --color-warn:       #a86a06;
+  --color-err:        #c62f38;
+  --color-info:       #0e7c92;
 
-  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Inter",
-               "SF Pro Display", "Segoe UI", Roboto, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --radius-card:      0.8rem;    /* brand radius */
+  --radius-ctl:       0.55rem;
+
+  --shadow-card:      0 1px 2px rgb(11 21 18 / 0.05),
+                      0 1px 0 rgb(11 21 18 / 0.03);
+  --shadow-pop:       0 12px 32px -12px rgb(11 21 18 / 0.22),
+                      0 2px 8px -2px rgb(11 21 18 / 0.08);
+  --grad:             linear-gradient(115deg, #04a268 0%, #0abfa0 55%, #10b7ce 100%);
+
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI",
+               Roboto, "Helvetica Neue", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 }
 
-/* Light theme — applied when prefers-color-scheme:light AND user hasn't pinned dark */
-@media (prefers-color-scheme: light) {
-  :root[data-theme="auto"] {
-    --color-bg:         #f6f7fb;
-    --color-bg-soft:    #ffffff;
-    --color-panel:      #ffffff;
-    --color-panel-2:    #f9fafc;
-    --color-line:       rgb(15 18 40 / 0.08);
-    --color-line-soft:  rgb(15 18 40 / 0.04);
-    --color-ink:        #0b0d18;
-    --color-ink-2:      #42485c;
-    --color-muted:      #7d8398;
-    --shadow-card:      0 1px 0 rgb(255 255 255 / 0.6) inset,
-                        0 24px 48px -22px rgb(15 18 40 / 0.18),
-                        0 4px 12px -4px rgb(15 18 40 / 0.05);
-    --shadow-card-hover:0 1px 0 rgb(255 255 255 / 0.7) inset,
-                        0 30px 60px -24px rgb(99 102 241 / 0.22),
-                        0 6px 14px -3px rgb(15 18 40 / 0.08);
+/* ---- Dark tokens --------------------------------------------------------
+ * Applied when the user picked dark explicitly, OR when the OS prefers dark
+ * and the user has not pinned light. Every token redefined here also has a
+ * light definition above — never define a colour only inside one of these
+ * blocks, or the un-matched state renders with a missing variable.
+ * ---------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-brand:      #0fd08c;
+    --color-brand-2:    #22c3dc;
+    --color-brand-lift: #0fd08c;
+
+    --color-bg:         #071310;
+    --color-bg-soft:    #0a1a15;
+    --color-panel:      #0e211b;
+    --color-panel-2:    #12291f;
+    --color-line:       #1d3830;
+    --color-line-soft:  #162c25;
+
+    --color-ink:        #e8f2ec;
+    --color-ink-2:      #adc2b7;
+    --color-muted:      #7e968a;
+
+    --color-ok:         #2ddc93;
+    --color-warn:       #f0aa2c;
+    --color-err:        #ff6b73;
+    --color-info:       #35c6df;
+
+    --shadow-card:      0 1px 2px rgb(0 0 0 / 0.4);
+    --shadow-pop:       0 16px 40px -16px rgb(0 0 0 / 0.7),
+                        0 2px 8px -2px rgb(0 0 0 / 0.4);
   }
 }
-:root[data-theme="light"] {
-  --color-bg:         #f6f7fb;
-  --color-bg-soft:    #ffffff;
-  --color-panel:      #ffffff;
-  --color-panel-2:    #f9fafc;
-  --color-line:       rgb(15 18 40 / 0.08);
-  --color-line-soft:  rgb(15 18 40 / 0.04);
-  --color-ink:        #0b0d18;
-  --color-ink-2:      #42485c;
-  --color-muted:      #7d8398;
-  --shadow-card:      0 1px 0 rgb(255 255 255 / 0.6) inset,
-                      0 24px 48px -22px rgb(15 18 40 / 0.18),
-                      0 4px 12px -4px rgb(15 18 40 / 0.05);
-  --shadow-card-hover:0 1px 0 rgb(255 255 255 / 0.7) inset,
-                      0 30px 60px -24px rgb(99 102 241 / 0.22),
-                      0 6px 14px -3px rgb(15 18 40 / 0.08);
+:root[data-theme="dark"] {
+  --color-brand:      #0fd08c;
+  --color-brand-2:    #22c3dc;
+  --color-brand-lift: #0fd08c;
+
+  --color-bg:         #071310;
+  --color-bg-soft:    #0a1a15;
+  --color-panel:      #0e211b;
+  --color-panel-2:    #12291f;
+  --color-line:       #1d3830;
+  --color-line-soft:  #162c25;
+
+  --color-ink:        #e8f2ec;
+  --color-ink-2:      #adc2b7;
+  --color-muted:      #7e968a;
+
+  --color-ok:         #2ddc93;
+  --color-warn:       #f0aa2c;
+  --color-err:        #ff6b73;
+  --color-info:       #35c6df;
+
+  --shadow-card:      0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-pop:       0 16px 40px -16px rgb(0 0 0 / 0.7),
+                      0 2px 8px -2px rgb(0 0 0 / 0.4);
 }
 
-/* ---- Base layer -------------------------------------------------------- */
+/* ---- Base -------------------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html, body { margin: 0; height: 100%; }
 body {
-  font: 14.5px/1.5 var(--font-sans);
+  font: 15px/1.5 var(--font-sans);
   color: var(--color-ink);
   background: var(--color-bg);
-  background-image:
-    radial-gradient(900px 600px at 12% -8%, color-mix(in srgb, var(--color-brand) 22%, transparent), transparent 55%),
-    radial-gradient(700px 480px at 92% 6%,  color-mix(in srgb, var(--color-brand-2) 18%, transparent), transparent 55%),
-    radial-gradient(900px 700px at 50% 120%, color-mix(in srgb, var(--color-brand) 8%, transparent), transparent 60%);
-  background-attachment: fixed;
   min-height: 100vh;
-  font-feature-settings: "cv11", "ss01";
+  min-height: 100dvh;             /* dodges the mobile URL-bar jump */
+  -webkit-font-smoothing: antialiased;
 }
-::selection { background: color-mix(in srgb, var(--color-brand) 35%, transparent); color: var(--color-ink); }
+
+/* Keyboard focus must always be visible. Techs operate these pages one-handed
+ * with a bluetooth keyboard on a bench rig more often than you'd think. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-brand);
+  outline-offset: 2px;
+  border-radius: var(--radius-ctl);
+}
+
+::selection { background: color-mix(in srgb, var(--color-brand) 28%, transparent); }
+
+/* Numeric telemetry must not jiggle as digits change. */
+.tnum { font-variant-numeric: tabular-nums; font-feature-settings: "tnum"; }
+
+/* Scrollbars: thin and themed, so a log pane doesn't ship a bright grey bar
+ * through the middle of a dark page. */
+* { scrollbar-width: thin; scrollbar-color: var(--color-line) transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: var(--color-line); border-radius: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+/* Respect the OS setting. Vestibular disorders are not an edge case, and a
+ * dashboard that animates every value change is genuinely unusable for some
+ * people. Transitions collapse to instant rather than being removed, so
+ * nothing that relies on transitionend breaks. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Screen-reader-only: visually hidden but still announced. */
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}

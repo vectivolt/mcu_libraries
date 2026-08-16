@@ -9,10 +9,10 @@
 
 | Library | What it does | Routes | Wire size |
 |---|---|---|---:|
-| [**JouleOTA**](libraries/JouleOTA/) | Async drop-in firmware + filesystem updater with push-from-browser **and** pull-from-URL modes, HMAC-signed images, A/B rollback, live SSE progress | `/ota` `/ota/info` `/ota/upload` `/ota/pull` `/ota/events` `/ota/commit` `/ota/rollback` | **5.0 KB gz** |
-| [**JouleSerial**](libraries/JouleSerial/) | Bi-directional WebSocket console — 4 log levels with ANSI colour, regex search, hex view, history replay, exports (TXT/JSON/CSV) | `/serial` `/serial/ws` | **4.6 KB gz** |
-| [**JouleNet**](libraries/JouleNet/) | Multi-SSID Wi-Fi manager with captive portal, 9 custom-parameter types, static IP, mDNS, NVS-backed persistence, auto-failover | `/wifi` `/wifi/scan` `/wifi/connect` `/wifi/status` `/wifi/params` `/wifi/reset` `/wifi/restart` | **5.3 KB gz** |
-| [**JouleDash**](libraries/JouleDash/) | Real-time IoT dashboard over a single WebSocket — **15 widget types** (number, gauge, donut, slider, switch, button, chart, joystick, colour, image, custom-HTML, …) with multi-tab and dark/light/auto theme | `/` `/dash` `/dash/ws` | **7.0 KB gz** |
+| [**JouleOTA**](libraries/JouleOTA/) | Async drop-in firmware + filesystem updater with push-from-browser **and** pull-from-URL modes, HMAC-signed images, A/B rollback, live SSE progress | `/ota` `/ota/info` `/ota/upload` `/ota/pull` `/ota/events` `/ota/commit` `/ota/rollback` | **27.8 KB gz** |
+| [**JouleSerial**](libraries/JouleSerial/) | Bi-directional WebSocket console — 4 log levels with ANSI colour, regex search, hex view, history replay, exports (TXT/JSON/CSV) | `/serial` `/serial/ws` | **26.8 KB gz** |
+| [**JouleNet**](libraries/JouleNet/) | Multi-SSID Wi-Fi manager with captive portal, 9 custom-parameter types, static IP, mDNS, NVS-backed persistence, auto-failover | `/wifi` `/wifi/scan` `/wifi/connect` `/wifi/status` `/wifi/params` `/wifi/reset` `/wifi/restart` | **30.6 KB gz** |
+| [**JouleDash**](libraries/JouleDash/) | Real-time IoT dashboard over a single WebSocket — **16 widget types** (number, gauge, donut, slider, switch, button, chart, joystick, colour, image, custom-HTML, …) with multi-tab and dark/light/auto theme | `/` `/dash` `/dash/ws` | **31.6 KB gz** |
 
 **Author:** [Chinmoy Bhuyan](mailto:dikibhuyan@gmail.com) ·
 **License:** MIT ·
@@ -24,7 +24,7 @@
 
 |  |  |
 |---|---|
-| ![JouleDash dashboard](docs/screenshots/dash-desktop-overview.png) <br>**JouleDash** — 17 cards, 3 tabs, live WebSocket | ![JouleOTA updater](docs/screenshots/ota-desktop.png) <br>**JouleOTA** — drag-drop with SVG progress ring |
+| ![JouleDash dashboard](docs/screenshots/dash-desktop-overview.png) <br>**JouleDash** — 29 cards, 4 tabs, live WebSocket | ![JouleOTA updater](docs/screenshots/ota-desktop.png) <br>**JouleOTA** — drag-drop with SVG progress ring |
 | ![JouleNet portal](docs/screenshots/wifi-desktop.png) <br>**JouleNet** — multi-SSID picker + custom-param form | ![JouleSerial console](docs/screenshots/serial-desktop.png) <br>**JouleSerial** — colour-tinted WebSocket log + cmd input |
 
 Mobile mockups: [dash · overview](docs/screenshots/dash-mobile-overview.png) ·
@@ -42,7 +42,7 @@ no tab ever scrolls off-screen.
 
 * **Premium UI, tiny on the wire.** Every page is a single self-contained
   document — no external CDN, no web-fonts, no fingerprintable assets —
-  and is served **pre-gzipped from flash** so the largest page is under
+  and is served **pre-gzipped from flash**, so the largest page is about
   7 KB on the wire. Loads in one TCP round-trip on real-world Wi-Fi.
 * **Mobile-first and theme-aware.** Glass-morphism panels, smooth
   micro-interactions, 44 px touch targets, fluid grid breakpoints. The
@@ -64,6 +64,19 @@ no tab ever scrolls off-screen.
 ---
 
 ## Install
+
+> **Cloning this repo?** The four libraries are git **submodules**, so a plain
+> `git clone` leaves `libraries/*` empty and every build fails with
+> *"no such file or directory: JouleOTA.h"*. Use:
+>
+> ```bash
+> git clone --recurse-submodules https://github.com/vectivolt/mcu_libraries.git
+> ```
+>
+> Already cloned without them? `git submodule update --init --recursive`.
+>
+> You do **not** need this repo to use a library — Options A and C below install
+> a single library on its own.
 
 ### Option A — drop into your sketch
 
@@ -172,8 +185,9 @@ Then open `http://joule.local` on any device on the same network.
 | ESP32-S2              | ✅ | No BLE — irrelevant here |
 | ESP32-C3              | ✅ | Single-core, smaller heap |
 | ESP8266 (NodeMCU)     | ⚠ | Compiles. OTA works. Dash works for small layouts. PSRAM-free constraints limit history sizes. |
-| arduino-esp32 3.x     | ✅ | Required for `AsyncURIMatcher::exact()` |
-| arduino-esp32 2.x     | ⚠ | Routes match via legacy `on()` matcher; not recommended |
+| arduino-esp32 3.x     | ✅ | Recommended |
+| arduino-esp32 2.x     | ✅ | Verified on 2.0.17 (platform espressif32 6.13.0) |
+| ESPAsyncWebServer 3.x | ✅ | **Required** — `AsyncURIMatcher::exact()` lives here, not in the core |
 
 ---
 
@@ -192,8 +206,7 @@ mcu_libraries/
 │   ├── JouleNet/    ← Wi-Fi provisioning  (README inside)
 │   └── JouleDash/   ← Real-time dashboard (README inside)
 └── tools/
-    ├── gzip_ui.py          ← pre-compress UI HTML into PROGMEM blobs
-    ├── minify_ui.py        ← strip whitespace from UI source
+    ├── mock_device.js      ← fake device for UI work (no ESP32 needed)
     ├── stamp_authors.py    ← add author header to every file
     └── preview_proxy.js    ← localhost proxy used to screenshot the live device
 ```
@@ -246,7 +259,7 @@ Reference test environment used to validate every release:
 * **Verified end-to-end** (Python `websockets` + `urllib` from the host Mac):
   * All 5 HTML routes (`/`, `/dash`, `/ota`, `/wifi`, `/serial`) stream
     to completion
-  * `/dash/ws` layout push delivers all 17 cards / 15 widget types
+  * `/dash/ws` layout push delivers all 29 cards / 16 widget types
     (including the donut)
   * `cmd led=1` round-trips on `/dash/ws` and the value is rebroadcast
     to every connected tab
@@ -271,7 +284,7 @@ PRs welcome. Style guidelines:
   `*::describe()` (or `_typeName()`), a render branch in `*_ui.h`, and
   a test path in `demo/src/main.cpp`
 
-After editing any `*_ui.h`, re-run `python3 tools/gzip_ui.py` to
+After editing the Svelte sources, run `npm run build` in `ui/` to
 refresh the matching `*_ui_gz.h` PROGMEM blob.
 
 ---

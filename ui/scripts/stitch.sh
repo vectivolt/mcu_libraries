@@ -44,7 +44,11 @@ else:
     ;;
   call)
     local_tool="${2:?tool name}"
-    local_args="${3:-{}}"
+    # NOT "${3:-{}}" — the shell ends the expansion at the first `}`, so that
+    # form appends a stray `}` to whatever the caller passed and every
+    # non-default argument reached the server as malformed JSON.
+    local_args="$3"
+    [ -n "$local_args" ] || local_args='{}'
     rpc "{\"jsonrpc\":\"2.0\",\"id\":$ID,\"method\":\"tools/call\",\"params\":{\"name\":\"$local_tool\",\"arguments\":$local_args}}" \
       | /opt/homebrew/bin/python3 -m json.tool
     ;;
