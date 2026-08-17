@@ -60,7 +60,11 @@ pages) on **2026-08-17**. Evidence is in the last column.
 | **Licensing — no keygen recoverable from a flash dump** | ✅ device holds a *public* key only | — | — | — | — | see [the honest security statement](#the-honest-security-statement) — this removes the keygen, not firmware patching |
 | **Licensing — activation with no internet and no app** | ✅ paste into the VectiNet portal | — | — | — | — | |
 | **Licensing — runs off the ESP32** | ✅ pure C99 core, no OS, no libc headers | — | — | — | — | the other four VectiSuite libraries are ESP32-bound; VectiLicense is not |
-| **Commercial licence terms readable before you pay** | n/a — Apache-2.0, full text in repo | ❌ | ❌ | ❌ | ❌ | SCL text published nowhere; store says SCL-1.3, READMEs say SCL-1.2 |
+| **Licence terms readable before you pay** | Apache-2.0, full text in repo | ✅ | ✅ | ✅ | ✅ | Commercial licence v1.3 is published on the vendor's site (verified 2026-08-17) |
+| **You keep ownership of your own modifications** | ✅ Apache-2.0 §2–3 | ❌ | ❌ | ❌ | ❌ | *"All intellectual property rights in the Licensed Material, including any modifications or enhancements created by Licensee based on the Licensed Material, shall remain the exclusive property of Licensor."* |
+| **You may build a competing product** | ✅ no restriction | ❌ | ❌ | ❌ | ❌ | *"Licensee shall not use the Licensed Material to build, develop, or offer any product or service that directly or indirectly competes with the products or services offered by Licensor."* |
+| **You may ship firmware unobfuscated** | ✅ | ❌ | ❌ | ❌ | ❌ | commercial licence requires pre-compiling and static linking so the library cannot be extracted; firmware may not be distributed in clear text |
+| **You may sublicense or redistribute** | ✅ Apache-2.0 | ❌ | ❌ | ❌ | ❌ | *"Licensee shall not sublicense the Licensed Material to any third party."* |
 | **Seats** | unlimited | — | — | — | 1 developer | Paid Alternative 4 Pro is a single-developer seat |
 | **Maturity — be honest** | ⚠️ new: no users, no CI, not in Arduino Library Manager. The four web libraries have no test suite; VectiLicense has one (9 `ctest` cases) but most of its HALs have never been compiled | ✅ mature, widely used, heavily tutorialised | ✅ 647 ★ | ✅ | ✅ mature, widely used | Paid Alternative 2: 647 stars, 0 open issues, last commit 2025-12-04 |
 | **Dashboard flash cost** | 46,811 B gzipped | — | — | — | lighter | that is the price of 49 widgets vs 9; no measured figure for Paid Alternative 4's blob |
