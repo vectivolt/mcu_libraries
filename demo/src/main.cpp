@@ -29,6 +29,7 @@
 #include <VectiDash.h>
 
 #include <math.h>
+#include <esp_ota_ops.h>
 
 // ---- defaults ----------------------------------------------------------
 //
@@ -424,6 +425,21 @@ void setup() {
   server.begin();
   VectiSerial.inf("HTTP server up — routes: / /dash /ota /serial /wifi");
   VectiSerial.inf("mDNS: http://%s.local", HOSTNAME);
+#if defined(ESP32)
+  {
+    // Which slot are we in, and has it been accepted? Without this the only way
+    // to tell an OTA'd image from a reverted one is over the network, which is
+    // exactly what you cannot reach when an update has gone wrong.
+    const esp_partition_t *run = esp_ota_get_running_partition();
+    esp_ota_img_states_t st = ESP_OTA_IMG_UNDEFINED;
+    if (run) esp_ota_get_state_partition(run, &st);
+    VectiSerial.inf("running slot=%s state=%s", run ? run->label : "?",
+                    st == ESP_OTA_IMG_VALID          ? "valid"
+                    : st == ESP_OTA_IMG_PENDING_VERIFY ? "PENDING_VERIFY (reverts on next reset unless committed)"
+                    : st == ESP_OTA_IMG_INVALID      ? "invalid"
+                    : st == ESP_OTA_IMG_ABORTED      ? "aborted" : "undefined");
+  }
+#endif
   VectiNet.autoConnect();
 
   // Seed Energy + RSSI charts with a plausible warm-up curve so the first
@@ -445,15 +461,25 @@ void loop() {
   static uint32_t last = 0, startMs = millis(), chartT = 0, notifyT = millis();
   uint32_t now = millis();
 
-  // Self-test for the rollback watchdog: 20 s of uptime with an associated
-  // radio means this image boots, joins, and serves. Only then is it worth
-  // marking valid — before that, a crash should hand the device back to the
-  // previous slot.
+  // Self-test for the rollback watchdog. 20 s of uptime plus a working radio
+  // means this image boots and serves, and is worth marking valid.
+  //
+  // "A working radio" must include SoftAP. The first version of this gate tested
+  // only WiFi.status() == WL_CONNECTED, which is a STATION state and is never
+  // true on a device serving its own provisioning portal. arduino-esp32 ships
+  // CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y, so an OTA'd image boots as
+  // PENDING_VERIFY and the bootloader reverts it on the NEXT reset unless it is
+  // marked valid. The effect was that you could OTA a factory-fresh device,
+  // watch it reboot into the new image, and silently get the old one back on the
+  // following power cycle — with the update reported as successful.
   static bool committed = false;
-  if (!committed && (now - startMs) > 20000 && WiFi.status() == WL_CONNECTED) {
+  const bool sta_up = (WiFi.status() == WL_CONNECTED);
+  const bool ap_up  = (WiFi.getMode() & WIFI_MODE_AP) && (WiFi.softAPIP() != IPAddress((uint32_t)0));
+  if (!committed && (now - startMs) > 20000 && (sta_up || ap_up)) {
     committed = true;
     VectiOTA.commit();
-    VectiSerial.inf("self-test passed — firmware slot marked valid");
+    VectiSerial.inf("self-test passed (%s) — firmware slot marked valid",
+                    sta_up ? "station" : "softap");
   }
 
   if (now - last < 1000) return;
