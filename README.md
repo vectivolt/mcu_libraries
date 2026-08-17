@@ -776,33 +776,54 @@ blob. That is the trade.
 
 ## 🔬 Verified on hardware — and what is not
 
-Reference device: **ESP32-S3 rev v0.2, QFN56, 8 MB flash, 2 MB embedded PSRAM,
-USB-Serial/JTAG, MAC `D0:CF:13:72:17:58`.** The device was exercised **over USB serial
-only — it was never joined to a LAN.**
+Reference board: **ESP32-S3-DevKitC-1**, 8 MB flash, 2 MB PSRAM, USB-Serial/JTAG,
+MAC `D0:CF:13:72:17:58`. Reproduce with `tools/hw_verify.py` and `tools/soak.py`.
 
-**Verified:**
+### Over the network — 12/12
 
-- Flashes: 1,226,384 bytes written, esptool hash verified.
-- Boots cleanly. PSRAM initialises. No panic, no reset loop.
-- HTTP server starts; routes `/ /dash /ota /serial /wifi` register.
-- mDNS starts (`vecti-demo.local`).
-- With no stored credentials it enters the captive-portal state, which is correct.
-- **No memory leak.** Soak with the history ring cut to 16 entries and a 4 s heartbeat:
-  heap fell from 247,596 B while the ring filled, then went **flat at 244,188 B from
-  ~72 s onward** and stayed flat. The steady ~96 B/min decline seen at production
-  settings is the 512-entry ring filling, not a leak; the ±496 B oscillation is one
-  alloc/free cycle of the JSON serialisation buffer.
+Run against the device's own SoftAP at `192.168.4.1` (`tools/hw_verify.py`):
 
-**Not verified — do not assume otherwise:**
+| Check | Result |
+|---|---|
+| `GET /` → 302 `/dash` | ✅ |
+| `/dash` `/ota` `/serial` `/wifi` | ✅ gzip, inflating to exactly the built blob sizes |
+| `/ota/info`, `/wifi/status` | ✅ every documented key present |
+| Captive-portal probes | ✅ all four (`/generate_204` `/gen_204` `/hotspot-detect.html` `/ncsi.txt`) return 200 |
+| `/dash/ws` layout push | ✅ 68 cards, 5 tabs |
+| `/dash/ws` command round trip | ✅ value echoed to all clients |
+| `/serial/ws` history replay | ✅ |
+| `POST /ota/upload` | ✅ 200 OK, real 1,226,480 B image, 4.4 s |
 
-- HTTP endpoints serving real responses over a network
-- The WebSocket dashboard against real hardware
-- OTA upload / pull / rollback on real hardware
-- Captive-portal provisioning end to end
-- **Anything VectiLicense.** It has never been on this board, or any board. Its own test
-  suite runs on a host; its ESP32 HAL and its four bridges have never been compiled.
+### Endurance — 25 hard resets, 40 minutes
 
----
+`tools/soak.py` power-cycles the board over DTR/RTS and asserts on every cycle:
+
+```
+clean boots: 25/25
+heap samples: 18   min=245,744  max=245,748   drift = -1 B
+PASS: every boot clean, no faults, no heap trend
+```
+
+No panic, backtrace, corrupt-heap, watchdog or brownout reset in any cycle. Free heap
+varied by **4 bytes** across the whole run.
+
+### What this found
+
+A real OTA against real silicon exposed a defect that reading the code did not:
+`arduino-esp32` sets `CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y`, so an updated image boots
+`PENDING_VERIFY` and the bootloader reverts it on the **next** reset unless something
+marks it valid. The demo gated `commit()` on `WiFi.status() == WL_CONNECTED` — a station
+state that is never true on a device serving its own portal. The update reported success,
+booted, and would have silently reverted a power cycle later. Fixed, and the running slot
+and its OTA state are now logged at boot so the condition is diagnosable over serial.
+
+### Not verified
+
+- **RP2040, STM32 and NXP** — the HALs type-check and link in CI, and a bare-metal
+  Cortex-M image links (8,972 B on M0+, 8,444 B on M4). None has **executed** on silicon;
+  those boards are not on hand.
+- **One unit.** Everything above is a single ESP32-S3. No multi-unit reproduction.
+- **Long-horizon soak.** 40 minutes, not 40 days.
 
 ## 🚧 Honest limitations
 
