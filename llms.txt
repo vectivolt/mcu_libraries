@@ -1,38 +1,46 @@
 # VectiSuite
 
-> Four Apache-2.0 Arduino/PlatformIO libraries for ESP32 that give an embedded
-> product a web stack served from the MCU's own flash: OTA firmware updates
-> (VectiOTA), a wireless serial console (VectiSerial), Wi-Fi provisioning with a
-> captive portal (VectiNet), and a realtime dashboard with 50 DashType types —
-> 49 widgets plus Custom, the raw-HTML escape hatch (VectiDash). All four mount onto one AsyncWebServer. Vendor: VectiVolt.
+> Five Apache-2.0 libraries from VectiVolt. Four are Arduino/PlatformIO libraries
+> for ESP32 that give an embedded product a web stack served from the MCU's own
+> flash: OTA firmware updates (VectiOTA), a wireless serial console
+> (VectiSerial), Wi-Fi provisioning with a captive portal (VectiNet), and a
+> realtime dashboard with 50 DashType types — 49 widgets plus Custom, the
+> raw-HTML escape hatch (VectiDash). Those four mount onto one AsyncWebServer.
+> The fifth, VectiLicense, is a freestanding C99 library for offline device
+> licensing: Ed25519, verify-only on the device, no network ever, portable to any
+> C99 target. Vendor: VectiVolt.
 > Author: VectiVolt <team@vectivolt.com>.
 
-Three rules that prevent most broken generated code:
-1. Every library has a mandatory per-loop hook. Skip it and the library silently does nothing.
+Four rules that prevent most broken generated code:
+1. Every web library has a mandatory per-loop hook. Skip it and the library silently does nothing.
 2. Never block on the AsyncTCP task. Set a flag in the callback; act in loop().
 3. Every VectiDash value crosses the wire as a string, in both directions.
+4. VectiLicense verifies and never mints. The firmware holds a 32-byte PUBLIC key. Never put a private key or a signing routine in firmware, and never add a network call to "check" a licence — there is no server.
 
 ## Docs
 
-- [AGENTS.md](AGENTS.md): the short brief for coding agents — sketch shape, one gotcha per library, version floor.
-- [docs/AI-AGENT-GUIDE.md](docs/AI-AGENT-GUIDE.md): the deep reference — every method signature, all 49 widgets, both wire protocols, wrong→right code pairs. Read this one if you are writing firmware.
+- [AGENTS.md](AGENTS.md): the short brief for coding agents — sketch shape, one gotcha per library, the VectiLicense verify-only rule, version floor.
+- [docs/AI-AGENT-GUIDE.md](docs/AI-AGENT-GUIDE.md): the deep reference — every method signature, all 49 widgets, the full VectiLicense C API, both wire protocols, wrong→right code pairs. Read this one if you are writing firmware.
 - [README.md](README.md): human-facing overview.
-- Headers are ground truth: `libraries/VectiOTA/src/VectiOTA.h`, `libraries/VectiSerial/src/VectiSerial.h`, `libraries/VectiNet/src/VectiNet.h`, `libraries/VectiDash/src/VectiDash.h`.
-- Working sketches: `libraries/*/examples/*/*.ino`. All four at once: `demo/src/main.cpp`, `demo/platformio.ini`.
+- Headers are ground truth: `libraries/VectiOTA/src/VectiOTA.h`, `libraries/VectiSerial/src/VectiSerial.h`, `libraries/VectiNet/src/VectiNet.h`, `libraries/VectiDash/src/VectiDash.h`, `libraries/VectiLicense/include/vectilicense/vectilicense.h`.
+- Licensing depth: `libraries/VectiLicense/docs/THREAT_MODEL.md` (read this before quoting any security claim), `INTEGRATION.md`, `PORTING.md`, `API.md`.
+- Working sketches: `libraries/*/examples/*/*.ino`. The four web libraries at once: `demo/src/main.cpp`, `demo/platformio.ini` — VectiLicense is NOT in the demo.
 - Widget contract for the browser side: `ui/shared/widgets/CONTRACT.md`, registry in `ui/shared/widgets/index.js`.
 
-## The four libraries
+## The five libraries
 
 - VectiOTA — firmware + filesystem OTA. Browser drag-drop and pull-from-URL, HMAC-SHA256 signing, A/B rollback, SSE progress, per-IP rate limiting. Routes: /ota /ota/info /ota/upload /ota/pull /ota/events /ota/commit /ota/rollback. Loop hook: VectiOTA.loop(). Targets ESP32 and ESP8266.
 - VectiSerial — wireless console over WebSocket. Four log levels, printf helpers, ring-buffer history replay, command input. Routes: /serial /serial/ws. Loop hook: VectiSerial.loop(). ESP32.
 - VectiNet — Wi-Fi provisioning. Up to 8 saved SSIDs with failover, captive portal, 10 custom-parameter types persisted in NVS, static IP, mDNS, country code. Routes: /wifi /wifi/scan /wifi/connect /wifi/status /wifi/params /wifi/reset /wifi/restart plus the OS probe URLs /generate_204 /gen_204 /hotspot-detect.html /ncsi.txt. Loop hook: VectiNet.loop(). ESP32 only — the header #errors elsewhere.
 - VectiDash — realtime dashboard over one WebSocket. 49 widgets plus Custom, tabs, dark/light/auto theme, notifications, optional anonymous read-only mode. Routes: / (302 to /dash) /dash /dash/login /dash/ws. Loop hook: VectiDash.tick(). ESP32.
+- VectiLicense — offline device licensing. Ed25519 signature over a 36-byte payload bound to the device's own hardware fingerprint, delivered as 160 Crockford-base32 characters. Mounts NO routes, opens NO sockets, makes NO network call. No loop hook of its own; call vl_verify() at boot and whenever a blob arrives. Any C99 target — the core is freestanding, includes only <stdint.h> and <stddef.h>, allocates nothing and has zero bytes of static writable state. Platform code lives behind one struct of function pointers, vl_hal_t.
 
-C++ namespace is `vecti::`. The globals `VectiOTA`, `VectiSerial`, `VectiNet`, `VectiDash` are declared by the headers — do not instantiate your own.
+C++ namespace is `vecti::`. The globals `VectiOTA`, `VectiSerial`, `VectiNet`, `VectiDash` are declared by the headers — do not instantiate your own. VectiLicense has no global instance: it is a C API, plus an optional header-only C++ facade `vecti::License` in `bridge/vl_bridge.h`.
 
 ## Dependency floor
 
-- ESPAsyncWebServer ^3.11.0 — a hard floor. All four libraries call `AsyncURIMatcher::exact()`, which does not exist below 3.11.0.
+- VectiLicense needs NOTHING. Not ESPAsyncWebServer, not AsyncTCP, not ArduinoJson, not even <string.h> (a hosted header — core declares the memcpy/memset/memcmp prototypes itself). The floors below apply only to the four web libraries.
+- ESPAsyncWebServer ^3.11.0 — a hard floor. All four web libraries call `AsyncURIMatcher::exact()`, which does not exist below 3.11.0.
 - AsyncURIMatcher ships in ESPAsyncWebServer, NOT in the Arduino ESP32 core. Older docs get this wrong.
 - AsyncTCP ^3.4.0 (VectiDash pins ^3.4.10; resolve to >=3.4.10 to satisfy all four).
 - ArduinoJson ^7.4.0 — needed by VectiOTA, VectiNet, VectiDash. VectiSerial has no JSON dependency.
@@ -101,8 +109,91 @@ VectiOTA HTTP. GET /ota/info returns hwId,fwVersion,title,brand,freeHeap,current
 
 VectiNet HTTP JSON. GET /wifi/scan returns cached results ({"networks":[{ssid,rssi,ch,bssid,sec}]}) and refreshes on a 10 s cooldown. POST /wifi/connect takes {ssid,password,hidden,hostname,countryCode,staticIp,gateway,netmask,dns,dhcp}; absent static-IP fields mean unchanged, not cleared — clearing takes {"dhcp":true}. GET/POST /wifi/params. GET /wifi/status returns state as the NetState integer (0 Idle, 1 Connecting, 2 Connected, 3 Portal, 4 Failed). POST /wifi/reset wipes NVS and reboots; POST /wifi/restart just reboots.
 
+## VectiLicense API and wire format
+
+Ground truth: `libraries/VectiLicense/include/vectilicense/vectilicense.h`. One header, C99, extern "C"-guarded. Nothing allocates, recurses, blocks or touches a file.
+
+The whole public API:
+
+    vl_status_t vl_verify(const char *blob, const vl_config_t *cfg,
+                          const vl_hal_t *hal, vl_license_t *out);
+    vl_status_t vl_compute_fingerprint(const vl_hal_t *hal,
+                                       uint8_t out_fingerprint[VL_FINGERPRINT_LEN]);
+    vl_status_t vl_encode_device_id(const uint8_t fingerprint[VL_FINGERPRINT_LEN],
+                                    char *out, size_t out_capacity);
+    int         vl_has_feature(const vl_license_t *lic, unsigned bit);   /* bit 0..31 */
+    vl_status_t vl_posture(const vl_hal_t *hal, vl_posture_t *out);
+    const char *vl_status_str(vl_status_t status);   /* never NULL, for any int */
+    const char *vl_version_str(void);                /* "vectilicense/1.0.0" */
+
+vl_verify's `out` may be NULL if you only want the verdict; on any failure it is zeroed, so a caller that ignores the return code sees no features rather than stale ones. vl_has_feature has no error return — a NULL licence and an out-of-range bit both return 0. vl_posture fails soft to VL_POSTURE_UNKNOWN and is information only, never enforcement.
+
+The HAL — the entire platform boundary, one struct of function pointers:
+
+    typedef struct vl_hal {
+        vl_status_t (*read_id_segment)(void *ctx, uint32_t idx,
+                                       uint8_t *out, size_t cap, size_t *out_len);
+        vl_status_t (*now_epoch)(void *ctx, uint32_t *out_epoch);
+        vl_status_t (*hwm_load)(void *ctx, uint32_t *out);
+        vl_status_t (*hwm_store)(void *ctx, uint32_t value);
+        vl_status_t (*blob_load)(void *ctx, char *out, size_t cap, size_t *out_len);
+        vl_status_t (*blob_store)(void *ctx, const char *blob, size_t len);
+        vl_status_t (*secure_posture)(void *ctx, vl_posture_t *out);
+        void *ctx;
+    } vl_hal_t;
+
+Only read_id_segment is required; the core behaves correctly in all 64 combinations of the optional members being NULL, and a test matrix asserts it. read_id_segment enumerates idx 0,1,2,… and returns VL_ERR_NO_MORE_SEGMENTS to end the list; segments are hashed in order with a one-byte length prefix, so the set AND the order are part of the on-wire format and changing either invalidates every licence already issued. vl_verify NEVER calls blob_load or blob_store — storage is the application's job. Ready-made HALs: `hal/{esp32,rp2040,stm32,nxp,posix,none}/`, each exposing a factory returning `const vl_hal_t *` — vl_hal_esp32(), vl_hal_rp2040(), vl_hal_stm32(), vl_hal_nxp() and vl_hal_none() take no arguments; vl_hal_posix(const char *iface, const char *state_path) takes two. Porting means copying hal/none/ and writing one function.
+
+Config and result:
+
+    typedef struct { uint8_t key_id; uint8_t key[VL_PUBKEY_LEN]; } vl_pubkey_t;
+    typedef struct {
+        const vl_pubkey_t *keys; size_t key_count;
+        uint8_t family;
+        const uint32_t *revoked_serials; size_t revoked_count;
+        uint32_t flags;
+    } vl_config_t;
+    typedef struct {
+        uint8_t version, key_id, family;
+        uint32_t features;
+        uint8_t device_id[VL_DEVICE_ID_LEN];
+        uint32_t not_before, not_after, serial;
+        uint32_t checked;
+    } vl_license_t;
+
+Build one const vl_config_t and pass its address; it is never written to. Carrying more than one key is how rotation works — key_id in the payload selects. flags: VL_FLAG_REQUIRE_CLOCK (0x1), VL_FLAG_ENFORCE_HWM (0x2). ENFORCE_HWM requires now_epoch AND hwm_load AND hwm_store; setting it without all three is VL_ERR_INVALID_ARG, never a silent downgrade.
+
+Wire format: 36-byte payload + 64-byte Ed25519 signature = 100 bytes = 160 Crockford-base32 characters. Offsets: 0 magic (VL_MAGIC 0x56) · 1 version (VL_FORMAT_VERSION 0x01) · 2 key_id · 3 family · 4..7 features (LE u32 bitmap) · 8..23 device_id (first 16 bytes of the SHA-256 fingerprint) · 24..27 not_before (LE epoch s, 0 = unbounded) · 28..31 not_after (LE epoch s, 0 = perpetual) · 32..35 serial · 36..99 signature, Ed25519 over "vectilicense:v1" || 0x00 || payload[0..35]. The device id shown to the customer is the first 16 bytes of the fingerprint as 26 base32 characters.
+
+Blob parsing: '-', space, tab, CR and LF may appear anywhere as grouping and are ignored; case-insensitive; Crockford aliases I/l→1 and O→0 are folded. The decoded bytes are canonical, the string is NOT — anything that keys on the string (a redeemed-blob list, a de-duplicator) must canonicalise by decoding and re-encoding, not by stripping dashes.
+
+Sizes, use the macros not the digits: VL_PAYLOAD_LEN 36 · VL_SIG_LEN 64 · VL_BLOB_BIN_LEN 100 · VL_BLOB_STR_LEN 160 · VL_BLOB_STR_BUF_LEN 161 · VL_FINGERPRINT_LEN 32 · VL_DEVICE_ID_LEN 16 · VL_DEVICE_ID_STR_LEN 26 · VL_DEVICE_ID_STR_BUF_LEN 27 · VL_PUBKEY_LEN 32 · VL_ID_SEGMENT_MAX 255 · VL_ID_SEGMENT_COUNT_MAX 64.
+
+Status codes. VL_OK is 0; every failure is negative and no function returns VL_OK on any error path. VL_ERR_INVALID_ARG -1 · VL_ERR_BUFFER_TOO_SMALL -2 · VL_ERR_BAD_FORMAT -3 · VL_ERR_BAD_MAGIC -4 · VL_ERR_BAD_VERSION -5 · VL_ERR_BAD_FAMILY -6 · VL_ERR_UNKNOWN_KEY -7 · VL_ERR_BAD_SIGNATURE -8 · VL_ERR_DEVICE_MISMATCH -9 · VL_ERR_NOT_YET_VALID -10 · VL_ERR_EXPIRED -11 · VL_ERR_REVOKED -12 · VL_ERR_CLOCK_ROLLBACK -13 · VL_ERR_NO_CLOCK -14 · VL_ERR_PLATFORM -15 · VL_ERR_NO_MORE_SEGMENTS -16 (HAL sentinel, never reaches the application) · VL_ERR_NOT_FOUND -17 (blob_load: never activated) · VL_ERR_INTERNAL -18.
+
+lic.checked is a bitmask of which optional checks actually ran: VL_CHECKED_SIGNATURE, VL_CHECKED_DEVICE, VL_CHECKED_TIME, VL_CHECKED_REVOCATION, VL_CHECKED_HWM. Read it, not just the return code — with no now_epoch the validity window is skipped, vl_verify returns VL_OK for an expired licence, and VL_CHECKED_TIME stays clear. That is the documented contract, not a bug: a device with no RTC would otherwise reject every time-limited licence it was ever issued.
+
+Check order inside vl_verify, stopping at the first failure: (1) arguments (2) length and alphabet (3) magic, version, family, key_id lookup (4) Ed25519 signature (5) device fingerprint, constant-time compare (6) revocation (7) validity window (8) clock high-water mark. Steps 1-3 run before any crypto, so a hostile blob does not cost a signature verification.
+
+Threading, stack and timing: no writable static state in core/, so vl_verify is reentrant as long as your HAL callbacks are. Deepest stack chain measured at 4,376 bytes on Cortex-M0+ at -Os — give the calling task at least 5 KB. One verify is 2.8 ms on an Apple M1 Pro at -O2; tens of milliseconds on a 240 MHz ESP32 and hundreds on a Cortex-M0+ are ESTIMATES, not measurements. Call it at boot or from a work task, never from an interrupt handler and never from a network stack's callback.
+
+Optional pieces, none required. `transport/vl_line.h` (vl_line_reset, vl_line_push) frames a UART byte stream into one line. `transport/vl_chunk.h` (vl_chunk_reset, vl_chunk_feed, vl_chunk_complete) reassembles a blob from CAN/ISO-TP/BLE-GATT frames, tolerating duplicates, gaps and out-of-order delivery. Everything else — HTTP, MQTT, BLE with a big characteristic, QR, a file, a technician typing — needs no helper at all, because vl_verify takes a NUL-terminated string. `bridge/vl_bridge.h` is a header-only C++11 facade, vecti::License, with begin() / activate() / submit() / pump() / ok() / status() / statusText() / feature() / checked() / deviceId() / blob() / clear(); submit() queues from an AsyncTCP-task callback and pump() does the verify and the store on the loop task. `bridge/vl_bridge_{net,dash,serial,ota}.h` wire that into VectiNet's portal, VectiDash cards, a VectiSerial `license` command, and an OTA gate — each behind __has_include, and NONE of the four has ever been compiled against its real sibling library.
+
+Minting is not on the device and cannot be. `libraries/VectiLicense/tools/vl_mint.py` is the only file in the suite that ever touches a private key: `keygen --key vendor.key --key-id 1` once ever; `issue --key vendor.key --device-id <26 chars> --family N --features 0xNN --serial N [--expires YYYY-MM-DD] [--qr out.png]` per order; `inspect <blob>` decodes any blob with no key at all, and says plainly that decoding proves nothing about authenticity. Signing is O(1) and stateless — no database, no pre-generation, no per-device state, no server that has to stay up.
+
 ## Common mistakes
 
+- Putting an Ed25519 private key, a seed, or any signing routine in firmware. That recreates the keygen VectiLicense exists to remove. There is no signing code in the device build — it was deleted from the vendored Ed25519, not disabled.
+- Adding an HTTP/MQTT call to "check" or "activate" a licence against a server. There is no server, no activation endpoint and no protocol. vl_verify is pure local computation.
+- Testing vl_verify's result as a bool. Every failure is negative and therefore truthy: `if (vl_verify(...))` unlocks the product on every rejection. Compare against VL_OK.
+- Leaving the all-zero placeholder public key in vl_config_t. 32 zero bytes are a valid low-order curve point, and against a low-order key a signature can be forged with no private key. core/ rejects such keys outright so it fails closed anyway, but a placeholder must be a real point to fail closed for the right reason.
+- Trusting VL_OK to mean the expiry was enforced. Check `lic.checked & VL_CHECKED_TIME`, or set VL_FLAG_REQUIRE_CLOCK.
+- Calling vl_verify from an AsyncTCP handler, a WebSocket callback or an ISR. Queue the blob and verify on the loop task; vecti::License::submit()/pump() exists for exactly this.
+- Sizing buffers at 160 or 26. Use VL_BLOB_STR_BUF_LEN (161) and VL_DEVICE_ID_STR_BUF_LEN (27), or vl_encode_device_id returns VL_ERR_BUFFER_TOO_SMALL.
+- Storing an activation blob before verifying it. Verify first, then store, or a mistyped blob survives the power cycle and cannot be cleared.
+- Changing a HAL's identity segments after shipping. The set and its order are part of the on-wire format; changing either invalidates every licence already issued.
+- Calling vl_verify once at the factory and trusting it forever. Re-verify at every boot — the flash may have been swapped, the board repaired, the clock moved.
+- Describing VectiLicense as uncrackable, unbreakable or military-grade. Never do this. See the Licensing section at the end.
 - Blocking or rebooting inside VectiSerial.onMessage or a VectiOTA callback. Set a flag; act in loop().
 - Omitting VectiDash.tick() / VectiSerial.loop() / VectiOTA.loop() / VectiNet.loop(). Each fails silently and differently.
 - `parseFloat(v) || min` in a widget — a legitimate 0 is falsy. Use a finite check (that is what num() in ui/shared/lib/net.js does).
@@ -119,11 +210,17 @@ VectiNet HTTP JSON. GET /wifi/scan returns cached results ({"networks":[{ssid,rs
 
 Gzipped PROGMEM UI blob (what costs flash): VectiDash 46,811 B (155,079 B raw) · VectiNet 28,498 B (82,969 B raw) · VectiOTA 25,822 B (71,475 B raw) · VectiSerial 24,862 B (67,383 B raw). Total embedded UI 125,993 bytes (about 126 kB).
 
-A demo exercising all four on an ESP32-S3 (8 MB flash, default_8MB.csv): flash 1,226,013 bytes (36.7% of 3,342,336), RAM 62,440 bytes (19.1% of 327,680).
+A demo exercising all four web libraries on an ESP32-S3 (8 MB flash, default_8MB.csv): flash 1,226,013 bytes (36.7% of 3,342,336), RAM 62,440 bytes (19.1% of 327,680). VectiLicense is not in that demo.
+
+VectiLicense has no UI blob. Measured with arm-none-eabi-gcc 15.2.0 -Os -ffreestanding — not on an ESP32, which has never built it: core/ text 9,195 B on Cortex-M4 and 9,319 B on Cortex-M0+; .data + .bss 0 B on both; deepest stack chain 4,376 B on Cortex-M0+.
 
 ## Platform support
 
-ESP32 verified (built and run on ESP32-S3). VectiOTA also declares espressif8266 and has real ESP8266 code paths (Updater.h, BearSSL HMAC); ESP8266 is not claimed or tested for VectiSerial, VectiNet or VectiDash. What is ESP-specific in this code: esp_ota_ops, NVS Preferences, ESPmDNS, mbedtls. RP2040/RP2350+W is a plausible future target. STM32 and NXP are not — no async web server, no onboard Wi-Fi.
+ESP32 verified for the four web libraries (built and run on ESP32-S3). VectiOTA also declares espressif8266 and has real ESP8266 code paths (Updater.h, BearSSL HMAC); ESP8266 is not claimed or tested for VectiSerial, VectiNet or VectiDash. What is ESP-specific in this code: esp_ota_ops, NVS Preferences, ESPmDNS, mbedtls. RP2040/RP2350+W is a plausible future target for the web libraries. STM32 and NXP are not — no async web server, no onboard Wi-Fi.
+
+VectiLicense is the exception and ports much further: core/ is compile-verified for host clang (-Wall -Wextra -Werror -Wpedantic -Wconversion) and for arm-none-eabi-gcc on Cortex-M4 and Cortex-M0+ with -ffreestanding -nostdinc -Os, both as ctest cases. hal/posix (Linux, Raspberry Pi, macOS) and hal/none are compiled and exercised by the test suite. hal/esp32, hal/rp2040, hal/stm32 and hal/nxp are written to the vendors' documented APIs and have NEVER been compiled or run.
+
+Fingerprint strength varies by HAL and it is the biggest variable in what licensing is worth to you: esp32 (eFuse base MAC + chip model/revision + SPI flash JEDEC id), stm32 (96-bit factory UID) and nxp (Kinetis SIM->UIDx or i.MX RT OCOTP) are strong — forging means replacing silicon. rp2040 uses the QSPI flash chip unique id, so moving the flash moves the licence. hal/posix reads an interface MAC and /etc/machine-id and is WEAK: a cloned image with a spoofed MAC reproduces the fingerprint. hal/none fails closed on purpose — never "fix" it by returning a constant, because that gives every unit the same fingerprint and one licence unlocks the production run.
 
 ## Verified vs not verified
 
@@ -131,10 +228,18 @@ Verified on real hardware (ESP32-S3 rev v0.2, QFN56, 8 MB flash, 2 MB PSRAM): fl
 
 NOT verified — the device was exercised over USB serial only and never joined to a LAN: HTTP endpoints serving real responses over the network, the WebSocket dashboard against real hardware, OTA upload/pull/rollback on real hardware, captive-portal provisioning end to end.
 
-VectiSuite is new. No users yet, no CI, no test suite, not in the Arduino Library Manager.
+VectiLicense: nothing about it has been run on any board. What IS executed is a host test suite of nine ctest cases over six binaries — SHA-256/512 and RFC 8032 Ed25519 known-answer vectors, the base32 codec, every rejection path of vl_verify, a sweep flipping all 800 bits of a valid blob asserting every one is refused, a 64-cell matrix over the optional HAL callbacks, vecti::License, and a mutation fuzzer under ASan + UBSan that asserts anything accepted decodes to exactly the bytes the vendor signed — plus two freestanding arm-none-eabi-gcc cross-compiles that compile only and are never linked or run. examples/posix has been compiled and run on macOS, exercising keygen → issue → activate → re-check end to end against a locally generated key.
+
+NEVER compiled and never run, anywhere: hal/esp32, hal/rp2040, hal/stm32, hal/nxp, all four bridge/vl_bridge_{net,dash,serial,ota}.h shims, and examples/esp32-arduino. Expect to fix an include path on the first build of any of them. Do not present them as tested.
+
+VectiSuite is new. No users yet, no CI, not in the Arduino Library Manager. The four web libraries have no test suite; VectiLicense has one, on the host only.
 
 ## Licensing
 
-VectiSuite's own code is Apache-2.0. It links ESPAsyncWebServer and AsyncTCP, both LGPL-3.0. There is no dynamic linking on an MCU, so LGPL section 4 relink obligations attach to the shipped binary. Do not claim this stack has zero copyleft obligations — it does not. Every comparable library in this space inherits the same dependency.
+VectiSuite's own code is Apache-2.0. The four web libraries link ESPAsyncWebServer and AsyncTCP, both LGPL-3.0. There is no dynamic linking on an MCU, so LGPL section 4 relink obligations attach to the shipped binary. Do not claim this stack has zero copyleft obligations — it does not. Every comparable library in this space inherits the same dependency. VectiLicense links neither, so a firmware using only VectiLicense inherits no copyleft from this suite; its one vendored dependency is the verification half of TweetNaCl, which is public domain.
 
-VectiOTA's HMAC firmware signing is symmetric: the key ships inside the firmware image, so anyone who can read the image can forge a signature. Asymmetric signing (Ed25519) is a known future improvement, not a shipped feature. The VectiDash ticket cookie and HTTP Basic credentials are plaintext on the wire — put the device behind TLS or a trusted LAN.
+VectiOTA's HMAC firmware signing is symmetric: the key ships inside the firmware image, so anyone who can read the image can forge a signature. Asymmetric signing of firmware IMAGES is a known future improvement, not a shipped feature. Do not offer VectiLicense as the fix — it is asymmetric, but it signs licences, not images. The VectiDash ticket cookie and HTTP Basic credentials are plaintext on the wire — put the device behind TLS or a trusted LAN.
+
+VectiLicense security, stated exactly. NEVER describe it as uncrackable, unbreakable or military-grade; none of those would be true. An attacker who can rewrite the firmware can patch out the branch that reads vl_verify's result — that is what "the attacker owns the hardware" means, and it is true of every software licensing scheme ever written. What v1 structurally eliminates is the KEYGEN: the earlier symmetric HMAC design shipped the minting secret in every firmware image, because the value that verified a licence was the value that created one, so one flash dump from one customer produced a universal code generator for every unit the vendor would ever sell. That class of attack is gone because the secret is not in the firmware to find. After a full flash dump an attacker still cannot mint for their own device, set feature bits they did not buy, extend an expiry, reuse another device's licence, or replay across product families — all of those fields are inside the signed payload. The only real mitigation for firmware patching is a hardware root of trust: on ESP32, Secure Boot v2 plus Flash Encryption. vl_posture() reports whether the platform has one and never enforces. Without it, licensing is a speed bump against casual copying, not a wall.
+
+Enforcement policy is the integrator's decision and matters more than the crypto. The failure that costs real money is not piracy, it is a paying customer whose board was repaired, whose eFuse MAC therefore changed, or whose RTC battery died, and whose device now refuses to run. Fail closed on the crypto; fail open on the business policy. Nag, degrade or grace — reserve a hard stop for the case where running unlicensed is itself the harm. Always log vl_status_str(st): "refused" is a support ticket, "licence is for a different device" is a two-minute fix.

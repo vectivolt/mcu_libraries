@@ -272,6 +272,17 @@ const server = http.createServer((req, res) => {
 
   if (p === "/") { res.writeHead(302, { Location: "/dash" }); return res.end(); }
 
+  // Static passthrough for anything under ui/dist/ — used to eyeball doc assets
+  // in a real browser without standing up a second server.
+  if (p.startsWith("/static/")) {
+    const f = path.join(DIST, p.slice(8));
+    if (!f.startsWith(DIST) || !fs.existsSync(f)) { res.writeHead(404); return res.end("nope"); }
+    const ext = path.extname(f);
+    const type = ext === ".svg" ? "image/svg+xml" : ext === ".html" ? "text/html; charset=utf-8" : "application/octet-stream";
+    res.writeHead(200, { "Content-Type": type });
+    return res.end(fs.readFileSync(f));
+  }
+
   if (APPS[p]) {
     const file = path.join(DIST, APPS[p], "index.html");
     if (!fs.existsSync(file)) { res.writeHead(404); return res.end(`build ${APPS[p]} first`); }

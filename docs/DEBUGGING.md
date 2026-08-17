@@ -439,17 +439,214 @@ the case rollback exists to catch.
 
 ---
 
-## ⚠️ Two things to keep in mind while you debug
+## 🔑 Debugging an activation failure
 
-**Firmware signing is symmetric.** `setSigningKey()` is HMAC-SHA256 and the key ships
-inside the firmware image. It raises the bar past "has the Wi-Fi password"; it does not
-survive an attacker who can read flash. Asymmetric signing (Ed25519) is a known future
-improvement, not a shipped feature.
+Licensing has no endpoint to `curl` and no event stream to tail — VectiLicense mounts
+nothing and never touches the network. Everything you need is a status code, a device id,
+and a blob you can decode on your own laptop.
 
-**Licensing.** VectiSuite's own code is Apache-2.0, but it links **ESPAsyncWebServer** and
-**AsyncTCP**, which are **LGPL-3.0**. There is no dynamic linking on an MCU, so LGPL §4
-relink obligations attach to the shipped binary. Every competing library in this space
-inherits the same dependency — but do not ship believing there are no copyleft obligations.
+Four checks, in this order. Each one eliminates a whole class of cause, and the first two
+take seconds.
+
+```mermaid
+flowchart TD
+    A["Licence refused"] --> B{"What does<br/>vl_status_str(st) say?"}
+
+    B -->|"BAD_FORMAT / BAD_MAGIC"| C["The paste is wrong, not the licence.<br/>Wrong length, a stray character,<br/>or not a blob at all"]
+    B -->|"BAD_SIGNATURE on EVERY licence"| D["Wrong vendor key in the build.<br/>Usually the placeholder — nothing<br/>can ever sign for it"]
+    B -->|"UNKNOWN_KEY"| E["key_id not in CFG.keys.<br/>Rotated out, or firmware<br/>predates the key"]
+    B -->|"DEVICE_MISMATCH"| F{"Does vl_mint.py inspect's<br/>device id match the one<br/>the device prints?"}
+    B -->|"EXPIRED / NOT_YET_VALID"| G["Suspect the clock before<br/>the licence. Print now_epoch<br/>next to not_before/not_after"]
+    B -->|"PLATFORM"| H["The HAL could not answer.<br/>Dump the device id alone —<br/>identity is not reading"]
+
+    F -->|"No"| I["Minted for a different device.<br/>Transcription error, a copied<br/>licence, or a repaired board"]
+    F -->|"Yes"| J{"Is the fingerprint stable<br/>across reboots?"}
+    J -->|"No"| K["The identity source is not stable.<br/>No licence can ever hold"]
+    J -->|"Yes"| L["family / key_id mismatch —<br/>compare inspect's output<br/>against CFG"]
+```
+
+### 1. Read the status code — never just "unlicensed"
+
+`vl_verify()` never fails vaguely. Every rejection names exactly one cause, and
+`vl_status_str()` turns it into text and **never returns NULL**, for any int, so it is
+safe directly inside a format string.
+
+```c
+vl_license_t lic;
+vl_status_t st = vl_verify(blob, &CFG, hal, &lic);
+VectiSerial.err("licence: %s (%d)", vl_status_str(st), (int)st);
+```
+
+If your firmware only logs a boolean, fix that before anything else — it is the
+difference between a support ticket and a two-minute answer. And log the *applicable*
+checks too, because `VL_OK` does not mean everything was checked:
+
+```c
+if (st == VL_OK && lic.not_after != 0u && !(lic.checked & VL_CHECKED_TIME)) {
+    VectiSerial.wrn("licence: expiry present but NOT enforced — no clock on this board");
+}
+```
+
+With `VectiSerial` mirroring to hardware UART, that lands in the same capture as
+everything else:
+
+```
+[ 1841] INF licence: device id 7V3VAR49YVAVNKKRJT0FR2RAE0
+[ 1902] ERR licence: licence is for a different device (-9)
+```
+
+The `license` command from `bridge/vl_bridge_serial.h` prints exactly this set —
+verdict, serial, family, features, window, and a warning when `VL_CHECKED_TIME` or
+`VL_CHECKED_HWM` is clear:
+
+```
+license          → same as `license status`
+license status   → verdict, serial, features, expiry, what was actually checked
+license id       → the 26-character device id
+license <blob>   → queue an activation
+```
+
+> That bridge has **never been compiled** against the real VectiSerial. If it does not
+> build, the four `VectiSerial.inf()` calls inside it are trivial to inline.
+
+### 2. Dump the device id on its own
+
+Identity is separable from verification: `vl_compute_fingerprint()` needs no blob, no
+key and no config. If it fails, nothing else matters.
+
+```c
+uint8_t fp[VL_FINGERPRINT_LEN];
+char    id[VL_DEVICE_ID_STR_BUF_LEN];          /* 27, not 26 */
+
+vl_status_t st = vl_compute_fingerprint(hal, fp);
+if (st != VL_OK) {
+    VectiSerial.err("identity unreadable: %s", vl_status_str(st));   /* usually -15 */
+} else {
+    vl_encode_device_id(fp, id, sizeof id);
+    VectiSerial.inf("device id: %s", id);
+}
+```
+
+`VL_ERR_PLATFORM` here means a HAL callback failed, not that the device is unlicensed.
+On ESP32 the identity is three segments — the eFuse base MAC, the chip info
+(model / cores / revision / features), and the SPI flash JEDEC id — so a stuck flash bus
+reading `0x000000` or `0xFFFFFF` produces it. `VL_ERR_INVALID_ARG` means a NULL `hal` or
+a NULL `read_id_segment`; `VL_ERR_BUFFER_TOO_SMALL` from `vl_encode_device_id()` means
+you sized the buffer 26 instead of `VL_DEVICE_ID_STR_BUF_LEN`.
+
+### 3. `inspect` the blob — no private key needed
+
+`vl_mint.py inspect` decodes any blob on your laptop, with no key at all. This is the
+support-call tool: it tells you what the customer actually pasted.
+
+```bash
+python3 libraries/VectiLicense/tools/vl_mint.py inspect \
+  AR0G208D00000FP7PNG8KXPNQB77H5M0ZG5GMW0000001ZSX71NYM0R0006CZNR6BZ7D10H9T7V5QQCP...
+```
+
+```
+magic     : 0x56 (ok)
+version   : 1 (ok)
+key_id    : 1
+family    : 2
+features  : 0x0000000d  bits: 0, 2, 3
+device id : 7V3VAR49YVAVNKKRJT0FR2RAE0
+not_before: 0 (unbounded)
+not_after : 1798847999 (2027-01-01 23:59:59 UTC)
+serial    : 1002
+signature : 3f9c…
+
+signature not checked (no --pubkey given). Decoding proves nothing about
+authenticity; only the device's vl_verify() does.
+```
+
+Read that output against your firmware's `CFG` and against the device id from step 2:
+
+| Field | Compare against | If it differs |
+|---|---|---|
+| `device id` | what the device printed | `VL_ERR_DEVICE_MISMATCH`. Transcription error, a copied licence, or a repaired board |
+| `family` | `CFG.family` | `VL_ERR_BAD_FAMILY` — wrong SKU |
+| `key_id` | the `key_id`s in `CFG.keys` | `VL_ERR_UNKNOWN_KEY` — rotated out, or firmware predates the key |
+| `version` | `VL_FORMAT_VERSION` | `VL_ERR_BAD_VERSION` — minted by a newer tool |
+| `not_after` | the device's clock | `VL_ERR_EXPIRED` — suspect the clock first |
+| `serial` | your deny-list | `VL_ERR_REVOKED` |
+
+Add `--pubkey vendor.key` (or 64 hex characters) to check the signature locally:
+
+```bash
+python3 libraries/VectiLicense/tools/vl_mint.py inspect <blob> --pubkey vendor.key
+# → signature : VALID against the given public key
+```
+
+**If that says VALID and the device still returns `VL_ERR_BAD_SIGNATURE`, the firmware
+is carrying a different public key than the one you minted with.** That is the single
+most common licensing bug, and the usual culprit is the shipped placeholder key — its
+private half was generated in memory and discarded, so nothing can ever sign for it, and
+an unmodified example refuses every licence loudly at the first activation. Paste your
+own from `vl_mint.py keygen`.
+
+Reading `inspect`'s output proves nothing about authenticity — the script says so itself.
+Only the device's `vl_verify()` does that, and the signature covers
+`"vectilicense:v1" ‖ 0x00 ‖ payload[0..35]`, so any edit to any field invalidates it.
+
+### 4. Check the fingerprint is stable across reboots
+
+A device id that changes between boots means **no licence can ever hold**. This is the
+check people skip, and it is the one that explains "it worked, then it didn't".
+
+```c
+/* in setup(), on every boot — then power-cycle five times and diff the log */
+VectiSerial.inf("device id: %s", id);
+```
+
+```bash
+cd demo && pio device monitor -b 115200 | tee /tmp/id.log
+# power-cycle a few times, then:
+grep 'device id' /tmp/id.log | sort -u      # must print exactly ONE line
+```
+
+More than one line means the identity source is not stable. Causes, in order:
+
+| Cause | Tell |
+|---|---|
+| A HAL segment read that intermittently fails | the id changes *and* you sometimes see `VL_ERR_PLATFORM`. On ESP32 the flash JEDEC read is the flaky one |
+| An identity source that is not factory-programmed | a random value stored in plain flash, a build-time constant, a config file, or anything a user can edit. None of these belong in `read_id_segment` |
+| The HAL's segment set changed between builds | segments are hashed **in order with a one-byte length prefix**, so adding, removing or reordering one changes every device id and invalidates every licence in the field. Diff the HAL, not the licence |
+| A stub that returns a constant | the opposite failure: the id is *too* stable — identical across units, so one licence unlocks the whole production run. `hal/none` returns `VL_ERR_PLATFORM` on purpose; never "fix" it by returning fixed bytes |
+
+Also confirm the id survives a **flash erase plus reflash**, not just a reset. A
+fingerprint that depends on anything the firmware wrote is not a fingerprint.
+
+### One last check, on the storage path
+
+If activation appears to succeed and then evaporates, the bug is usually ordering rather
+than crypto: **verify first, store second.** Storing first means a mistyped blob survives
+the power cycle and the customer's next message is "it says invalid and I can't clear
+it". And re-verify at every boot — `vl_verify()` never calls `blob_load` or `blob_store`
+itself, so nothing happens unless your code asks.
+
+---
+
+## ⚠️ Three things to keep in mind while you debug
+
+**Firmware signing is symmetric.** VectiOTA's `setSigningKey()` is HMAC-SHA256 and the key
+ships inside the firmware image. It raises the bar past "has the Wi-Fi password"; it does
+not survive an attacker who can read flash. Asymmetric signing of firmware *images* is a
+known future improvement, not a shipped feature — and VectiLicense is not it, because it
+signs licences, not images.
+
+**Licensing (the legal kind).** VectiSuite's own code is Apache-2.0, but the four web
+libraries link **ESPAsyncWebServer** and **AsyncTCP**, which are **LGPL-3.0**. There is no
+dynamic linking on an MCU, so LGPL §4 relink obligations attach to the shipped binary.
+Every competing library in this space inherits the same dependency — but do not ship
+believing there are no copyleft obligations. VectiLicense links neither.
+
+**Licensing (the product kind).** VectiLicense removes the *keygen* — the firmware holds
+only a public key. It does not stop someone who can reflash the device from patching out
+the branch that reads `vl_verify()`'s result, and no software licensing scheme does.
+Secure Boot v2 + Flash Encryption is the only real mitigation; `vl_posture()` reports
+whether you have it and never enforces. Do not debug on the assumption that the check
+cannot be bypassed — debug on the assumption that a paying customer's board got repaired.
 
 ---
 
@@ -460,3 +657,6 @@ inherits the same dependency — but do not ship believing there are no copyleft
 - `ui/shared/widgets/CONTRACT.md` — widget props, value shapes, the `num()` rule
 - `libraries/Vecti{OTA,Serial,Net,Dash}/src/*.h` — the API, and the threading contract for
   every callback, written where you will actually read it
+- `libraries/VectiLicense/include/vectilicense/vectilicense.h` — every status code and
+  every contract, in one header; `docs/API.md` next to it is the same thing with room to
+  explain why

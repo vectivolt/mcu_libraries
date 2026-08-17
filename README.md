@@ -4,13 +4,15 @@
 
 # VectiSuite
 
-**Four Apache-2.0 libraries that give an ESP32 a real web stack: OTA updates, a wireless
-console, Wi-Fi provisioning, and a live dashboard — all served from the chip's own flash.**
+**Five Apache-2.0 libraries. Four give an ESP32 a real web stack — OTA updates, a wireless
+console, Wi-Fi provisioning and a live dashboard, all served from the chip's own flash.
+The fifth licenses the product: offline, asymmetric, verify-only on the device.**
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-3da9fc?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-ESP32-2ee5a0?style=flat-square)](#-install)
 [![UI in flash](https://img.shields.io/badge/UI%20in%20flash-126%20kB%20gzipped-f59e0b?style=flat-square)](#-what-it-costs-you)
 [![Widgets](https://img.shields.io/badge/widgets-49%20%2B%20custom%20HTML-7c5cff?style=flat-square)](#-the-widget-catalogue)
+[![Licensing](https://img.shields.io/badge/licensing-Ed25519%20verify--only-2ee5a0?style=flat-square)](#-vectilicense--offline-device-licensing)
 [![Paywalled elsewhere](https://img.shields.io/badge/same%20features%20elsewhere-%24946-e5484d?style=flat-square)](#-versus-the-paid-incumbents)
 
 </div>
@@ -22,6 +24,10 @@ console, Wi-Fi provisioning, and a live dashboard — all served from the chip's
 The four popular commercial libraries in this space are all sold by a single vendor as
 separate products. Buying the Pro tier of all four costs **$946**. VectiSuite ships the
 same feature set, plus things none of them have, under Apache-2.0.
+
+The comparison covers four products — an OTA updater, a console, a provisioning portal
+and a dashboard. **Device licensing is not something they charge extra for; it is not a
+thing they do at all**, which is why the licensing rows below read `—` rather than 💰.
 
 They are referred to below as **Paid Alternative 1–4** rather than by name: the point of
 this table is what the *features and licences* cost you, not who publishes them.
@@ -50,9 +56,13 @@ pages) on **2026-08-17**. Evidence is in the last column.
 | **Dashboard — input cards** | ✅ free | — | — | — | 💰 $299 | paywalled |
 | **Dashboard — custom-HTML escape hatch** | ✅ | — | — | — | ❌ both tiers | absent in free *and* Pro |
 | **Dashboard — branding / brand colour** | ✅ free | — | — | — | 💰 $299 | paywalled |
+| **Licensing — lock features to one device** | ✅ Ed25519, offline | — | — | — | — | **no equivalent in the compared products.** All four are OTA / console / provisioning / dashboard products; none of them ships a device-licensing feature at any tier. This is a capability gap, not a paywall. |
+| **Licensing — no keygen recoverable from a flash dump** | ✅ device holds a *public* key only | — | — | — | — | see [the honest security statement](#the-honest-security-statement) — this removes the keygen, not firmware patching |
+| **Licensing — activation with no internet and no app** | ✅ paste into the VectiNet portal | — | — | — | — | |
+| **Licensing — runs off the ESP32** | ✅ pure C99 core, no OS, no libc headers | — | — | — | — | the other four VectiSuite libraries are ESP32-bound; VectiLicense is not |
 | **Commercial licence terms readable before you pay** | n/a — Apache-2.0, full text in repo | ❌ | ❌ | ❌ | ❌ | SCL text published nowhere; store says SCL-1.3, READMEs say SCL-1.2 |
 | **Seats** | unlimited | — | — | — | 1 developer | Paid Alternative 4 Pro is a single-developer seat |
-| **Maturity — be honest** | ⚠️ new: no users, no CI, no test suite, not in Arduino Library Manager | ✅ mature, widely used, heavily tutorialised | ✅ 647 ★ | ✅ | ✅ mature, widely used | Paid Alternative 2: 647 stars, 0 open issues, last commit 2025-12-04 |
+| **Maturity — be honest** | ⚠️ new: no users, no CI, not in Arduino Library Manager. The four web libraries have no test suite; VectiLicense has one (9 `ctest` cases) but most of its HALs have never been compiled | ✅ mature, widely used, heavily tutorialised | ✅ 647 ★ | ✅ | ✅ mature, widely used | Paid Alternative 2: 647 stars, 0 open issues, last commit 2025-12-04 |
 | **Dashboard flash cost** | 46,811 B gzipped | — | — | — | lighter | that is the price of 49 widgets vs 9; no measured figure for Paid Alternative 4's blob |
 
 > A "—" means the product does not cover that domain. `⚠️` means partially / with a caveat.
@@ -62,8 +72,12 @@ pages) on **2026-08-17**. Evidence is in the last column.
 ## 📸 What it looks like
 
 Every page is a single self-contained document — no CDN, no web fonts, no external
-requests — served pre-gzipped straight from PROGMEM. All four honour
+requests — served pre-gzipped straight from PROGMEM. All four SPAs honour
 `prefers-color-scheme` and persist an explicit dark/light choice in `localStorage`.
+
+VectiLicense has no page of its own. It borrows one: its bridges add a device-ID field
+and a paste box to VectiNet's portal, or three cards to VectiDash. See
+[VectiLicense](#-vectilicense--offline-device-licensing).
 
 ### VectiDash — real-time dashboard
 
@@ -159,7 +173,25 @@ void loop() {
 }
 ```
 
-### All four at once
+### VectiLicense — 3 lines
+
+Not an Arduino library in the same sense: no server, no routes, no `loop()` hook of its
+own. Three lines is the whole gate.
+
+```c
+#include "vectilicense/vectilicense.h"                 // 1
+
+vl_license_t lic;
+vl_status_t st = vl_verify(blob, &CFG, hal, &lic);      // 2  (no network, ever)
+if (st == VL_OK && vl_has_feature(&lic, FEATURE_MODBUS)) enable_modbus();  // 3
+```
+
+`CFG` is a `const vl_config_t` holding your 32-byte **public** key and the family byte;
+`hal` is a `const vl_hal_t *` — on ESP32, `vl_hal_esp32()` from
+`hal/esp32/vl_hal_esp32.h`. Full setup in
+[VectiLicense](#-vectilicense--offline-device-licensing).
+
+### All four web libraries at once
 
 ```cpp
 #include <WiFi.h>
@@ -208,6 +240,12 @@ void loop() {
 
 Then open `http://vecti.local/`.
 
+That sketch is what `demo/` builds. **VectiLicense is not in it** — the demo has never
+been built with the licensing library, and its bridges have never been compiled against
+the real VectiOTA / VectiSerial / VectiNet / VectiDash. Add it deliberately, from
+[the VectiLicense section](#-vectilicense--offline-device-licensing), and expect to fix
+an include path on the first build.
+
 > ⚠️ **Threading.** ESPAsyncWebServer callbacks run on the **AsyncTCP task**; `loop()`
 > runs on the **Arduino task**. Never block inside a callback — no `delay()`, no
 > `ESP.restart()`, no long HTTP fetch. Set a flag and act in `loop()`. The libraries
@@ -237,6 +275,15 @@ flowchart LR
     OTA -.-> FLASH
     SER -.-> FLASH
     NET -.-> FLASH
+
+    LIC["<b>VectiLicense</b><br/><i>no routes, no server, no network</i><br/>vl_verify() — pure computation"]
+    KEY[["32-byte Ed25519<br/><b>public</b> key in flash"]]
+    LIC -.-> KEY
+
+    NET -. "portal field:<br/>paste 160 chars" .-> LIC
+    DASH -. "QR device id +<br/>paste card" .-> LIC
+    SER -. "console: license command" .-> LIC
+    LIC -. "gate: allowFirmwareUpdates()" .-> OTA
   end
 
   BR <-->|"WebSocket · /dash/ws · /serial/ws"| SRV
@@ -244,8 +291,14 @@ flowchart LR
   BR <-->|"HTTP · GET/POST"| SRV
 ```
 
-The four libraries never collide on a route, and they never own the server — you pass in
-your own `AsyncWebServer` and keep adding your own endpoints alongside.
+The four web libraries never collide on a route, and they never own the server — you pass
+in your own `AsyncWebServer` and keep adding your own endpoints alongside.
+
+VectiLicense is the odd one out on purpose: it mounts **nothing**, opens **nothing**, and
+has no ESP32 in it. Its core is freestanding C99. The dotted edges above are the optional
+`bridge/` shims — each behind `__has_include`, so an uninstalled sibling compiles to
+nothing. **None of those four shims has ever been compiled against the real sibling
+library.**
 
 ### Endpoint map
 
@@ -272,6 +325,191 @@ your own `AsyncWebServer` and keep adding your own endpoints alongside.
 | `/wifi/reset` | POST | VectiNet | Erase NVS + reboot |
 | `/wifi/restart` | POST | VectiNet | Reboot only |
 | `/generate_204` `/gen_204` `/hotspot-detect.html` `/ncsi.txt` | GET | VectiNet | OS captive-portal probes |
+| *(none)* | — | **VectiLicense** | Mounts no route and opens no socket. Activation rides on whatever surface you already have. |
+
+---
+
+## 🔑 VectiLicense — offline device licensing
+
+The fifth library sells the other four. It answers one question — *is this unit licensed
+for this feature?* — using nothing but arithmetic. **No network call, ever. Nothing to
+phone home to.**
+
+A licence is an Ed25519 signature over a payload bound to that device's own hardware
+fingerprint. The firmware embeds the **32-byte public key**. The private key stays on
+your machine and is never shipped, so a firmware image contains no minting material at
+all — dump the flash and you get a public key.
+
+| | |
+|---|---|
+| Blob on the wire | 36-byte payload + 64-byte signature = **100 bytes** → **160** Crockford-base32 characters |
+| Device id | first 16 bytes of a SHA-256 hardware fingerprint → **26** characters |
+| Carries | device id, product family, 32-bit feature bitmap, validity window, serial |
+| Core | pure C99, freestanding, zero dependencies, no allocation, **0 bytes of static RAM** |
+| Flash | **9,195 B** (Cortex-M4) / **9,319 B** (Cortex-M0+), `-Os`, measured |
+| Stack | 4,376 B at the deepest point — size the calling task at ≥5 KB |
+| Per verify | 2.8 ms on an Apple M1 Pro at `-O2`; tens of ms on an ESP32 *(estimate)*. Never call it from an ISR or an AsyncTCP callback. |
+
+Nothing is pre-generated per device and there is no database: the customer reports 26
+characters, you sign for exactly those, you send back 160.
+
+### Setting it up
+
+```c
+#include "vectilicense/vectilicense.h"
+#include "vl_hal_esp32.h"                       /* hal/esp32/ — or your own */
+
+#define FEATURE_MODBUS 0u                       /* your bit numbering */
+
+static const vl_pubkey_t VENDOR_KEYS[] = {
+    { .key_id = 1, .key = { 0x02, 0x1a, /* ...30 more, from vl_mint.py keygen... */ } },
+};
+static const vl_config_t CFG = {
+    .keys = VENDOR_KEYS, .key_count = 1,
+    .family = 2,                                /* this product line */
+    .revoked_serials = NULL, .revoked_count = 0,
+    .flags = 0,
+};
+
+/* 1. show the customer their device id */
+uint8_t fp[VL_FINGERPRINT_LEN];
+char id[VL_DEVICE_ID_STR_BUF_LEN];              /* 27 bytes */
+if (vl_compute_fingerprint(vl_hal_esp32(), fp) == VL_OK) {
+    vl_encode_device_id(fp, id, sizeof id);     /* "7V3VAR49YVAVNKKRJT0FR2RAE0" */
+}
+
+/* 2. verify whatever 160 characters arrived, from wherever */
+vl_license_t lic;
+vl_status_t st = vl_verify(blob, &CFG, vl_hal_esp32(), &lic);
+if (st != VL_OK) {
+    log_warn("unlicensed: %s", vl_status_str(st));
+} else if (vl_has_feature(&lic, FEATURE_MODBUS)) {
+    enable_modbus();
+}
+```
+
+`vl_verify()` takes a **NUL-terminated string**, and that is the entire transport
+contract. HTTP, MQTT, BLE, a QR scan, a file on a USB stick, a technician typing at a
+console — all work with no helper code. Only two paths needed any: `transport/vl_chunk.c`
+reassembles a blob from CAN/ISO-TP/BLE-GATT frames, and `transport/vl_line.c` turns a
+UART byte stream into one line.
+
+### Device id → mint → activate
+
+The flagship path: **a sealed box with no internet and no app**, activated by joining its
+own SoftAP and pasting into VectiNet's captive portal. VectiDash can show the device id
+as a QR so the customer photographs 26 characters instead of transcribing them.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant HW as Device hardware
+    participant FW as Firmware · vl_verify()
+    participant P as Phone · VectiNet portal
+    participant V as You · vl_mint.py
+
+    Note over HW,FW: the device never touches a network on this side
+    FW->>HW: read identity segments (eFuse MAC, chip id, flash JEDEC id)
+    HW-->>FW: raw bytes
+    FW->>FW: SHA-256 with a domain prefix → 32-byte fingerprint
+    FW-->>P: device id, 26 chars (portal field, QR card, console, label)
+
+    P->>V: device id + what they bought
+    Note over V: the private key lives here and nowhere else
+    V->>V: build the 36-byte payload (family, features, window, serial)
+    V->>V: Ed25519 sign the domain prefix vectilicense:v1 plus the payload
+    V-->>P: licence blob, 160 chars (QR, email, file)
+
+    P->>FW: paste into the portal / dashboard / serial console
+    FW->>FW: length, alphabet, magic, version, family, key id — no crypto yet
+    FW->>FW: Ed25519 verify against the embedded public key
+    FW->>HW: recompute the fingerprint, constant-time compare
+    FW->>FW: revocation → validity window → clock rollback mark
+    FW-->>P: VL_OK, or a status code naming the check that failed
+```
+
+Steps 1–4 need no vendor. Steps 9–14 need no network. Only the middle — 26 characters out,
+160 back — involves a human, and that can be a web form, an email, or a sticker in a box.
+
+### The wire format
+
+| Offset | Size | Field | Notes |
+|---|---|---|---|
+| 0 | 1 | `magic` | `VL_MAGIC` = `0x56` (`'V'`) |
+| 1 | 1 | `version` | `VL_FORMAT_VERSION` = `0x01` |
+| 2 | 1 | `key_id` | selects among the embedded public keys — this is how rotation works |
+| 3 | 1 | `family` | product line; a licence for one family is refused by another |
+| 4 | 4 | `features` | little-endian 32-bit bitmap, read with `vl_has_feature()` |
+| 8 | 16 | `device_id` | first `VL_DEVICE_ID_LEN` bytes of the SHA-256 fingerprint |
+| 24 | 4 | `not_before` | LE epoch seconds, `0` = no lower bound |
+| 28 | 4 | `not_after` | LE epoch seconds, `0` = perpetual |
+| 32 | 4 | `serial` | for support, and the handle revocation uses |
+| 36 | 64 | `signature` | Ed25519 over `"vectilicense:v1" ‖ 0x00 ‖ payload[0..35]` |
+
+Offsets 0..35 are the signed payload (`VL_PAYLOAD_LEN`); 36..99 is the signature
+(`VL_SIG_LEN`). The domain-separation prefix means a VectiLicense signature can never be
+replayed into another protocol that happens to use the same vendor key.
+
+160 characters is deliberately not hand-typeable. A code short enough to type has ~75 bits
+at best — that is a MAC, a MAC needs a shared secret, and a shared secret in firmware is
+exactly the keygen this design removes.
+
+### The honest security statement
+
+**VectiLicense is not uncrackable, and this repository will never say it is.**
+
+An attacker who can rewrite your firmware can patch out the branch that reads
+`vl_verify()`'s result. That is what "the attacker owns the hardware" means, and it is
+true of every software licensing scheme ever written.
+
+What v1 structurally eliminates is the **keygen**. The earlier symmetric (HMAC) design
+shipped the *minting* secret in every firmware image, because the value that verified a
+licence was the value that created one: a single flash dump from a single customer
+produced a universal code generator for every unit the vendor would ever sell. That class
+of attack is gone — not obfuscated, gone — because the secret is no longer in the firmware
+to find.
+
+| After a full flash dump, an attacker still cannot | Why |
+|---|---|
+| Mint a licence for their own device | needs a signature over their device id, which needs the private key |
+| Turn on features they did not buy | `features` is inside the signed payload |
+| Extend an expiry | `not_after` is inside the signed payload |
+| Reuse someone else's licence | `device_id` is bound to the local fingerprint, compared in constant time |
+| Replay a licence from another product line | `family` is inside the signed payload |
+
+The only real mitigation for firmware patching is a hardware root of trust — on ESP32,
+**Secure Boot v2 + Flash Encryption**. `vl_posture()` reports whether you have one; it
+never enforces. Without it, licensing is a speed bump against casual copying, not a wall.
+
+Two more things worth knowing before you price a product on this:
+
+- **With no clock, expiry is not enforced.** If the HAL has no `now_epoch`, `vl_verify()`
+  returns `VL_OK` for an expired licence and leaves `VL_CHECKED_TIME` clear in
+  `lic.checked`. Read that bit, or set `VL_FLAG_REQUIRE_CLOCK`.
+- **On a general-purpose OS the fingerprint is weak.** `hal/posix` reads an interface MAC
+  and `/etc/machine-id`; a cloned image with a spoofed MAC reproduces it. On MCU HALs
+  (eFuse, factory UID, OTP) it is strong.
+
+### What has been built and run, and what has not
+
+Straight from VectiLicense's own repository, because it matters more than the feature list:
+
+| | Status |
+|---|---|
+| `core/` — Ed25519 verify, SHA-256/512, base32, parsing | **compile-verified and tested.** 9 `ctest` cases: RFC 8032 and SHA known-answer vectors, every rejection path, an 800-bit flip sweep, a 64-cell HAL matrix, a mutation fuzzer under ASan + UBSan. Cross-compiles freestanding for Cortex-M4 and M0+. |
+| `hal/posix`, `hal/none` | compiled and exercised by the test suite |
+| `transport/` | compile-verified, tested, cross-compiled |
+| `bridge/vl_bridge.h` (`vecti::License`) | compiled and tested on the host |
+| `hal/esp32`, `hal/rp2040`, `hal/stm32`, `hal/nxp` | **never compiled, never run.** Written to each vendor's documented API. |
+| `bridge/vl_bridge_{net,dash,serial,ota}.h` | **never compiled against the real VectiNet / VectiDash / VectiSerial / VectiOTA.** Not once, not anywhere. |
+| Every example | never flashed; the POSIX one has been run on macOS |
+
+Expect to fix an include path on your first ESP32 build. The examples ship a
+**placeholder public key** whose private half was generated in memory and discarded, so an
+unmodified example refuses every licence with `VL_ERR_BAD_SIGNATURE` — loudly, at the
+first activation. Paste your own from `vl_mint.py keygen`, and **never substitute an
+all-zero key**: 32 zero bytes are a valid low-order curve point, and `core/` rejects such
+keys outright precisely so that mistake fails closed for the right reason.
 
 ---
 
@@ -382,7 +620,9 @@ for its parameter dropdowns.
 ## 🎯 ESP family support — every target build-tested
 
 Each row below was compiled on this machine, not inferred from a manifest. `pio run`
-in `demo/` rebuilds the whole matrix.
+in `demo/` rebuilds the whole matrix. **VectiLicense is absent from it** — the demo does
+not include the library and `hal/esp32` has never been built with an ESP toolchain, so
+there is no honest column to add.
 
 | Target | Core | VectiOTA | VectiSerial | VectiNet | VectiDash | Full image |
 |---|---|:--:|:--:|:--:|:--:|---|
@@ -420,13 +660,17 @@ open an issue and say so.
 
 ## 📦 Install
 
-Dependency floor, for all four:
+Dependency floor, for the four web libraries:
 
 | Dependency | Minimum | Why |
 |---|---|---|
 | `ESP32Async/ESPAsyncWebServer` | **^3.11.0** | all four call `AsyncURIMatcher::exact()`, which does not exist below 3.11.0 — and which lives in ESPAsyncWebServer, **not** in the Arduino core |
 | `ESP32Async/AsyncTCP` | **^3.4.0** (VectiDash declares ^3.4.10) | |
 | `bblanchon/ArduinoJson` | **^7.4.0** | not needed by VectiSerial |
+
+**VectiLicense needs none of them.** Its core includes `<stdint.h>` and `<stddef.h>` and
+nothing else — not even `<string.h>`, which is a hosted header, so it declares the three
+functions it calls itself. Add it alone if licensing is all you want.
 
 ### PlatformIO — from GitHub
 
@@ -442,12 +686,15 @@ lib_deps =
   https://github.com/vectivolt/VectiSerial.git
   https://github.com/vectivolt/VectiNet.git
   https://github.com/vectivolt/VectiDash.git
+  https://github.com/vectivolt/VectiLicense.git
   ESP32Async/ESPAsyncWebServer @ ^3.11.0
   ESP32Async/AsyncTCP          @ ^3.4.10
   bblanchon/ArduinoJson        @ ^7.4.0
 ```
 
-Take only the ones you want — the four are independent.
+Take only the ones you want — the five are independent. VectiLicense's bridges to the
+other four are each behind `__has_include`, so installing it alongside nothing else
+compiles cleanly and simply gives you the C API.
 
 ### PlatformIO — from a local checkout
 
@@ -467,7 +714,7 @@ Not in the Library Manager. Copy the folders you want out of `libraries/` into
 
 ### Cloning this repo
 
-The four libraries are git **submodules** — a plain `git clone` leaves `libraries/*`
+The five libraries are git **submodules** — a plain `git clone` leaves `libraries/*`
 empty and every build fails with *"no such file or directory: VectiOTA.h"*.
 
 ```bash
@@ -480,11 +727,13 @@ git submodule update --init --recursive
 
 | Target | Status |
 |---|---|
-| **ESP32** (all four libraries) | ✅ Built and run on an ESP32-S3 |
+| **ESP32** (the four web libraries) | ✅ Built and run on an ESP32-S3 |
 | **ESP8266** — VectiOTA only | ⚠️ `library.json` declares `espressif8266` and the source has real ESP8266 paths (BearSSL HMAC, `Updater.h`). Not tested. |
 | **ESP8266** — Serial / Net / Dash | ❌ Not claimed. VectiNet `#error`s on non-ESP32: it needs Preferences/NVS, ESPmDNS and `esp_wifi`. |
-| **RP2040 / RP2350+W** | Plausible future target — ESPAsyncWebServer already supports it. Not done. |
-| **STM32, NXP** | No. No async web server, no onboard Wi-Fi. |
+| **RP2040 / RP2350+W** | Plausible future target for the web libraries — ESPAsyncWebServer already supports it. Not done. |
+| **STM32, NXP** | No async web server, no onboard Wi-Fi — so no for the four web libraries. |
+| **VectiLicense — any C99 target** | ✅ `core/` is compile-verified for host clang and for `arm-none-eabi-gcc` on Cortex-M4 and M0+ with `-ffreestanding -nostdinc -Os`. A board nobody has ported means copying `hal/none/` and writing one function. |
+| **VectiLicense — ESP32 / RP2040 / STM32 / NXP HALs** | ⚠️ Written to each vendor's documented API. **Never compiled, never run.** `hal/posix` and `hal/none` are the two that the test suite exercises. |
 
 What is genuinely ESP-specific in *our* code: `esp_ota_ops`, NVS `Preferences`,
 `ESPmDNS`, `mbedtls`. ESPAsyncWebServer 3.11.0 itself declares `espressif32`,
@@ -504,6 +753,15 @@ Measured, not estimated. The gzipped PROGMEM blob is what actually consumes flas
 | VectiOTA | 71,475 B | **25,822 B** |
 | VectiSerial | 67,383 B | **24,862 B** |
 | **Total UI** | | **125,993 B ≈ 126 kB** |
+
+VectiLicense adds no UI blob at all. Its cost is code, measured with
+`arm-none-eabi-gcc 15.2.0 -Os -ffreestanding` — not on an ESP32, which has never built it:
+
+| | Cortex-M4 | Cortex-M0+ |
+|---|---:|---:|
+| `core/` text | 9,195 B | 9,319 B |
+| `.data` + `.bss` | **0 B** | **0 B** |
+| deepest stack chain (`-fstack-usage`) | — | 4,376 B |
 
 Whole-firmware footprint of the bundled demo, which exercises all four libraries at
 once — ESP32-S3-DevKitC-1, 8 MB flash, 2 MB PSRAM, `default_8MB.csv` partitions:
@@ -541,22 +799,40 @@ only — it was never joined to a LAN.**
 - The WebSocket dashboard against real hardware
 - OTA upload / pull / rollback on real hardware
 - Captive-portal provisioning end to end
+- **Anything VectiLicense.** It has never been on this board, or any board. Its own test
+  suite runs on a host; its ESP32 HAL and its four bridges have never been compiled.
 
 ---
 
 ## 🚧 Honest limitations
 
-**The LGPL question.** Our code is Apache-2.0. But all four libraries link
+**The LGPL question.** Our code is Apache-2.0. But the four web libraries link
 **ESPAsyncWebServer** and **AsyncTCP**, which are **LGPL-3.0**. On an MCU there is no
 dynamic linking, so LGPL §4's relink obligations attach to the binary you ship. We do
 **not** claim "zero copyleft obligations" — that would be false. What is true: our
 source is Apache-2.0 and readable, and **every competitor in this space inherits exactly
 the same async dependency.** Talk to your counsel about §4 either way.
 
-**Firmware signing is symmetric.** `setSigningKey()` is HMAC-SHA256. The key ships
-inside the firmware image, so anyone who can read the flash can forge a valid signature.
-It raises the bar over "a stolen Wi-Fi password is enough"; it is not code signing.
-Asymmetric signing (Ed25519) is a known future improvement, not a shipped feature.
+VectiLicense is the exception, and it is a real one: it links neither, so a firmware that
+uses only VectiLicense inherits no copyleft from this suite. Its one vendored dependency
+is the verification half of TweetNaCl, which is public domain.
+
+**Firmware signing is symmetric.** VectiOTA's `setSigningKey()` is HMAC-SHA256. The key
+ships inside the firmware image, so anyone who can read the flash can forge a valid
+signature. It raises the bar over "a stolen Wi-Fi password is enough"; it is not code
+signing. Asymmetric signing (Ed25519) for *firmware images* is a known future improvement,
+not a shipped feature. **VectiLicense does not fix this** — it is asymmetric, but it signs
+*licences*, not images. Do not read one as the other.
+
+**Licensing is a business control, not a security boundary.** VectiLicense removes the
+keygen; it cannot stop someone who reflashes the device from deleting the call to
+`vl_verify()`. Secure Boot v2 + Flash Encryption is the only real mitigation. See
+[the honest security statement](#the-honest-security-statement).
+
+**Most of VectiLicense has never been compiled.** `core/`, `transport/`, `hal/posix`,
+`hal/none` and `vecti::License` are tested. `hal/esp32`, `hal/rp2040`, `hal/stm32`,
+`hal/nxp`, all four VectiSuite bridges and every example are written to documented APIs
+and have never been built. Budget an afternoon for the first ESP32 integration.
 
 **Pulled images carry no signature.** `POST /ota/pull` has no `X-Vecti-Signature` to
 check, so pin a CA with `setPullCACert()`. An `https://` pull with neither a CA nor
@@ -581,15 +857,16 @@ people have already hit the sharp edges of, that is a real argument for them.
 
 ```
 mcu_libraries/
-├── demo/                    PlatformIO sketch wiring all four libraries
-│   ├── platformio.ini
+├── demo/                    PlatformIO sketch wiring the four web libraries
+│   ├── platformio.ini       (VectiLicense is deliberately not in it — see above)
 │   └── src/main.cpp
 ├── docs/screenshots/        PNGs used here and in the per-library docs
 ├── libraries/               ← git submodules
 │   ├── VectiOTA/            README + examples inside
 │   ├── VectiSerial/
 │   ├── VectiNet/
-│   └── VectiDash/
+│   ├── VectiDash/
+│   └── VectiLicense/        core/ hal/ transport/ bridge/ tools/vl_mint.py
 ├── ui/                      Svelte sources for the four SPAs
 │   ├── apps/{dash,net,ota,serial}/
 │   ├── shared/widgets/      one .svelte per widget + CONTRACT.md
@@ -598,6 +875,10 @@ mcu_libraries/
     ├── mock_device.js       fake device for UI work — no ESP32 needed
     └── preview_proxy.js     localhost proxy for screenshotting a live device
 ```
+
+VectiLicense has no `ui/` entry because it has no UI. Its only tool,
+`libraries/VectiLicense/tools/vl_mint.py`, is the **one file in the whole suite that ever
+touches a private key** — and it runs on your machine, never on a device.
 
 Build and flash the demo:
 
@@ -633,13 +914,31 @@ node ui/scripts/capture-docs.mjs
 - [ ] `VectiDash.begin(..., allowAnonymousRead=false)` if even reading telemetry should require a login
 - [ ] `VectiOTA.setID(...)` with something unique — the MAC works, a serial number is better
 
+If you ship VectiLicense, add these — they are the ones that cause field returns:
+
+- [ ] The Ed25519 private key is backed up offline and is **not** in the repo, the firmware or CI
+- [ ] At least **two** `key_id`s are in the shipping firmware, so rotation is a config change and not a recall
+- [ ] The `family` byte is assigned and written down; feature bits live in a header shared with your order system
+- [ ] The HAL's identity segments are **frozen** — adding or reordering one invalidates every licence already issued
+- [ ] The placeholder public key is gone. Verify it: an unmodified example returns `VL_ERR_BAD_SIGNATURE`
+- [ ] Enforcement is nag / degrade / grace, **not** hard stop, unless you can defend hard stop
+- [ ] `vl_status_str(st)` reaches a log your support desk can read — "refused" is a ticket, "licence is for a different device" is a two-minute fix
+- [ ] If you sell time-limited licences, you read `lic.checked & VL_CHECKED_TIME` or set `VL_FLAG_REQUIRE_CLOCK`
+- [ ] Somebody has run the full loop on real hardware — device id → mint → paste → reboot → still licensed — **and** the failure paths: another device's blob, a typo, an empty paste
+
 ---
 
 ## 🤝 Contributing
 
 PRs welcome.
 
-- C++17. No C++20-only features — VectiOTA still has to build for ESP8266.
+- C++17 for the four web libraries. No C++20-only features — VectiOTA still has to build
+  for ESP8266.
+- **VectiLicense `core/` is C99 and freestanding.** No `<string.h>`, no `stdio`, no
+  `malloc`, no vendor header, no writable static state. That is what lets the same object
+  files run on an ESP32, an STM32 and your laptop, and the ARM cross-compile in its
+  `ctest` suite is what keeps it true. Platform code goes behind `vl_hal_t` or it does not
+  go in.
 - Comments explain **why**, not what.
 - A new widget needs four things in sync: a `DashType` enumerator (**append**, never
   reorder), a case in `typeName()`, a `.svelte` file registered in

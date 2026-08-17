@@ -14,3 +14,7 @@
 	path = libraries/VectiDash
 	url  = https://github.com/vectivolt/VectiDash.git
 	branch = main
+[submodule "libraries/VectiLicense"]
+	path = libraries/VectiLicense
+	url = https://github.com/vectivolt/VectiLicense.git
+	branch = main

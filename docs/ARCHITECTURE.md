@@ -1,12 +1,14 @@
 # VectiSuite architecture 🏗
 
-How the four libraries fit together on one ESP32: one HTTP server, four route
-namespaces, four pre-built web apps living in flash, and two FreeRTOS tasks that
-must not touch each other's data.
+How five libraries fit together. Four of them share one ESP32: one HTTP server,
+four route namespaces, four pre-built web apps living in flash, and two FreeRTOS
+tasks that must not touch each other's data. The fifth, VectiLicense, sits
+underneath all of that and shares none of it — no server, no routes, no ESP32.
 
 Read this before you write a sketch that does anything unusual — a custom route,
 a blocking callback, a second server instance. Everything here is taken from the
-source in `libraries/Vecti*/src/`.
+source in `libraries/Vecti*/src/` and
+`libraries/VectiLicense/{include,core,hal,transport,bridge}/`.
 
 - [One server, four tenants](#-one-server-four-tenants)
 - [Route ownership](#-route-ownership)
@@ -16,6 +18,7 @@ source in `libraries/Vecti*/src/`.
 - [Memory strategy](#-memory-strategy)
 - [Auth model](#-auth-model)
 - [The WebSocket handshake ticket](#-the-websocket-handshake-ticket)
+- [The licensing layer](#-the-licensing-layer)
 - [Footprint](#-footprint)
 - [Licensing](#-licensing)
 
@@ -23,8 +26,10 @@ source in `libraries/Vecti*/src/`.
 
 ## 🧩 One server, four tenants
 
-You create the `AsyncWebServer`. All four libraries mount onto it. There is no
-second server, no second port, no second TCP stack.
+You create the `AsyncWebServer`. All four web libraries mount onto it. There is
+no second server, no second port, no second TCP stack. VectiLicense is not a
+tenant at all — it mounts nothing; see [the licensing
+layer](#-the-licensing-layer).
 
 ```cpp
 #include <ESPAsyncWebServer.h>
@@ -267,6 +272,8 @@ hook:
 | `VectiSerial::onMessage` | **AsyncTCP** — treat as ISR-adjacent |
 | `VectiNet::onState`, `onConfig` | **`loop()`** |
 | `VectiOTA::onStart/onProgress/onEnd/onError/onBeforeReboot` | **AsyncTCP** for the upload path, **`loop()`** for the pull path |
+| `vecti::License::submit()` | **whichever task called it** — it only `memcpy`s into one slot and sets a flag, so it is safe from AsyncTCP |
+| `vecti::License::pump()` / `vl_verify()` | **`loop()` only.** Tens of ms of Ed25519 plus a blocking NVS write. Never call `vl_verify()` from a handler or an ISR |
 
 > ⚠️ `VectiSerial.onMessage` is the one that surprises people: it fires on the
 > AsyncTCP task. Logging from it is explicitly safe (`_log()` only appends under
@@ -524,6 +531,117 @@ Basic auth on the upgrade and are accepted on that path.
 
 ---
 
+## 🔑 The licensing layer
+
+VectiLicense is architecturally unlike the other four, and the differences are
+deliberate rather than incidental.
+
+| | The four web libraries | VectiLicense |
+|---|---|---|
+| Owns | a route namespace on your `AsyncWebServer` | **nothing.** No route, no socket, no port |
+| Needs | ESPAsyncWebServer, AsyncTCP, ArduinoJson | nothing. Not even `<string.h>` |
+| Language | C++17, Arduino | C99, freestanding, `extern "C"` |
+| Target | ESP32 (VectiOTA also ESP8266) | any conforming C99 target |
+| Loop hook | mandatory, one each | none. Call `vl_verify()` at boot and when a blob arrives |
+| Network | the entire point | never. Not once, not optionally |
+| State | rings, queues, mutexes | **zero bytes of static writable state** |
+
+### Four layers, strictly separated
+
+```mermaid
+flowchart TB
+  subgraph VL["VectiLicense"]
+    direction TB
+    CORE["<b>core/</b> — pure C99, freestanding, zero dependencies<br/>Ed25519 verify · SHA-256/512 · base32 · parse · constant-time compare<br/><i>compile-verified: host clang + arm-none-eabi Cortex-M4/M0+</i>"]
+    HAL["<b>hal/</b> — one struct of function pointers, vl_hal_t<br/>esp32 · rp2040 · stm32 · nxp · posix · none<br/><i>only posix and none have ever been compiled</i>"]
+    TR["<b>transport/</b> — optional framing<br/>vl_chunk (CAN/ISO-TP/BLE GATT) · vl_line (UART)<br/><i>everything else needs no helper</i>"]
+    BR["<b>bridge/</b> — optional shims, each behind __has_include<br/>vecti::License + VectiNet / VectiDash / VectiSerial / VectiOTA<br/><i>the four sibling shims have never been compiled</i>"]
+  end
+
+  HW[("Hardware identity<br/>eFuse · UID · OTP · flash id")]
+  KEY[["32-byte Ed25519<br/><b>public</b> key, in flash"]]
+
+  HAL -->|"read_id_segment()"| HW
+  CORE -->|"injected, never included"| HAL
+  CORE --> KEY
+  BR --> CORE
+  TR --> CORE
+```
+
+The layering is a rule, not a suggestion: **`core/` includes no vendor header,
+no `stdio.h`, no `time.h`, no `malloc`.** Anything that talks to hardware lives
+behind `vl_hal_t`, and every callback in that struct except `read_id_segment` is
+optional and may be NULL. That is what lets the same object files run on an
+ESP32, an STM32 and a laptop — and it is what the freestanding ARM cross-compile
+in the `ctest` suite exists to keep true.
+
+### How it composes with the other four
+
+The composition points are the `bridge/` headers. Each is guarded by
+`__has_include`, so an uninstalled sibling compiles to nothing and a
+licensing-only firmware pulls in no Arduino at all.
+
+```mermaid
+flowchart LR
+  subgraph IN["Getting 160 characters in"]
+    NETB["<b>vl_bridge_net.h</b><br/>vecti::NetLicensePortal<br/>3 fields on VectiNet's portal:<br/>device id · verdict · paste box"]
+    DASHB["<b>vl_bridge_dash.h</b><br/>vecti::DashLicenseCard<br/>3 VectiDash cards:<br/>Status · QrCode · Textarea"]
+    SERB["<b>vl_bridge_serial.h</b><br/>licenseSerialCommand()<br/>console commands:<br/>license · license id · license &lt;blob&gt;"]
+  end
+
+  FAC["<b>vl_bridge.h</b> — vecti::License<br/>one-slot inbox + cached device id + verdict<br/><i>this is the half that IS compiled and tested</i>"]
+
+  OUT["<b>vl_bridge_ota.h</b><br/>licenseGateOta()<br/>allowFirmwareUpdates(lic.ok())"]
+
+  NETB -->|"submit()"| FAC
+  DASHB -->|"submit()"| FAC
+  SERB -->|"submit()"| FAC
+  FAC -->|"pump() → vl_verify()"| OUT
+```
+
+**The flagship path is VectiNet's captive portal**: the operator joins the
+device's own SoftAP from a phone, the portal pops up, and activation happens
+*before the device has ever joined a network*. A sealed box, no internet, no app.
+`portal.attach()` must run before `VectiNet.begin()`, which is when VectiNet
+freezes the parameter form.
+
+VectiDash's `QrCode` card runs the other direction: it renders the 26-character
+device id on-device so the customer photographs it instead of transcribing it.
+
+### Why `submit()` and `pump()` are two calls
+
+This is the same threading rule as everywhere else in this document, with a
+sharper edge:
+
+| Where a blob arrives | Task | What must happen |
+|---|---|---|
+| VectiNet portal POST | **AsyncTCP** | queue only |
+| `VectiSerial::onMessage` | **AsyncTCP** | queue only |
+| `DashCardBase::onChange` | `loop()` | could verify directly — goes through the queue anyway, so there is one story rather than two |
+
+`vl_verify()` on an ESP32 is tens of milliseconds of Ed25519 (an estimate — it
+has never been run on one) and wants ~5 KB of stack; `blob_store()` is a blocking
+NVS flash erase. Doing either on the AsyncTCP task starves every other socket on
+the device. So `submit()` `memcpy`s into **one** slot and sets a flag, and
+`pump()` — on the loop task — does the verify and the store. One slot, one
+writer: while a blob is pending, `submit()` returns `false` rather than
+overwriting a buffer `pump()` may be reading.
+
+### What the layer does not do
+
+It has no shared state with the other four, no lock, and nothing to reap. It
+also cannot save you from firmware patching — see
+[Licensing](#-licensing) at the end of this document, and
+`libraries/VectiLicense/docs/THREAT_MODEL.md` for the long version.
+
+One architectural constraint worth writing down before your first shipment: the
+HAL's **identity segments are part of the on-wire format**. They are hashed in
+order with a one-byte length prefix, so adding, removing or reordering one
+changes every device id and invalidates every licence already issued. Freeze
+them the way you would freeze a `DashType` enumerator.
+
+---
+
 ## 📏 Footprint
 
 Measured on the combined demo (`demo/src/main.cpp`) exercising all four
@@ -535,6 +653,21 @@ libraries at once — ESP32-S3-DevKitC-1, 8 MB flash, 2 MB PSRAM,
 
 Of that flash, 125,993 bytes (≈126 kB) is the four embedded UI blobs. They cost **no RAM**: the
 bytes are served straight out of PROGMEM.
+
+VectiLicense is not in that demo and has never been built for an ESP32. Its cost
+was measured with `arm-none-eabi-gcc 15.2.0 -Os -ffreestanding`:
+
+| | Cortex-M4 | Cortex-M0+ |
+|---|---:|---:|
+| `core/` text | 9,195 B | 9,319 B |
+| `.data` + `.bss` | **0 B** | **0 B** |
+| deepest stack chain (`-fstack-usage`) | — | 4,376 B |
+
+The chain is `vl_verify` 264 → `vl_ed25519_verify` 2,544 → `scalarmult` 32 →
+`add` 1,184 → `M` 304 → `car25519` 48. Size any task that calls `vl_verify()`
+at ≥5 KB. One verify is 2.8 ms on an Apple M1 Pro at `-O2`; tens of milliseconds
+on a 240 MHz ESP32 and hundreds on a Cortex-M0+ are **estimates, not
+measurements**.
 
 ### What has actually been verified on hardware
 
@@ -556,6 +689,11 @@ USB-Serial/JTAG.
 - The WebSocket dashboard against real hardware.
 - OTA upload / pull / rollback on real hardware.
 - Captive-portal provisioning end to end.
+- **Anything VectiLicense.** It has never been on this board or any board. Its
+  `core/`, `transport/`, `hal/posix`, `hal/none` and `vecti::License` are covered
+  by a 9-case host `ctest` suite plus a compile-only ARM cross-compile.
+  `hal/esp32`, `hal/rp2040`, `hal/stm32`, `hal/nxp` and all four sibling bridges
+  have **never been compiled**.
 
 The device was verified over USB serial only; it was never joined to a LAN.
 
@@ -565,6 +703,11 @@ The device was verified over USB serial only; it was never joined to a LAN.
 |---|---|---|---|---|
 | ESP32 (built + run on ESP32-S3) | ✅ | ✅ | ✅ | ✅ |
 | ESP8266 | code paths exist (BearSSL HMAC, `Updater.h`), declared in `library.json` | not claimed | `#error` at compile time | not claimed |
+
+VectiLicense sits outside that table: `core/` is compile-verified for host clang
+and for `arm-none-eabi-gcc` on Cortex-M4 and Cortex-M0+ with
+`-ffreestanding -nostdinc -Os`, both as `ctest` cases. A board nobody has ported
+means copying `hal/none/` and writing one function.
 
 What is ESP-specific in *our* code: `esp_ota_ops`, NVS `Preferences`, `ESPmDNS`,
 `mbedtls`. ESPAsyncWebServer 3.11.0 itself declares `espressif32, espressif8266,
@@ -581,19 +724,54 @@ Dependency floor: ESPAsyncWebServer `^3.11.0`, AsyncTCP `^3.4.0`, ArduinoJson
 
 VectiSuite's own code is **Apache-2.0** — full text in each repo's `LICENSE`.
 
-It links **ESPAsyncWebServer** and **AsyncTCP**, both **LGPL-3.0**. On an MCU
-there is no dynamic linking, so LGPL §4's relink obligations attach to the
-shipped binary. Do not read "Apache-2.0" as "no copyleft obligations" — the
-honest position is: Apache-2.0 for our code, LGPL-3.0 inherited from the async
-stack. Every competing library in this space inherits exactly the same
-dependency; this is a property of the ecosystem, not a differentiator.
+The four web libraries link **ESPAsyncWebServer** and **AsyncTCP**, both
+**LGPL-3.0**. On an MCU there is no dynamic linking, so LGPL §4's relink
+obligations attach to the shipped binary. Do not read "Apache-2.0" as "no
+copyleft obligations" — the honest position is: Apache-2.0 for our code,
+LGPL-3.0 inherited from the async stack. Every competing library in this space
+inherits exactly the same dependency; this is a property of the ecosystem, not a
+differentiator. **VectiLicense links neither**, so a firmware that uses only it
+inherits no copyleft from this suite; its one vendored dependency is the
+verification half of TweetNaCl, which is public domain.
 
 One more honest note, since it is an architecture decision and not a marketing
 one: **VectiOTA's firmware signing is symmetric HMAC-SHA256.** The key ships
 inside the firmware image. It raises the bar meaningfully against a stolen Wi-Fi
 password, and it does nothing against someone who can read your flash.
-Asymmetric signing (Ed25519) is a known future improvement, not a shipped
-feature.
+Asymmetric signing of firmware *images* is a known future improvement, not a
+shipped feature — and **VectiLicense is not it.** VectiLicense is asymmetric, but
+it signs licences, not images. Two different problems, two different keys.
+
+### And the honest limit of the licensing layer
+
+An attacker who can rewrite the firmware can patch out the branch that reads
+`vl_verify()`'s result:
+
+```c
+if (vl_verify(blob, &CFG, hal, &lic) == VL_OK) {
+    unlock();          /*  ← patch the branch, NOP the call, flip the compare */
+}
+```
+
+That is not a weakness in Ed25519 or in the implementation. It is what "the
+attacker owns the hardware" means, and it is true of every software licensing
+scheme ever written. **Nothing in this repository is described as unbreakable,
+uncrackable or military-grade, because none of those would be true.**
+
+What the asymmetric design structurally eliminates is the **keygen**. A symmetric
+scheme verifies by recomputing, so the value that checks a licence is the value
+that mints one — and it has to ship in every firmware image. One flash dump then
+produces a universal code generator for the whole product line. Here the private
+key never enters the firmware, so there is nothing to extract: a flash dump
+yields a public key.
+
+The only real mitigation for firmware patching is a hardware root of trust — on
+ESP32, **Secure Boot v2 + Flash Encryption**, which moves trust into eFuses.
+`vl_posture()` reports whether the platform has one and deliberately never
+enforces; deciding that an unprotected device should not honour a licence is the
+integrator's call. The long version is
+`libraries/VectiLicense/docs/THREAT_MODEL.md`, and it is the most important file
+in that repository.
 
 ---
 
@@ -602,6 +780,9 @@ feature.
 - [WIRE-PROTOCOL.md](WIRE-PROTOCOL.md) — every endpoint, frame and event.
 - [WIDGETS.md](WIDGETS.md) — all 50 `DashType` types with payload formats.
 - `ui/shared/widgets/CONTRACT.md` — how to write a new widget.
+- `libraries/VectiLicense/docs/THREAT_MODEL.md` — what licensing defends against
+  and what it cannot. Read before quoting any security claim.
+- `libraries/VectiLicense/docs/PORTING.md` — a new MCU HAL in under an hour.
 
 ---
 

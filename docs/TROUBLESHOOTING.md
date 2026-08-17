@@ -11,6 +11,12 @@ For *technique* — reading the log, running a heap soak, decoding a crash — s
 > on a LAN. The causes below are read off the source and the wire format; if one of them
 > is wrong, it is wrong because the path was never run, not because it was measured
 > differently. File an issue.
+>
+> **VectiLicense has never run on a board at all.** Its `core/` is covered by a 9-case
+> host `ctest` suite — including a sweep that flips all 800 bits of a valid blob and
+> asserts every one is refused — so the *status codes* below are reliable. The ESP32 HAL
+> and all four VectiSuite bridges have never been compiled, so anything in the licensing
+> table below that involves hardware identity or a bridge is read off the source.
 
 ---
 
@@ -35,6 +41,11 @@ pio device monitor -b 115200             # from demo/
 
 If step 1 is a connection refused and step 3 is silent too, jump to
 [DEBUGGING.md → my device is unreachable](DEBUGGING.md#-decision-tree-my-device-is-unreachable).
+
+**Licensing has no HTTP surface to curl** — VectiLicense mounts no route and makes no
+network call, so triage starts on the serial log with the status code and the device id.
+That procedure is
+[DEBUGGING.md → debugging an activation failure](DEBUGGING.md#-debugging-an-activation-failure).
 
 ---
 
@@ -93,7 +104,7 @@ curl -N http://$DEV/ota/events            # leave running in another terminal
 | Upload succeeds, device reboots into the **old** image | `rollback-watchdog` on the SSE stream | The new firmware never called `VectiOTA.commit()` inside `setRollbackTimeoutMs()`, so the bootloader reverted | This is the feature working. Call `commit()` after a real self-test. The demo waits for 20 s uptime **and** `WiFi.status() == WL_CONNECTED` first. |
 | Upload succeeds, device reboots into the old image, **no** rollback event | You uploaded in filesystem mode | `mode` defaults to `firmware`; `?mode=filesystem` lands in the SPIFFS/LittleFS partition | Check the `start:` event — it names the content type for the mode that ran. |
 | Upload succeeds, device never reboots | An `onBeforeReboot` callback returned `false` | That suppresses the automatic reboot on purpose | Return `true`, or reboot yourself once your shutdown finishes. |
-| `/ota/info` shows `"slotState": "pending"` long after boot | The rollback watchdog is armed and waiting | Normal between a fresh OTA boot and `commit()`. If it stays pending with no timeout set, `setRollbackTimeoutMs(0)` means "never revert" — the slot just never gets marked valid. |
+| `/ota/info` shows `"slotState": "pending"` long after boot | The rollback watchdog is armed and waiting | Normal between a fresh OTA boot and `commit()` | Call `commit()` once your self-test passes. With `setRollbackTimeoutMs(0)` ("never revert") the slot is never marked valid on its own. |
 | `/ota/rollback` returns `409` | `rollback-unavailable` | There is no other valid slot to go back to (e.g. serially-flashed build) | Expected. Nothing to revert to. |
 
 **Signing a firmware image** (symmetric HMAC-SHA256 — see the caveat at the bottom):
@@ -153,6 +164,54 @@ Filesystem image instead: `curl -f -F "fs=@littlefs.bin" 'http://$DEV/ota/upload
 | `<script>` inside `setCustomHtml()` never runs | Deliberate — the snippet is injected as markup | The only live part is `<span id="dash-<id>-out">`, which the runtime fills from `setValue()`. Everything else is inert. |
 | Cards jump between tabs / reorder unexpectedly after a runtime change | Layout frame is stale | `VectiDash.refreshLayout()` after adding or reconfiguring cards. |
 
+## 🔑 Licensing (VectiLicense)
+
+**Start with the status code.** `vl_verify()` never fails vaguely — every rejection names
+exactly one cause, and `vl_status_str(st)` prints it. If your firmware logs only
+"unlicensed", fix that first; it is the difference between a support ticket and a
+two-minute answer.
+
+```c
+vl_status_t st = vl_verify(blob, &CFG, hal, &lic);
+if (st != VL_OK) log_warn("licence refused: %s (%d)", vl_status_str(st), (int)st);
+```
+
+| Symptom / status | Likely cause | Fix / diagnostic |
+|---|---|---|
+| Blob rejected, `VL_ERR_BAD_FORMAT` (−3) | Truncated paste, an extra character, a `U` (not in the Crockford alphabet), or a smart quote from a word processor | 160 significant characters. `-`, space, tab, CR and LF are ignored anywhere, and case does not matter, so a copy from an email with line breaks is fine as-is. Count what actually arrived before blaming the key. |
+| Blob rejected, `VL_ERR_BAD_MAGIC` (−4) | Not a licence at all — the customer pasted a Wi-Fi password, an OTA token, or the device id back at you | `vl_mint.py inspect <blob>` says so in one line. |
+| **Every** licence rejected with `VL_ERR_BAD_SIGNATURE` (−8), including ones you just minted | **The wrong vendor key is in the build.** Most often the shipped placeholder public key — its private half was generated in memory and discarded, so nothing can ever sign for it | Paste your own from `vl_mint.py keygen`. Confirm the key in firmware matches the key file you minted with: `vl_mint.py inspect <blob> --pubkey vendor.key`. If that says VALID and the device still says −8, the firmware has a different key. |
+| `VL_ERR_UNKNOWN_KEY` (−7) | The `key_id` in the payload is not in `CFG.keys` — you rotated the key out too early, or the firmware predates it | Ship both keys for at least one release before you start signing with the new one. Dropping the old `key_id` retires every licence signed with it, deliberately or by accident. |
+| `VL_ERR_BAD_FAMILY` (−6) | Right customer, wrong SKU. Refused **before any crypto runs** | Check `--family` on the mint command against `CFG.family`. |
+| `VL_ERR_DEVICE_MISMATCH` (−9) | The blob was minted for a different device id | Three real causes, in order of likelihood: a transcription error in the 26 characters; a genuinely copied licence; **or the board was repaired.** An eFuse MAC, a swapped flash chip or a replaced MCU changes the fingerprint and legitimately invalidates the licence. Re-issue for the new device id. |
+| `VL_ERR_DEVICE_MISMATCH` on **every** device after a firmware update | The HAL's identity segments changed | The segment set and its order are part of the on-wire format — they are hashed in sequence with a one-byte length prefix. Adding, removing or reordering one invalidates every licence in the field. Revert the HAL change, or re-issue the fleet. |
+| `VL_ERR_EXPIRED` (−11) or `VL_ERR_NOT_YET_VALID` (−10) on a device that should be fine | The clock is wrong, not the licence | Print `hal->now_epoch`'s value next to the licence's `not_before`/`not_after`. An unsynced SNTP clock reads as 1970 → `NOT_YET_VALID`; a wildly future clock reads as `EXPIRED`. |
+| Expired licence quietly keeps working | **This is documented behaviour, not a bug.** With `hal->now_epoch` NULL the window is not enforced, `vl_verify()` returns `VL_OK`, and `VL_CHECKED_TIME` stays clear in `lic.checked` | Read the bit: `if (lic.not_after && !(lic.checked & VL_CHECKED_TIME))`. Or set `VL_FLAG_REQUIRE_CLOCK` and get `VL_ERR_NO_CLOCK` instead. A device with no RTC would otherwise have to reject every time-limited licence ever issued to it. |
+| `VL_ERR_NO_CLOCK` (−14) | You set `VL_FLAG_REQUIRE_CLOCK` on a board whose HAL has no `now_epoch` | Either supply a clock or drop the flag. There is no middle setting. |
+| `VL_ERR_CLOCK_ROLLBACK` (−13) | `now` is below the stored high-water mark. Someone set the clock back — **or the RTC battery died** | The second is far more common in the field. `VL_FLAG_ENFORCE_HWM` is opt-in precisely because it can strand a unit this way. Clearing the mark means clearing whatever `hwm_store` wrote. |
+| `VL_ERR_INVALID_ARG` (−1) right after enabling rollback protection | `VL_FLAG_ENFORCE_HWM` needs **all three** of `now_epoch`, `hwm_load` and `hwm_store` | Deliberate: it refuses rather than silently downgrading to no protection. A mark with no clock to compare against is not weaker rollback protection, it is none. |
+| `VL_ERR_PLATFORM` (−15) | A HAL callback failed — the hardware could not answer | **Never treat this as "unlicensed" without logging it.** Dump the device id (`vl_compute_fingerprint()` alone) to see whether identity reads at all. On ESP32 the three segments are the eFuse MAC, the chip info, and the SPI flash JEDEC id; a stuck flash bus (`0x000000` / `0xFFFFFF`) returns this. |
+| `VL_ERR_NOT_FOUND` (−17) at boot | `blob_load` found nothing stored. That is "never activated" | Not an error worth logging as one. Show the activation prompt. |
+| `VL_ERR_REVOKED` (−12) | The serial is on your compiled-in deny-list | Check your own records before telling the customer. Revocation is checked **after** the signature and device binding, so a `−12` means the licence was otherwise genuine. |
+| **"Works on my bench device but not the customer's"** | Almost always a device-id problem, not a key problem | Reproduce it in this order: (1) does the customer's device id match what you minted for? Get them to read it back. (2) `vl_mint.py inspect <blob>` — does the decoded `device id` field match theirs? (3) same `family`? (4) same `key_id`, and is that key in the firmware **they** are running? Bench units often run a newer build with a newer key. |
+| Same blob accepted on two different devices | The fingerprint is not unique — the classic cause is a HAL whose `read_id_segment` returns a **constant** | Never "fix" `hal/none` by returning fixed bytes; it fails closed on purpose. Also check you are on a real per-device identity source: an eFuse/UID/OTP value, not a config file, a build-time constant, or a random number stored in plain flash. |
+| **Chunked activation never completes** (CAN / ISO-TP / BLE GATT): `vl_chunk_complete()` keeps returning `VL_ERR_NOT_FOUND` (−17) | At least one chunk index has genuinely never arrived. "Complete" means every index `0..expect-1` was *individually* seen — receiving the right **number** of chunks is not enough, and the same chunk twice does not fill in for its missing neighbour | Log `c.have` against `c.expect` and dump the `seen` bitmap. A sender that stops one frame early, or that reuses a `seq`, produces exactly this. Duplicates and out-of-order arrival are fine by design. |
+| Chunks are being fed but rejected: `vl_chunk_feed()` returns `VL_ERR_BAD_FORMAT` (−3) | Three causes, all framing: `seq` is past the end of the message; the length is wrong **for that seq** — chunk `seq` occupies bytes `[seq*chunk_size …]`, so every chunk except the last must be *exactly* `chunk_size` bytes, not merely ≤ it; or a duplicate arrived whose bytes differ from the copy already held (the earlier copy is kept) | A CAN frame with a short DLC in the middle of the message is the classic. Check the return of *every* `feed()`, not just `complete()` — a rejected chunk changes nothing and is otherwise silent. |
+| `vl_chunk_feed()` / `vl_chunk_complete()` return `VL_ERR_INVALID_ARG` (−1) from the very first frame | `vl_chunk_reset()` was never called, or it failed and left the state **disarmed** on purpose so nothing reassembles into a half-configured buffer | `chunk_size` must be ≥1 and `total_len` must be 1..`VL_CHUNK_MAX_LEN` (default **192**). Pass `VL_BLOB_STR_LEN` (160) as `total_len` — **not** 161; the NUL is not transmitted, `complete()` adds it. Check `reset()`'s return value. |
+| `vl_chunk_complete()` returns `VL_ERR_BUFFER_TOO_SMALL` (−2) | `cap` is less than `total_len + 1` | Size the output with `VL_BLOB_STR_BUF_LEN`. |
+| Chunked activation completes, then `vl_verify()` says `VL_ERR_BAD_FORMAT` | The helper only bounds and orders bytes — it has no opinion on the content, and never validates the alphabet, magic or length | The framing delivered the wrong bytes. Log the `*out_len` `complete()` reported and the first 32 characters; a `seq`-numbering off-by-one shows up here, not in the transport helper. |
+| Activation "hangs" the whole device, or every other socket stalls during it | You called `vl_verify()` on the AsyncTCP task | Tens of milliseconds of Ed25519 and, if `blob_store` writes NVS, a blocking flash erase — on the task servicing every connection. Queue and verify in `loop()`: `vecti::License::submit()` then `pump()`. |
+| Stack overflow / crash inside `vl_verify()` | The calling task's stack is too small | The deepest chain measures **4,376 B** on Cortex-M0+. Give any task that calls it at least 5 KB. |
+| Device id changes between reboots | The identity source is not stable | See [DEBUGGING.md → debugging an activation failure](DEBUGGING.md#-debugging-an-activation-failure) for the check. A fingerprint that moves means no licence can ever hold. |
+| `vl_encode_device_id()` returns `VL_ERR_BUFFER_TOO_SMALL` (−2) | The buffer is 26 bytes, not 27 | Use `VL_DEVICE_ID_STR_BUF_LEN`. Same class of bug for blobs: `VL_BLOB_STR_BUF_LEN` is 161. |
+| Build fails on `hal/esp32`, or on a bridge header | Expected — none of those files has ever been compiled | They are written to documented vendor APIs. Fix the include path; the logic is the part worth reading. Report what you had to change. |
+
+**Two things that are not troubleshooting and are worth saying to a customer instead:**
+a licence refused because the board was repaired is your problem to fix quickly, not
+theirs to prove; and a device that hard-stops on a licensing failure will generate more
+cost in field returns than it ever protects. Fail closed on the crypto, fail open on the
+business policy — nag, degrade or grace.
+
 ## 💥 Stability
 
 | Symptom | Likely cause | Fix / diagnostic |
@@ -168,7 +227,7 @@ Filesystem image instead: `curl -f -F "fs=@littlefs.bin" 'http://$DEV/ota/upload
 
 ---
 
-## ⚖️ Two caveats you should know before you debug the wrong thing
+## ⚖️ Three caveats you should know before you debug the wrong thing
 
 **Licensing.** VectiSuite's own code is Apache-2.0. It links **ESPAsyncWebServer** and
 **AsyncTCP**, which are **LGPL-3.0**. There is no dynamic linking on an MCU, so LGPL §4
@@ -176,16 +235,28 @@ relink obligations attach to the shipped binary. That is the honest position —
 copyleft obligations". Every competing library in this space inherits exactly the same
 dependency.
 
-**Firmware signing is symmetric.** `setSigningKey()` is HMAC-SHA256, and the key ships
-inside the firmware image. It stops someone who has your Wi-Fi password from pushing an
-arbitrary binary; it does **not** survive an attacker who can read your flash. Asymmetric
-signing (Ed25519) is a known future improvement, not a shipped feature.
+**Firmware signing is symmetric.** VectiOTA's `setSigningKey()` is HMAC-SHA256, and the
+key ships inside the firmware image. It stops someone who has your Wi-Fi password from
+pushing an arbitrary binary; it does **not** survive an attacker who can read your flash.
+Asymmetric signing of firmware *images* is a known future improvement, not a shipped
+feature. **VectiLicense is not that feature** — it is asymmetric, but it signs licences,
+not images.
+
+**Licensing is a business control, not a security boundary.** VectiLicense removes the
+*keygen*: the firmware holds only a public key, so a flash dump yields nothing to sign
+with. It cannot stop someone who reflashes the device from patching out the branch that
+reads `vl_verify()`'s result — that is true of every software licensing scheme. Secure
+Boot v2 + Flash Encryption is the only real mitigation, and `vl_posture()` only reports
+whether you have it. Nothing here is uncrackable and this repo does not say it is.
 
 ---
 
 ## 🔗 See also
 
-- [DEBUGGING.md](DEBUGGING.md) — serial log format, heap soak, mock device, PROGMEM decode, crash decoding, OTA bisection
+- [DEBUGGING.md](DEBUGGING.md) — serial log format, heap soak, mock device, PROGMEM decode, crash decoding, OTA bisection, activation-failure debugging
 - [WIRE-PROTOCOL.md](WIRE-PROTOCOL.md) — every frame and endpoint in full
 - `ui/shared/widgets/CONTRACT.md` — the widget prop/value contract
 - Headers carry the API and the threading rules: `libraries/Vecti{OTA,Serial,Net,Dash}/src/*.h`
+  and `libraries/VectiLicense/include/vectilicense/vectilicense.h`
+- `libraries/VectiLicense/docs/{API,INTEGRATION,PORTING,THREAT_MODEL}.md` — every status
+  code, every delivery path, and the honest limits

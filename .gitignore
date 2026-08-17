@@ -11,8 +11,3 @@ demo/build/
 .claude/
 ui/node_modules/
 ui/dist/
-
-# Not part of VectiSuite: a separate product with its own git remote that
-# happens to sit under libraries/. Excluded so it can never be swept into a
-# commit here by `git add -A`.
-libraries/cblicense/

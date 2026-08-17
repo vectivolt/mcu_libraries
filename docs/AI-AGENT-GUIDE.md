@@ -1,11 +1,19 @@
 # VectiSuite — the AI agent's reference 🤖
 
-Everything an agent needs to write **compiling, correct** ESP32 firmware against
-VectiOTA, VectiSerial, VectiNet and VectiDash on the first attempt. Every
-signature here was transcribed from the headers in
-`libraries/Vecti{OTA,Serial,Net,Dash}/src/*.h`; every endpoint from the matching
-`.cpp`. Where this file and your prior knowledge disagree, this file is right —
-and where this file and the headers disagree, **the headers are right**.
+Everything an agent needs to write **compiling, correct** firmware against
+VectiOTA, VectiSerial, VectiNet, VectiDash and VectiLicense on the first
+attempt. Every signature here was transcribed from the headers in
+`libraries/Vecti{OTA,Serial,Net,Dash}/src/*.h` and
+`libraries/VectiLicense/include/vectilicense/vectilicense.h`; every endpoint
+from the matching `.cpp`. Where this file and your prior knowledge disagree,
+this file is right — and where this file and the headers disagree, **the headers
+are right**.
+
+The first four are ESP32 Arduino libraries that share one `AsyncWebServer`. The
+fifth, **VectiLicense**, is a freestanding C99 library with no server, no routes
+and no network: it verifies Ed25519 licence blobs locally. It has one rule that
+overrides everything else in this document — [the device verifies and never
+mints](#-vectilicense--the-rule-the-api-and-the-hal).
 
 Short version for a busy agent: [`../AGENTS.md`](../AGENTS.md).
 Flat digest: [`../llms.txt`](../llms.txt).
@@ -24,17 +32,23 @@ flowchart TD
     D -->|yes| NET[VectiNet<br/>/wifi]
     A --> E{Show live values, or let<br/>someone press/drag controls?}
     E -->|yes| DASH[VectiDash<br/>/dash]
+    A --> F{Unlock paid features<br/>per unit, offline?}
+    F -->|yes| LIC[VectiLicense<br/>no routes · no network]
 
     OTA --> Z[All four mount on ONE<br/>AsyncWebServer. Combining<br/>them is the normal case.]
     SER --> Z
     NET --> Z
     DASH --> Z
+    LIC --> Y["Mounts nothing. Composes with<br/>any of the four, or with none —<br/>the core has no ESP32 in it."]
 ```
 
 Reach for a **plain `AsyncWebServer` handler** instead when you need a bespoke
 JSON API, a file upload that is not firmware, or a page these four do not draw.
 None of the libraries prevents that — just do not mount it on `/`, `/ota*`,
 `/serial*`, `/wifi*` or `/dash*`.
+
+Do **not** reach for VectiLicense to sign firmware images — that is VectiOTA's
+`setSigningKey()`, and it is symmetric HMAC. VectiLicense signs *licences*.
 
 ---
 
@@ -63,6 +77,14 @@ lib_deps =
 | **ArduinoJson `^7.4.0`** | Required by VectiOTA, VectiNet, VectiDash. VectiSerial deliberately has no JSON dependency — it hand-rolls its frames. |
 | **The demo builds on arduino-esp32 2.0.17 / platform espressif32 6.13.0** | That is the combination that was actually built and flashed. |
 | `lib_ignore = AsyncTCP_RP2040W, ESPAsyncTCP` | If a global PlatformIO library store holds RP2040/ESP8266 async TCP ports, the dependency finder pulls one in and fails on an `#error` meant for another board. |
+| **VectiLicense needs none of the three** | Not ESPAsyncWebServer, not AsyncTCP, not ArduinoJson — not even `<string.h>`, which is a hosted header, so `core/` declares the three functions it calls (`memcpy`, `memset`, `memcmp`) itself. Your runtime must still provide those symbols; every bare-metal runtime does. Do not add dependencies to a licensing-only sketch. |
+
+Add the fifth submodule the same way as the others:
+
+```ini
+lib_deps =
+    https://github.com/vectivolt/VectiLicense.git
+```
 
 ### Platform support — be precise
 
@@ -77,6 +99,21 @@ What is ESP-specific in *this* code: `esp_ota_ops`, NVS `Preferences`,
 `ESPmDNS`, `mbedtls`. ESPAsyncWebServer itself declares `espressif32,
 espressif8266, raspberrypi, libretiny`, so the web layer ports further than
 these libraries currently do.
+
+VectiLicense is on a different axis entirely — say so precisely, because the
+gap between "portable" and "tested" is wide here:
+
+| VectiLicense layer | Portable to | Actually built? |
+|---|---|---|
+| `core/` — Ed25519 verify, SHA-256/512, base32, parse, constant-time compare | any conforming C99 target | ✅ **compile-verified and tested.** Host clang with `-Wall -Wextra -Werror -Wpedantic -Wconversion`; `arm-none-eabi-gcc` for Cortex-M4 and M0+ with `-ffreestanding -nostdinc -Os`, both as `ctest` cases |
+| `hal/posix` (Linux, Pi, macOS), `hal/none` (the stub to fill in) | POSIX hosts / anything | ✅ compiled and exercised by the test suite |
+| `transport/` — CAN/BLE chunk reassembly, UART line framing | anything moving 160 chars | ✅ compile-verified, tested, cross-compiled |
+| `bridge/vl_bridge.h` — `vecti::License` | any C++11, no Arduino | ✅ compiled and tested on the host |
+| `hal/esp32`, `hal/rp2040`, `hal/stm32`, `hal/nxp` | those families | ❌ **never compiled, never run.** Written to each vendor's documented API |
+| `bridge/vl_bridge_{net,dash,serial,ota}.h` | Arduino/ESP32 | ❌ **never compiled against the real sibling libraries.** Each is behind `__has_include`, which is exactly why nothing has ever type-checked them |
+
+Never state or imply that the ESP32 HAL or any bridge is tested. Tell the user
+to expect an include-path fix on the first build.
 
 ### Measured footprint
 
@@ -135,6 +172,323 @@ volatile bool rebootRequested = false;
 // in the callback:  rebootRequested = true;
 // in loop():        if (rebootRequested) ESP.restart();
 ```
+
+`vl_verify()` obeys the same rule for a different reason: it is tens of
+milliseconds of Ed25519 on an ESP32 and wants ~5 KB of stack. Running it on the
+AsyncTCP task starves every other socket, and a `blob_store()` NVS write there
+is a blocking flash erase on the task servicing them. Queue on the callback,
+verify in `loop()`.
+
+---
+
+## 🔑 VectiLicense — the rule, the API and the HAL
+
+`libraries/VectiLicense/include/vectilicense/vectilicense.h` is the entire
+public surface. C99, `extern "C"`-guarded, links into C and C++ alike. Nothing
+allocates, recurses, blocks or touches a file, and `core/` has no writable
+static state at all.
+
+### The rule that overrides everything else
+
+**The device verifies. It never mints, and it structurally cannot.**
+
+The firmware embeds a 32-byte Ed25519 **public** key. The private key lives in
+one file on the vendor's machine —
+`libraries/VectiLicense/tools/vl_mint.py` — and never ships. There is **no
+signing function anywhere in the device build**: it was deleted from the
+vendored Ed25519, not disabled.
+
+If a user asks for on-device licence generation, self-activation, or a
+"licensing server call", the correct answer is that none of those exist by
+design, and explaining why is the useful reply:
+
+| Never generate this | Why |
+|---|---|
+| A private key, seed, or signing routine in firmware | That recreates the keygen this library exists to remove. The previous symmetric design shipped the minting secret in every image; one flash dump unlocked every unit the vendor would ever sell. |
+| An HTTP / MQTT call to an activation endpoint | There is none. No server, no endpoint, no protocol. `vl_verify()` is pure local computation and needs no network, ever. |
+| `if (vl_verify(...)) unlock();` | Every failure is **negative**, therefore truthy. That unlocks the product on every rejection. Compare against `VL_OK`. |
+| An all-zero placeholder public key | 32 zero bytes are a valid **low-order** curve point, and a signature against a low-order key can be forged with no private key at all. `core/` rejects such keys outright so it fails closed — but write it as a real point, from `vl_mint.py keygen`, so it fails closed for the right reason. |
+
+### The functions — all of them
+
+```c
+#include "vectilicense/vectilicense.h"
+
+vl_status_t vl_verify(const char *blob,
+                      const vl_config_t *cfg,
+                      const vl_hal_t *hal,
+                      vl_license_t *out);
+
+vl_status_t vl_compute_fingerprint(const vl_hal_t *hal,
+                                   uint8_t out_fingerprint[VL_FINGERPRINT_LEN]);
+
+vl_status_t vl_encode_device_id(const uint8_t fingerprint[VL_FINGERPRINT_LEN],
+                                char *out, size_t out_capacity);
+
+int         vl_has_feature(const vl_license_t *lic, unsigned bit);   /* 0..31 */
+
+vl_status_t vl_posture(const vl_hal_t *hal, vl_posture_t *out);
+
+const char *vl_status_str(vl_status_t status);   /* never NULL, for any int */
+const char *vl_version_str(void);                /* "vectilicense/1.0.0" */
+```
+
+| Function | Contract |
+|---|---|
+| `vl_verify` | The whole library. `out` may be NULL if you only want the verdict. On **any** failure `*out` is zeroed, so a caller who ignores the return code sees no features rather than stale ones. Returns `VL_OK` only when every *applicable* check passed. |
+| `vl_compute_fingerprint` | `SHA-256("vectilicense:fingerprint:v1" ‖ (len_u8 ‖ segment)*)` over every segment the HAL yields, in order. `VL_ERR_PLATFORM` if the HAL yields none. `vl_verify()` calls it itself; you call it to show the customer their id. |
+| `vl_encode_device_id` | First 16 bytes of a fingerprint → 26 Crockford-base32 characters. `out_capacity` must be ≥ `VL_DEVICE_ID_STR_BUF_LEN` (27) or `VL_ERR_BUFFER_TOO_SMALL`. |
+| `vl_has_feature` | No error return by design: returns 0 for NULL, for `bit > 31`, and for a clear bit. An unreadable licence has no features. |
+| `vl_posture` | **Reports, never enforces.** Fails soft: a NULL `hal`, or a HAL with no `secure_posture`, gives `VL_POSTURE_UNKNOWN` in both fields and returns `VL_OK`. `VL_ERR_INVALID_ARG` only for a NULL `out`. |
+| `vl_status_str` | Never returns NULL — not for a valid code, not for a garbage int. Safe directly inside a log format string. |
+
+### The HAL — one struct, one required member
+
+```c
+typedef struct vl_hal {
+    /* REQUIRED. Enumerate hardware identity segments, idx 0..n-1.
+     * Write at most `cap` bytes to `out` and set *out_len.
+     * Return VL_ERR_NO_MORE_SEGMENTS to end the list. */
+    vl_status_t (*read_id_segment)(void *ctx, uint32_t idx,
+                                   uint8_t *out, size_t cap, size_t *out_len);
+
+    /* OPTIONAL. Wall-clock epoch seconds. NULL => validity windows are not
+     * enforced and vl_verify reports that it could not check them. */
+    vl_status_t (*now_epoch)(void *ctx, uint32_t *out_epoch);
+
+    /* OPTIONAL. Monotonic high-water mark, to blunt clock rollback.
+     * Both NULL or both set. */
+    vl_status_t (*hwm_load)(void *ctx, uint32_t *out);
+    vl_status_t (*hwm_store)(void *ctx, uint32_t value);
+
+    /* OPTIONAL. Persist the activated licence blob. NULL => caller stores it. */
+    vl_status_t (*blob_load)(void *ctx, char *out, size_t cap, size_t *out_len);
+    vl_status_t (*blob_store)(void *ctx, const char *blob, size_t len);
+
+    /* OPTIONAL. Platform security posture, for reporting only. */
+    vl_status_t (*secure_posture)(void *ctx, vl_posture_t *out);
+
+    void *ctx;
+} vl_hal_t;
+```
+
+**Only `read_id_segment` is required.** The core behaves correctly in all 64
+combinations of the optional members being NULL, and there is a test matrix
+asserting exactly that. Callbacks must not allocate and must not block
+indefinitely; anything other than `VL_OK` (or the documented sentinel) is a hard
+failure and `vl_verify()` fails closed.
+
+Four things agents get wrong about the HAL:
+
+- **`vl_verify()` never calls `blob_load` or `blob_store`.** It is handed a
+  blob; storage is the application's business. They live in the struct so the
+  bridges and examples have one place to find them.
+- **Segments are hashed in order with a one-byte length prefix**, so `{"AB","C"}`
+  and `{"A","BC"}` differ. The set *and* the order are part of the on-wire
+  format: changing either invalidates every licence already issued. Freeze them
+  before the first shipment.
+- **`VL_FLAG_ENFORCE_HWM` needs all three of `now_epoch`, `hwm_load`,
+  `hwm_store`.** Setting it without them is `VL_ERR_INVALID_ARG`, never a silent
+  downgrade — a mark with no clock to compare against is not weaker rollback
+  protection, it is none.
+- **`hal/none` fails on purpose.** Its `read_id_segment` returns
+  `VL_ERR_PLATFORM` so you find out at bring-up. Never "fix" it by returning a
+  constant: that gives every unit the same fingerprint, so one licence unlocks
+  the whole production run and no licence is ever revocable — and it fails
+  *silently*, all the way to the customer.
+
+Ready-made HALs live in `libraries/VectiLicense/hal/`, each exposing a factory:
+
+| Header | Factory | Identity it reads | Built? |
+|---|---|---|---|
+| `hal/esp32/vl_hal_esp32.h` | `const vl_hal_t *vl_hal_esp32(void)` | eFuse base MAC + chip model/cores/revision/features + SPI flash JEDEC id; NVS storage; Secure Boot posture | ❌ never |
+| `hal/rp2040/vl_hal_rp2040.h` | `vl_hal_rp2040()` | QSPI flash chip unique id | ❌ never |
+| `hal/stm32/vl_hal_stm32.h` | `vl_hal_stm32()` | 96-bit factory UID | ❌ never |
+| `hal/nxp/vl_hal_nxp.h` | `vl_hal_nxp()` | Kinetis `SIM->UIDx`, or i.MX RT OCOTP | ❌ never |
+| `hal/posix/vl_hal_posix.h` | `vl_hal_posix(const char *iface, const char *state_path)` | interface MAC + `/etc/machine-id` — **weak**, a cloned image with a spoofed MAC reproduces it | ✅ tested |
+| `hal/none/vl_hal_none.h` | `vl_hal_none()` | nothing; fails closed | ✅ tested |
+
+Porting a new board is copying `hal/none/` and writing one function. The
+walkthrough is `libraries/VectiLicense/docs/PORTING.md`.
+
+### Config and result
+
+```c
+typedef struct { uint8_t key_id; uint8_t key[VL_PUBKEY_LEN]; } vl_pubkey_t;
+
+typedef struct {
+    const vl_pubkey_t *keys;
+    size_t             key_count;
+    uint8_t            family;
+    const uint32_t    *revoked_serials;
+    size_t             revoked_count;
+    uint32_t           flags;      /* VL_FLAG_REQUIRE_CLOCK | VL_FLAG_ENFORCE_HWM */
+} vl_config_t;
+
+typedef struct {
+    uint8_t  version, key_id, family;
+    uint32_t features;
+    uint8_t  device_id[VL_DEVICE_ID_LEN];
+    uint32_t not_before, not_after, serial;
+    uint32_t checked;              /* VL_CHECKED_* bitmask */
+} vl_license_t;
+
+typedef enum { VL_POSTURE_UNKNOWN = 0, VL_POSTURE_OFF = 1, VL_POSTURE_ON = 2 }
+    vl_posture_state_t;
+typedef struct { vl_posture_state_t secure_boot, flash_encryption; } vl_posture_t;
+```
+
+Build **one `const vl_config_t`** and pass its address; it is never written to.
+Carrying more than one key is how rotation works — `key_id` in the payload
+selects. `revoked_serials = NULL` **or** `revoked_count = 0` disables the
+revocation check, and `VL_CHECKED_REVOCATION` then stays clear so a caller can
+tell "not revoked" from "not checked".
+
+**`checked` is the field agents forget.** `VL_OK` means every *applicable* check
+passed; `checked` says which were applicable.
+
+| Bit | Set when |
+|---|---|
+| `VL_CHECKED_SIGNATURE` | always, on `VL_OK` |
+| `VL_CHECKED_DEVICE` | always, on `VL_OK` |
+| `VL_CHECKED_TIME` | the HAL had a clock and the window was enforced |
+| `VL_CHECKED_REVOCATION` | a non-empty deny-list was configured and consulted |
+| `VL_CHECKED_HWM` | `VL_FLAG_ENFORCE_HWM` was set |
+
+With no `now_epoch`, `vl_verify()` returns **`VL_OK` for an expired licence** and
+leaves `VL_CHECKED_TIME` clear. That is the documented contract, not a bug — a
+device with no RTC would otherwise reject every time-limited licence it was ever
+issued. If expiry matters, read the bit or set `VL_FLAG_REQUIRE_CLOCK`.
+
+```c
+if (st == VL_OK && lic.not_after != 0u && !(lic.checked & VL_CHECKED_TIME)) {
+    /* This licence has an expiry that nobody enforced. Decide what that means. */
+}
+```
+
+### Status codes
+
+`VL_OK` is 0. **Every failure is negative**, and no function in this library
+returns `VL_OK` on any error path.
+
+| Code | Value | Usually means |
+|---|---:|---|
+| `VL_ERR_INVALID_ARG` | −1 | a bug in your integration, not a bad licence |
+| `VL_ERR_BUFFER_TOO_SMALL` | −2 | you passed fewer than `VL_DEVICE_ID_STR_BUF_LEN` bytes |
+| `VL_ERR_BAD_FORMAT` | −3 | truncated paste, extra characters, a `U`, a smart quote |
+| `VL_ERR_BAD_MAGIC` | −4 | the customer pasted something that is not a licence |
+| `VL_ERR_BAD_VERSION` | −5 | minted by a newer tool; upgrade the firmware |
+| `VL_ERR_BAD_FAMILY` | −6 | right customer, wrong SKU |
+| `VL_ERR_UNKNOWN_KEY` | −7 | key rotated out, or firmware predates the key |
+| `VL_ERR_BAD_SIGNATURE` | −8 | forgery, corruption, **or the wrong vendor key in the build** |
+| `VL_ERR_DEVICE_MISMATCH` | −9 | a copied licence — or a repaired board whose identity changed |
+| `VL_ERR_NOT_YET_VALID` | −10 | clock is wrong, or the licence starts later |
+| `VL_ERR_EXPIRED` | −11 | genuinely expired, or the clock is wrong |
+| `VL_ERR_REVOKED` | −12 | on the compiled-in deny-list |
+| `VL_ERR_CLOCK_ROLLBACK` | −13 | clock moved backwards; also what a dead RTC battery looks like |
+| `VL_ERR_NO_CLOCK` | −14 | `VL_FLAG_REQUIRE_CLOCK` on a board with no `now_epoch` |
+| `VL_ERR_PLATFORM` | −15 | a HAL callback failed. **Never treat as "unlicensed" without logging it** |
+| `VL_ERR_NO_MORE_SEGMENTS` | −16 | HAL sentinel; never reaches the application |
+| `VL_ERR_NOT_FOUND` | −17 | `blob_load`: never activated. Not worth logging as an error |
+| `VL_ERR_INTERNAL` | −18 | an invariant broke; report it |
+
+### The blob, and what `vl_verify` does with it
+
+100 binary bytes → 160 Crockford-base32 characters.
+
+| Offset | Size | Field |
+|---|---|---|
+| 0 | 1 | `magic` — `VL_MAGIC` = `0x56` (`'V'`) |
+| 1 | 1 | `version` — `VL_FORMAT_VERSION` = `0x01` |
+| 2 | 1 | `key_id` — selects among the embedded public keys |
+| 3 | 1 | `family` — product line |
+| 4 | 4 | `features` — little-endian u32 bitmap |
+| 8 | 16 | `device_id` — first `VL_DEVICE_ID_LEN` bytes of the fingerprint |
+| 24 | 4 | `not_before` — LE epoch seconds, `0` = unbounded |
+| 28 | 4 | `not_after` — LE epoch seconds, `0` = perpetual |
+| 32 | 4 | `serial` |
+| 36 | 64 | `signature` — Ed25519 over `"vectilicense:v1" ‖ 0x00 ‖ payload[0..35]` |
+
+`-`, space, tab, CR and LF may appear anywhere as grouping and are ignored; the
+input is case-insensitive and the Crockford aliases `I`/`l` → `1` and `O` → `0`
+are folded. **The decoded bytes are canonical; the string is not** — anything
+keyed on the string (a redeemed-blob list, a de-duplicator) must canonicalise by
+decoding and re-encoding, not by stripping dashes.
+
+Checks run in this order and stop at the first failure:
+
+1. arguments · 2. length and alphabet · 3. magic, version, family, key lookup —
+**all three before any crypto**, so a hostile blob cannot cost a signature
+verification per attempt · 4. Ed25519 signature · 5. device fingerprint,
+constant-time compare · 6. revocation · 7. validity window · 8. clock high-water
+mark.
+
+Size buffers with the macros, never the digits: `VL_BLOB_STR_BUF_LEN` (161),
+`VL_DEVICE_ID_STR_BUF_LEN` (27), `VL_FINGERPRINT_LEN` (32), `VL_PUBKEY_LEN`
+(32).
+
+### Cost, and where to call it
+
+| | |
+|---|---|
+| Flash | 9,195 B (Cortex-M4) / 9,319 B (Cortex-M0+), `-Os`, measured |
+| Static RAM | **0 bytes.** Nothing allocates |
+| Stack | 4,376 B deepest chain — give the calling task ≥5 KB |
+| One verify | 2.8 ms on an Apple M1 Pro at `-O2`. Tens of ms on a 240 MHz ESP32 and hundreds on a Cortex-M0+ are **estimates, not measurements** |
+
+Call it **at boot and when a blob arrives**, from the loop task or a work task.
+Never from an interrupt handler, never from a network stack's callback.
+
+### Minting — on your machine, never on the device
+
+```bash
+# once, ever, on a machine you trust
+python3 libraries/VectiLicense/tools/vl_mint.py keygen --key vendor.key --key-id 1
+
+# per order — the customer sends 26 characters, you send back 160
+python3 libraries/VectiLicense/tools/vl_mint.py issue --key vendor.key \
+        --device-id 7V3VAR49YVAVNKKRJT0FR2RAE0 \
+        --family 2 --features 0x0d --serial 1001 \
+        --expires 2027-01-01 --qr licence.png
+
+# on a support call — decodes any blob, no key needed
+python3 libraries/VectiLicense/tools/vl_mint.py inspect <blob>
+```
+
+`keygen` writes the key `0600` and prints the public half as a paste-ready C
+array; `vl_mint.py` refuses to load a group- or world-readable key file. Signing
+is O(1) and stateless: no database, no pre-generation, no per-device state, no
+server that has to stay up. `inspect` states plainly that decoding proves
+nothing about authenticity — only the device's `vl_verify()` does that.
+
+### Optional: transport helpers and the C++ bridge
+
+`vl_verify()` takes a NUL-terminated string, so HTTP, MQTT, BLE with a large
+characteristic, a QR scan, a file and a technician typing all need **no helper
+code**. Exactly two situations do:
+
+```c
+#include "vl_line.h"      /* UART / USB-CDC / telnet: bytes in, one line out */
+void        vl_line_reset(vl_line_t *l);
+vl_status_t vl_line_push(vl_line_t *l, char ch);   /* VL_OK = a line is ready in l->buf */
+
+#include "vl_chunk.h"     /* CAN / ISO-TP / BLE GATT: MTU-limited reassembly */
+vl_status_t vl_chunk_reset(vl_chunk_t *c, size_t chunk_size, size_t total_len);
+vl_status_t vl_chunk_feed(vl_chunk_t *c, uint32_t seq, const void *data, size_t len);
+vl_status_t vl_chunk_complete(const vl_chunk_t *c, char *out, size_t cap, size_t *n);
+```
+
+`bridge/vl_bridge.h` is a header-only C++11 facade with no `Arduino.h`:
+`vecti::License(cfg, hal)` with `begin()`, `activate()`, `submit()`, `pump()`,
+`ok()`, `status()`, `statusText()`, `feature(bit)`, `checked()`, `deviceId()`,
+`blob()`, `clear()`. **`submit()` queues, `pump()` verifies** — that split is
+the whole point: `submit()` is safe from an AsyncTCP-task callback, `pump()`
+runs on the loop task and does the Ed25519 verify and the NVS write.
+
+`bridge/vl_bridge_{net,dash,serial,ota}.h` wire that into VectiNet's portal,
+three VectiDash cards, a VectiSerial `license` command, and an OTA gate. Each is
+behind `__has_include`, so an uninstalled sibling compiles to nothing — and
+**none of the four has ever been compiled against its real sibling library.**
 
 ---
 
@@ -633,6 +987,119 @@ void loop() {
 ```
 
 A working version of exactly this lives in `demo/src/main.cpp`.
+
+### 7. Licensing — gate a feature, offline
+
+Plain C, no Arduino, no server. This is the pattern to reach for by default;
+the C++ bridge below is only worth it when a paste arrives on the AsyncTCP task.
+
+```c
+#include "vectilicense/vectilicense.h"
+#include "vl_hal_esp32.h"          /* hal/esp32/ — or vl_hal_posix.h, or your own */
+
+#define FEATURE_MODBUS   0u        /* define your bits in a header your order
+                                      system also reads; never reuse a retired bit */
+
+/* Paste this array from `vl_mint.py keygen`. It is PUBLIC — safe in the repo,
+   safe in the firmware, useless to an attacker. Ship two key ids from day one
+   so rotation is a config change instead of a recall. */
+static const vl_pubkey_t VENDOR_KEYS[] = {
+    { .key_id = 1, .key = { 0x02, 0x1a, /* ...30 more... */ } },
+};
+static const uint32_t REVOKED[] = { 4242, 9001 };      /* optional deny-list */
+
+static const vl_config_t CFG = {
+    .keys            = VENDOR_KEYS,
+    .key_count       = sizeof VENDOR_KEYS / sizeof VENDOR_KEYS[0],
+    .family          = 2,                              /* this product line */
+    .revoked_serials = REVOKED,
+    .revoked_count   = sizeof REVOKED / sizeof REVOKED[0],
+    .flags           = 0,                              /* no clock on this board */
+};
+
+static vl_license_t g_lic;
+static vl_status_t  g_status = VL_ERR_NOT_FOUND;
+
+/* 1. Show the customer their device id — 26 characters they read out or scan. */
+void show_device_id(void) {
+    const vl_hal_t *hal = vl_hal_esp32();
+    uint8_t fp[VL_FINGERPRINT_LEN];
+    char    id[VL_DEVICE_ID_STR_BUF_LEN];              /* 27, not 26 */
+
+    if (vl_compute_fingerprint(hal, fp) == VL_OK &&
+        vl_encode_device_id(fp, id, sizeof id) == VL_OK) {
+        log_info("device id: %s", id);                 /* "7V3VAR49YVAVNKKRJT0FR2RAE0" */
+    }
+}
+
+/* 2. Verify whatever 160 characters arrived — portal, console, QR, file, MQTT.
+      Verify FIRST, store second: a stored-but-invalid blob survives a power
+      cycle and the customer cannot clear it. */
+void activate(const char *blob) {
+    const vl_hal_t *hal = vl_hal_esp32();
+
+    g_status = vl_verify(blob, &CFG, hal, &g_lic);
+    if (g_status != VL_OK) {
+        log_warn("licence refused: %s", vl_status_str(g_status));
+        return;                                        /* g_lic is already zeroed */
+    }
+    if (hal->blob_store) {
+        hal->blob_store(hal->ctx, blob, strlen(blob));
+    }
+    if (g_lic.not_after != 0u && !(g_lic.checked & VL_CHECKED_TIME)) {
+        log_warn("expiry present but NOT enforced — this board has no clock");
+    }
+}
+
+/* 3. Re-verify at every boot. A licence that was good at the factory is not
+      evidence about this boot: flash gets swapped, boards get repaired. */
+void licence_boot(void) {
+    const vl_hal_t *hal = vl_hal_esp32();
+    char   blob[VL_BLOB_STR_BUF_LEN];                  /* 161 */
+    size_t len;
+
+    if (hal->blob_load &&
+        hal->blob_load(hal->ctx, blob, sizeof blob, &len) == VL_OK) {
+        g_status = vl_verify(blob, &CFG, hal, &g_lic);
+    }
+}
+
+/* 4. Gate. Fail closed on the crypto, fail OPEN on the business policy — a
+      hard stop turns a dead RTC battery into a field return. */
+int modbus_enabled(void) {
+    return g_status == VL_OK && vl_has_feature(&g_lic, FEATURE_MODBUS);
+}
+```
+
+If the blob arrives on the AsyncTCP task — a VectiNet portal POST, a
+VectiSerial command, a WebSocket frame — do **not** verify there. Queue it:
+
+```cpp
+#include <VectiLicense.h>          // pulls in the C API + the C++ bridges
+
+static const vl_hal_t *hal = vl_hal_esp32();
+static vecti::License  license(&CFG, hal);
+
+void setup() { license.begin(); }                    // re-verify what is stored
+
+// AsyncTCP task — memcpy into one slot and set a flag. Nothing else.
+void onPastedBlob(const String &s) { license.submit(s.c_str(), s.length()); }
+
+void loop() {
+  if (license.pump()) {                              // loop task: verify + store
+    if (license.ok()) VectiSerial.inf("licensed, serial %lu",
+                                      (unsigned long)license.license()->serial);
+    else              VectiSerial.err("refused: %s", license.statusText());
+  }
+}
+```
+
+One slot, one writer: while a blob is pending, `submit()` returns `false`
+rather than overwriting a buffer `pump()` may be reading.
+
+> ⚠️ Neither snippet has ever been compiled. `hal/esp32` and all four bridge
+> headers are written to documented APIs and have never been built. The C API
+> itself, and `vecti::License`, are covered by the host test suite.
 
 ---
 
@@ -1137,6 +1604,76 @@ const seq = Number(frame.seq);
 uint64_t since = strtoull(param.c_str(), nullptr, 10);
 ```
 
+### 13. A private key in the firmware
+
+```c
+// ❌ WRONG — and it is the exact failure VectiLicense was built to remove.
+// One flash dump yields a universal keygen for every unit you will ever ship.
+static const uint8_t VENDOR_SEED[32] = { 0x9a, 0x77, /* ... */ };
+static bool self_activate(void) { return sign_locally(VENDOR_SEED, my_device_id()); }
+```
+
+```c
+// ✅ RIGHT — 32 PUBLIC bytes. Dump the flash and you get a public key.
+// There is no signing function anywhere in the device build; it was deleted
+// from the vendored Ed25519, not disabled.
+static const vl_pubkey_t VENDOR_KEYS[] = {
+    { .key_id = 1, .key = { 0x02, 0x1a, /* ...30 more, from vl_mint.py keygen... */ } },
+};
+```
+
+### 14. Treating `vl_verify()`'s status as a bool
+
+```c
+// ❌ WRONG — every failure is NEGATIVE, therefore truthy. This unlocks the
+// product on VL_ERR_BAD_SIGNATURE, VL_ERR_EXPIRED, VL_ERR_DEVICE_MISMATCH…
+if (vl_verify(blob, &CFG, hal, &lic)) unlock();
+```
+
+```c
+// ✅ RIGHT — VL_OK is 0 and is the only success. Log the reason: "refused"
+// is a support ticket, "licence is for a different device" is a two-minute fix.
+vl_status_t st = vl_verify(blob, &CFG, hal, &lic);
+if (st == VL_OK) unlock();
+else             log_warn("unlicensed: %s", vl_status_str(st));
+```
+
+### 15. Assuming an internet call, or an activation server
+
+```cpp
+// ❌ WRONG — there is no server, no endpoint and no protocol. This device may
+// never see a network at all; that is the headline feature, not a limitation.
+HTTPClient http;
+http.begin("https://license.example.com/activate?id=" + deviceId);
+```
+
+```c
+// ✅ RIGHT — pure local computation. The transport contract is "160 characters
+// arrived from somewhere": captive portal, QR scan, serial console, MQTT, a
+// file on a USB stick, a technician typing.
+vl_status_t st = vl_verify(blob, &CFG, hal, &lic);
+```
+
+### 16. `VL_OK` read as "the expiry was enforced"
+
+```c
+// ❌ WRONG on any board without an RTC — with hal->now_epoch NULL the validity
+// window is skipped entirely and an expired licence returns VL_OK.
+if (vl_verify(blob, &CFG, hal, &lic) == VL_OK) enable_subscription_features();
+```
+
+```c
+// ✅ RIGHT — VL_OK means every APPLICABLE check passed. `checked` says which
+// were applicable. Alternatively set CFG.flags = VL_FLAG_REQUIRE_CLOCK to
+// refuse outright when there is no clock.
+if (vl_verify(blob, &CFG, hal, &lic) == VL_OK) {
+    if (lic.not_after != 0u && !(lic.checked & VL_CHECKED_TIME)) {
+        log_warn("expiry not enforced — no clock on this device");
+    }
+    enable_subscription_features();
+}
+```
+
 ---
 
 ## 📷 Screenshots
@@ -1173,23 +1710,83 @@ end to end on hardware: HTTP endpoints serving real responses over the network,
 the WebSocket dashboard against real hardware, OTA upload / pull / rollback on
 real hardware, captive-portal provisioning end to end.
 
-VectiSuite is new: no users yet, no CI, no test suite, and it is not in the
-Arduino Library Manager. If a user is choosing between this and a mature
-incumbent, say so.
+VectiSuite is new: no users yet, no CI, and it is not in the Arduino Library
+Manager. The four web libraries have no test suite. If a user is choosing
+between this and a mature incumbent, say so.
+
+### VectiLicense specifically
+
+**Nothing about it has run on any board.** What *is* executed is a host test
+suite — nine `ctest` cases over six binaries: SHA-256/512 and RFC 8032 Ed25519
+known-answer vectors, the base32 codec, every rejection path of `vl_verify()`, a
+sweep that flips all 800 bits of a valid blob and asserts every one is refused, a
+64-cell matrix over the optional HAL callbacks, `vecti::License`, and a mutation
+fuzzer under ASan + UBSan that asserts anything accepted decodes to exactly the
+bytes the vendor signed. Plus two freestanding `arm-none-eabi-gcc`
+cross-compiles, which compile only: nothing links those objects and no ARM
+object produced there has ever executed.
+
+`examples/posix/vl_activate.c` has been compiled **and run** on macOS, exercising
+keygen → issue → activate → re-check end to end against a locally generated key.
+
+**Never compiled and never run, anywhere:** `hal/esp32`, `hal/rp2040`,
+`hal/stm32`, `hal/nxp`, all four `bridge/vl_bridge_{net,dash,serial,ota}.h`
+shims, and `examples/esp32-arduino`. Do not present any of them as tested.
 
 ---
 
 ## 📄 Licensing — the honest position
 
 - **VectiSuite's own code is Apache-2.0.** Full text in each library's `LICENSE`.
-- It links **ESPAsyncWebServer** and **AsyncTCP**, both **LGPL-3.0**. On an MCU
-  there is no dynamic linking, so LGPL §4 relink obligations attach to the
-  shipped binary. **Never tell a user this stack carries "zero copyleft
-  obligations".** Every comparable library in this space inherits the same
-  dependency.
+- The four web libraries link **ESPAsyncWebServer** and **AsyncTCP**, both
+  **LGPL-3.0**. On an MCU there is no dynamic linking, so LGPL §4 relink
+  obligations attach to the shipped binary. **Never tell a user this stack
+  carries "zero copyleft obligations".** Every comparable library in this space
+  inherits the same dependency. **VectiLicense links neither**, so a
+  licensing-only firmware inherits no copyleft from this suite; its one vendored
+  dependency is the verification half of TweetNaCl, which is public domain.
 - VectiOTA's HMAC firmware signing is **symmetric** — the key ships inside the
   firmware image, so anyone who can read the image can forge a signature.
-  Asymmetric signing (Ed25519) is a known future improvement, **not** a shipped
-  feature.
+  Asymmetric signing *of firmware images* is a known future improvement, **not**
+  a shipped feature. **Do not offer VectiLicense as the fix:** it is asymmetric,
+  but it signs licences, not images.
 - The VectiDash ticket cookie and HTTP Basic credentials are plaintext on the
   wire. Put the device behind TLS or a trusted LAN.
+
+### How to talk about VectiLicense's security
+
+**Never write "uncrackable", "unbreakable" or "military-grade".** None would be
+true, and this repository does not use those words anywhere.
+
+An attacker who can rewrite the firmware can patch out the branch that reads
+`vl_verify()`'s result. That is not a weakness in Ed25519 or in this library — it
+is what "the attacker owns the hardware" means, and it is true of FlexLM,
+Sentinel, Denuvo and every other software licensing scheme ever written.
+
+What v1 structurally eliminates is the **keygen**. The earlier symmetric HMAC
+design verified a licence by *recomputing* it, so the value that checked a
+licence was the value that minted one, and it shipped in every firmware image:
+one flash dump from one customer produced a universal code generator for the
+whole product line. That is gone, because the secret is no longer in the
+firmware to find. After a full flash dump an attacker still cannot mint for
+their own device, set feature bits they did not buy, extend an expiry, reuse
+another device's licence, or replay across product families — every one of those
+fields is inside the signed payload.
+
+The only real mitigation for firmware patching is a hardware root of trust — on
+ESP32, **Secure Boot v2 + Flash Encryption**. `vl_posture()` reports whether the
+platform has one; it never enforces. Without it, licensing is a speed bump
+against casual copying, not a wall.
+
+Two more honesty requirements when advising on enforcement:
+
+- **The fingerprint is only as strong as the HAL.** MCU HALs read eFuses, factory
+  UIDs or OTP and are strong. `hal/posix` reads an interface MAC and
+  `/etc/machine-id`: a cloned image with a spoofed MAC reproduces it. On a
+  general-purpose OS, call it a deterrent, not a boundary.
+- **Fail closed on the crypto, fail open on the business policy.** The failure
+  that costs real money is not piracy — it is a paying customer whose board was
+  repaired, whose eFuse MAC therefore changed, or whose RTC battery died, and
+  whose device now refuses to run on a Saturday night. Recommend nag, degrade or
+  grace. Reserve a hard stop for the case where running unlicensed is itself the
+  harm.
